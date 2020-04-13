@@ -54,7 +54,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     Ok(s"Kontakt")
   }
 
-  def message() = Action { implicit request: Request[AnyContent] =>
-    Ok(s"Wyslano wiadomosc")
+  def checkout() = Action { implicit request: Request[AnyContent] =>
+    Ok(s"Zakupiono cos. Teraz zaplac")
   }
 }

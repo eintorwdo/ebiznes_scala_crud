@@ -1,0 +1,30 @@
+@(product: (Product, Manufacturer, Category, SubCategory))
+
+<ul>
+    <li>
+        <span><b>@product._1.name</b></span>
+    </li>
+    <li>
+        <span>Opis: @product._1.description</span>
+    </li>
+    <li>
+        <span>Producent: @product._2.name</span>
+    </li>
+    <li>
+        <span>Kategoria:</span>
+        <ul>
+            <li>
+                <a href="#">@product._3.name</a>
+            </li>
+            <li>
+                <a href="#">@product._4.name</a>
+            </li>
+        </ul>
+    </li>
+    <li>
+        <span>Cena: @product._1.price</span>
+    </li>
+    <li>
+        <span>Ilosc w magazynie: @product._1.amount</span>
+    </li>
+</ul>

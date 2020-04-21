@@ -67,7 +67,7 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
    * This is an asynchronous operation, it will return a future of the created person, which can be used to obtain the
    * id for that person.
    */
-  def create(name: String, description: String, category: Int, price: Int, amount: Int, manufacturer: Int, subcategory: Int): Future[Product] = db.run {
+  def create(name: String, description: String, price: Int, amount: Int, manufacturer: Int, category: Int, subcategory: Int): Future[Product] = db.run {
     // We create a projection of just the name and age columns, since we're not inserting a value for the id column
     (product.map(p => (p.name, p.description,p.price,p.amount,p.manufacturer,p.category,p.subcategory))
       // Now define it to return the id, because we want to know what id was generated for the person
@@ -107,7 +107,7 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
 
   def getById(id: Int): Future[Seq[(Product, Manufacturer, Category, SubCategory)]] = db.run {
     (for {
-      (((product, manufacturer), category), subcategory) <- product join man on (_.manufacturer === _.id) join cat on (_._1.category === _.id) join subcat on (_._1._1.subcategory === _.id)
+      (((product, manufacturer), category), subcategory) <- product.filter(_.id === id) join man on (_.manufacturer === _.id) join cat on (_._1.category === _.id) join subcat on (_._1._1.subcategory === _.id)
     } yield (product, manufacturer, category, subcategory)).result
   }
 }

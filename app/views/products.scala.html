@@ -1,0 +1,21 @@
+@(products: Seq[Product])
+<ul>
+    @for(product <- products) {
+        <li>
+            <ul>
+                <li>
+                    <span><b>@product.name</b></span>
+                </li>
+                <li>
+                    <span>Opis: @product.description</span>
+                </li>
+                <li>
+                    <span>Cena: @product.price</span>
+                </li>
+                <li>
+                    <span>Ilosc w magazynie: @product.amount</span>
+                </li>
+            </ul>
+        </li>
+      }
+</ul>

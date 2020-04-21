@@ -8,6 +8,14 @@ GET     /                           controllers.HomeController.index
 GET     /search                     controllers.HomeController.search(query)
 GET     /products                   controllers.ProductController.products
 GET     /products/:id               controllers.ProductController.product(id)
+GET     /addProduct                 controllers.ProductController.addProduct
+POST    /addProductHandle           controllers.ProductController.addProductHandle
+GET     /updateProduct/:id          controllers.ProductController.updateProduct(id: Int)
+POST    /updateProductHandle        controllers.ProductController.updateProductHandle
+GET     /addManufacturer            controllers.ProductController.addManufacturer
+POST    /addManufacturerHandle      controllers.ProductController.addManufacturerHandle
+GET     /updateManufacturer/:id     controllers.ProductController.updateManufacturer(id: Int)
+POST    /updateManufacturerHandle   controllers.ProductController.updateManufacturerHandle
 GET     /categories                 controllers.CategoryController.categories
 GET     /categories/:cat            controllers.CategoryController.category(cat)
 GET     /subcategories              controllers.CategoryController.subcategories()

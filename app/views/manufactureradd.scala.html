@@ -1,0 +1,15 @@
+@import scala.concurrent.{ExecutionContext, Future}
+
+@(product: Form[CreateManufacturerForm])(implicit request: MessagesRequestHeader, flash: Flash)
+
+@import helper._
+@flash.get("success").getOrElse("")
+
+
+@form(routes.ProductController.addManufacturerHandle()) {
+@helper.CSRF.formField
+@inputText(product("name"))
+<div class="buttons">
+    <input type="submit" value="Add Manufacturer"/>
+</div>
+}

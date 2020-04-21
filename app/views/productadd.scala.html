@@ -1,0 +1,37 @@
+@import scala.concurrent.{ExecutionContext, Future}
+
+@(product: Form[CreateProductForm], result: (Seq[Category], Seq[SubCategory], Seq[Manufacturer]))(implicit request: MessagesRequestHeader, flash: Flash)
+
+@import helper._
+@flash.get("success").getOrElse("")
+
+
+@form(routes.ProductController.addProductHandle()) {
+@helper.CSRF.formField
+@inputText(product("name"))
+@inputText(product("description"))
+@inputText(product("price"))
+@inputText(product("amount"))
+
+<select name="manufacturer" id="manufacturer">
+    @for(man <- result._3){
+    <option value="@man.id">@man.name</option>
+    }
+</select>
+
+<select name="category" id="category">
+    @for(cat <- result._1){
+      <option value="@cat.id">@cat.name</option>
+    }
+</select>
+
+<select name="subcategory" id="subcategory">
+@for(subcat <- result._2){
+    <option value="@subcat.id">@subcat.name</option>
+}
+</select>
+
+<div class="buttons">
+    <input type="submit" value="Add Product"/>
+</div>
+}

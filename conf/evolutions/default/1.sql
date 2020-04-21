@@ -9,7 +9,7 @@ CREATE TABLE "category" (
 CREATE TABLE "subcategory" (
  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
  "name" VARCHAR NOT NULL,
- "category" INTEGER NOT NULL,
+ "category" INTEGER,
  FOREIGN KEY(category) references category(id)
 );
 
@@ -24,9 +24,9 @@ CREATE TABLE "product" (
  "description" TEXT NOT NULL,
  "price" INTEGER NOT NULL,
  "amount" INTEGER NOT NULL,
- "manufacturer" INTEGER NOT NULL,
- "category" INTEGER NOT NULL,
- "subcategory" INTEGER NOT NULL,
+ "manufacturer" INTEGER,
+ "category" INTEGER,
+ "subcategory" INTEGER,
  FOREIGN KEY(manufacturer) references manufacturer(id),
  FOREIGN KEY(category) references category(id),
  FOREIGN KEY(subcategory) references subcategory(id)
@@ -42,7 +42,7 @@ CREATE TABLE "user" (
 CREATE TABLE "review" (
  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
  "description" TEXT NOT NULL,
- "user" INTEGER NOT NULL,
+ "user" INTEGER,
  "product" INTEGER NOT NULL,
  FOREIGN KEY(user) references user(id),
  FOREIGN KEY(product) references product(id)

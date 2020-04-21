@@ -1,5 +1,8 @@
-@()
+@(text: String = "")
 
-@main("Welcome to Play") {
+@main("Strona glowna") {
   <h1>Welcome to Play!</h1>
+  @if(text.length() > 0){
+    <p>@text</p>
+  }
 }

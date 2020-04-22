@@ -1,12 +1,12 @@
 package controllers
 
-import models.{Category, CategoryRepository, Product, ProductRepository, ManufacturerRepository, Manufacturer, SubCategoryRepository, SubCategory, Review, ReviewRepository}
+import models.{Category, CategoryRepository, Product, ProductRepository, ManufacturerRepository, Manufacturer, SubCategoryRepository, SubCategory, Review, ReviewRepository, User, UserRepository, Order, OrderDetailRepository}
 import javax.inject._
 import play.api._
 import play.api.mvc._
 import play.api.data.Form
 import play.api.data.Forms._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent._
 import scala.util.{Failure, Success}
 
 /**
@@ -14,7 +14,7 @@ import scala.util.{Failure, Success}
  * application's home page.
  */
 @Singleton
-class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo: CategoryRepository, manufacturerRepo: ManufacturerRepository, subCategoryRepository: SubCategoryRepository, reviewRepo: ReviewRepository, cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
+class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo: CategoryRepository, manufacturerRepo: ManufacturerRepository, subCategoryRepository: SubCategoryRepository, reviewRepo: ReviewRepository, userRepo: UserRepository, orderDetailRepo: OrderDetailRepository, cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
 
   val productForm: Form[CreateProductForm] = Form {
     mapping(
@@ -54,6 +54,23 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     )(CreateManufacturerForm.apply)(CreateManufacturerForm.unapply)
   }
 
+  val updateReviewForm: Form[UpdateReviewForm] = Form {
+    mapping(
+      "id" -> number,
+      "description" -> nonEmptyText,
+      "user" -> number,
+      "product" -> number
+    )(UpdateReviewForm.apply)(UpdateReviewForm.unapply)
+  }
+
+  val reviewForm: Form[CreateReviewForm] = Form {
+    mapping(
+      "description" -> nonEmptyText,
+      "user" -> number,
+      "product" -> number
+    )(CreateReviewForm.apply)(CreateReviewForm.unapply)
+  }
+
   def products() = Action.async { implicit request: MessagesRequest[AnyContent] =>
   val produkty = productsRepo.list()
     produkty.map(prds => {
@@ -61,14 +78,22 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     })
   }
 
-  def product(id: String) = Action.async { implicit request: MessagesRequest[AnyContent] =>
+  def product(id: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
     val produkt = productsRepo.getById(id.toInt)
-    produkt.map(prd => {
-      if(prd.isEmpty){
-        Ok(views.html.index())
+    val reviews = reviewRepo.listByProdId(id.toInt)
+    val users = userRepo.list()
+    val result = for {
+          r1 <- produkt
+          r2 <- reviews
+          r3 <- users
+    } yield (r1, r2, r3)
+
+    result.map(res => {
+      if(res._1.isEmpty){
+        Ok(views.html.index("Product not found"))
       }
       else{
-        Ok(views.html.product(prd.head))
+        Ok(views.html.product(res._1.head, reviewForm, res._2, res._3))
       }
     })
   }
@@ -168,7 +193,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
       },
       product => {
         productsRepo.create(product.name, product.description, product.price, product.amount, product.manufacturer, product.category, product.subcategory).map { _ =>
-          Redirect(routes.ProductController.addProduct()).flashing("success" -> "product.created")
+          Redirect(routes.ProductController.addProduct()).flashing("success" -> "product created")
         }
       }
     )
@@ -225,6 +250,92 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
 
   }
 
+
+  def addReviewHandle(id: Int) = Action.async { implicit request =>  //review form is integrated with product page
+    val produkt = productsRepo.getById(id)
+    val reviews = reviewRepo.listByProdId(id)
+    val users = userRepo.list()
+    val result = for {
+          r1 <- produkt
+          r2 <- reviews
+          r3 <- users
+    } yield (r1, r2, r3)
+    
+    var res:(Seq[(Product, Manufacturer, Category, SubCategory)], Seq[(Review, User)], Seq[User]) = (Seq[(Product, Manufacturer, Category, SubCategory)](), Seq[(Review, User)](), Seq[User]())
+
+    result.onComplete{
+      case Success(r) => res = r
+      case Failure(_) => print("fail")
+    }
+    
+    reviewForm.bindFromRequest.fold(
+      errorForm => {
+        if(!res._1.isEmpty){
+          Future.successful(
+            BadRequest(views.html.product(res._1.head, errorForm, res._2, res._3))
+          )
+        }
+        else{
+          Future.successful(
+            Ok(views.html.index("Product not found"))
+          )
+        }
+      },
+      review => {
+        reviewRepo.create(review.description, review.user, review.product).map { _ =>
+          Redirect(routes.ProductController.product(review.product)).flashing("success" -> "review created")
+        }
+      }
+    )
+
+  }
+
+  def updateReview(id: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
+    val review = reviewRepo.getById(id)
+    review.map(x => {
+      if(x.nonEmpty){
+        val rev = x.get
+        val revForm = updateReviewForm.fill(UpdateReviewForm(rev.id, rev.description, rev.user, rev.product))
+        Ok(views.html.reviewupdate(revForm))
+      }
+      else{
+        BadRequest(views.html.index("Review not found"))
+      }
+    })
+  }
+
+  def updateReviewHandle = Action.async { implicit request =>
+    updateReviewForm.bindFromRequest.fold(
+      errorForm => {
+        Future.successful(
+          BadRequest(views.html.reviewupdate(errorForm))
+        )
+      },
+      review => {
+        reviewRepo.update(review.id, Review(review.id, review.description, review.user, review.product)).map { _ =>
+          Redirect(routes.ProductController.product(review.product)).flashing("success" -> "review updated")
+        }
+      }
+    )
+
+  }
+
+  def deleteReview(id: Int) = Action { implicit request =>
+    val del = reviewRepo.delete(id)
+    Await.result(del, duration.Duration.Inf)
+    Ok(views.html.index("Review deleted"))
+  }
+
+  def deleteProduct(id: Int) = Action { implicit request =>
+    val delRev = reviewRepo.deleteByProductId(id)
+    Await.result(delRev, duration.Duration.Inf)
+    val updateOrd = orderDetailRepo.deleteProductId(id)
+    Await.result(updateOrd, duration.Duration.Inf)
+    val delPrd = productsRepo.delete(id)
+    Await.result(delPrd, duration.Duration.Inf)
+    Ok(views.html.index("Product deleted"))
+  }
+
   def manufacturers() = Action.async { implicit request: MessagesRequest[AnyContent] =>
   val manufacturers = manufacturerRepo.list()
     manufacturers.map(cat => {
@@ -275,3 +386,5 @@ case class CreateProductForm(name: String, description: String, price: Int, amou
 case class UpdateProductForm(id: Int, name: String, description: String, price: Int, amount: Int, manufacturer: Int, category: Int, subcategory: Int)
 case class CreateManufacturerForm(name: String)
 case class UpdateManufacturerForm(id: Int, name: String)
+case class CreateReviewForm(description: String, user: Int, product: Int)
+case class UpdateReviewForm(id: Int, description: String, user: Int, product: Int)

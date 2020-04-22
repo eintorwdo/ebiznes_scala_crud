@@ -1,0 +1,16 @@
+@(review: Form[UpdateReviewForm])(implicit request: MessagesRequestHeader, flash: Flash)
+
+@import helper._
+@flash.get("success").getOrElse("")
+
+
+@form(routes.ProductController.updateReviewHandle()) {
+@helper.CSRF.formField
+<input name="id" id="id" value="@review("id").value" type="hidden" />
+@inputText(review("description"))
+<input name="user" id="user" value="@review("user").value" type="hidden" />
+<input name="product" id="product" value="@review("product").value" type="hidden" />
+<div class="buttons">
+    <input type="submit" value="Update Review"/>
+</div>
+}

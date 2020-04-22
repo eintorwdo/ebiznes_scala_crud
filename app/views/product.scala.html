@@ -1,4 +1,7 @@
-@(product: (Product, Manufacturer, Category, SubCategory))
+@(product: (Product, Manufacturer, Category, SubCategory), reviewForm: Form[CreateReviewForm], reviews: Seq[(Review, User)], users: Seq[User])(implicit request: MessagesRequestHeader, flash: Flash)
+
+@import helper._
+@flash.get("success").getOrElse("")
 
 <ul>
     <li>
@@ -28,3 +31,37 @@
         <span>Ilosc w magazynie: @product._1.amount</span>
     </li>
 </ul>
+
+<p><b>Recenzje</b></p>
+<ul>
+    @for(review <- reviews){
+        <li>
+            <ul>
+                <li>
+                    Użytkownik: @review._2.name :
+                </li>
+                <li>
+                    @review._1.description
+                </li>
+                <a href="/updateReview/@review._1.id">Edytuj</a>
+                <a href="/deleteReview/@review._1.id">Usuń</a>
+            </ul>
+        </li>
+    }
+</ul>
+
+
+<p><b>Dodaj recenzję</b></p>
+@form(routes.ProductController.addReviewHandle(product._1.id)) {
+@helper.CSRF.formField
+@inputText(reviewForm("description"))
+<select name="user" id="user">
+    @for(usr <- users){
+        <option value="@usr.id">@usr.name</option>
+    }
+</select>
+<input name="product" id="product" value="@product._1.id" type="hidden" />
+<div class="buttons">
+    <input type="submit" value="Add Review"/>
+</div>
+}

@@ -37,11 +37,26 @@ class ReviewRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val 
       ) += (description, user, product)
   }
 
+  def listByProdId(id: Int): Future[Seq[(Review, User)]] = db.run {
+    (for {
+      (review, user) <- review.filter(_.product === id) join usr on (_.user === _.id)
+    } yield (review, user)).result
+  }
+
   def list(): Future[Seq[Review]] = db.run {
     review.result
   }
 
-  def getById(id: Int): Future[Review] = db.run {
-    review.filter(_.id === id).result.head
+  def getById(id: Int): Future[Option[Review]] = db.run {
+    review.filter(_.id === id).result.headOption
   }
+
+  def update(id: Int, new_review: Review): Future[Unit] = {
+    val revToUpdate: Review = new_review.copy(id)
+    db.run(review.filter(_.id === id).update(revToUpdate)).map(_ => ())
+  }
+
+  def delete(id: Int): Future[Unit] = db.run(review.filter(_.id === id).delete).map(_ => ())
+
+  def deleteByProductId(id: Int): Future[Unit] = db.run(review.filter(_.product === id).delete).map(_ => ())
 }

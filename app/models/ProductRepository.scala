@@ -51,6 +51,7 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
   import categoryRepository.CategoryTable
   import subCategoryRepository.SubCategoryTable
   import manufacturerRepository.ManufacturerTable
+  // import reviewRepository.ReviewTable
 
   private val product = TableQuery[ProductTable]
 
@@ -60,6 +61,7 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
 
   private val man = TableQuery[ManufacturerTable]
 
+  // private val rev = TableQuery[ReviewTable]
 
   /**
    * Create a person with the given name and age.
@@ -99,6 +101,14 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
   }
 
   def delete(id: Int): Future[Unit] = db.run(product.filter(_.id === id).delete).map(_ => ())
+    // val reviewQuery = rev.filter(_.product === id)
+    // val orderDetailQuery = for{
+    //   o <- ord if o.product === id
+    // } yield o.product
+
+    // val productQuery = product.filter(_.id === id)
+
+    // db.run((reviewQuery.delete andThen productQuery.delete).transactionally).map(_ => ())
 
   def update(id: Int, new_product: Product): Future[Unit] = {
     val productToUpdate: Product = new_product.copy(id)

@@ -77,7 +77,7 @@ CREATE TABLE "orderdetail" (
  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
  "price" INTEGER NOT NULL,
  "order_" INTEGER NOT NULL,
- "product" INTEGER NOT NULL,
+ "product" INTEGER,
  FOREIGN KEY(order_) references order_(id),
  FOREIGN KEY(product) references product(id)
 );

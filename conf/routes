@@ -7,7 +7,7 @@
 GET     /                           controllers.HomeController.index
 GET     /search                     controllers.HomeController.search(query)
 GET     /products                   controllers.ProductController.products
-GET     /products/:id               controllers.ProductController.product(id)
+GET     /products/:id               controllers.ProductController.product(id: Int)
 GET     /addProduct                 controllers.ProductController.addProduct
 POST    /addProductHandle           controllers.ProductController.addProductHandle
 GET     /updateProduct/:id          controllers.ProductController.updateProduct(id: Int)
@@ -16,6 +16,11 @@ GET     /addManufacturer            controllers.ProductController.addManufacture
 POST    /addManufacturerHandle      controllers.ProductController.addManufacturerHandle
 GET     /updateManufacturer/:id     controllers.ProductController.updateManufacturer(id: Int)
 POST    /updateManufacturerHandle   controllers.ProductController.updateManufacturerHandle
+POST    /addReviewHandle/:id        controllers.ProductController.addReviewHandle(id: Int)
+GET     /updateReview/:id           controllers.ProductController.updateReview(id: Int)
+POST    /updateReviewHandle         controllers.ProductController.updateReviewHandle
+GET     /deleteReview/:id           controllers.ProductController.deleteReview(id: Int)
+GET     /deleteProduct/:id          controllers.ProductController.deleteProduct(id: Int)
 GET     /categories                 controllers.CategoryController.categories
 GET     /categories/:cat            controllers.CategoryController.category(cat)
 GET     /subcategories              controllers.CategoryController.subcategories()

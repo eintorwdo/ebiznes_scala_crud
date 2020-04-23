@@ -1,4 +1,4 @@
-@(product: (Product, Manufacturer, Category, SubCategory), reviewForm: Form[CreateReviewForm], reviews: Seq[(Review, User)], users: Seq[User])(implicit request: MessagesRequestHeader, flash: Flash)
+@(product: (Product, Option[Manufacturer], Option[Category], Option[SubCategory]), reviewForm: Form[CreateReviewForm], reviews: Seq[(Review, User)], users: Seq[User])(implicit request: MessagesRequestHeader, flash: Flash)
 
 @import helper._
 @flash.get("success").getOrElse("")
@@ -10,18 +10,24 @@
     <li>
         <span>Opis: @product._1.description</span>
     </li>
-    <li>
-        <span>Producent: @product._2.name</span>
-    </li>
+    @if(product._2.nonEmpty){
+        <li>
+                <span>Producent: @product._2.get.name</span>
+        </li>
+    }
     <li>
         <span>Kategoria:</span>
         <ul>
-            <li>
-                <a href="#">@product._3.name</a>
-            </li>
-            <li>
-                <a href="#">@product._4.name</a>
-            </li>
+            @if(product._3.nonEmpty){
+                <li>
+                    <a href="#">@product._3.get.name</a>
+                </li>
+            }
+            @if(product._4.nonEmpty){
+                <li>
+                    <a href="#">@product._4.get.name</a>
+                </li>
+            }
         </ul>
     </li>
     <li>

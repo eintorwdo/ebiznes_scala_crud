@@ -9,7 +9,7 @@ CREATE TABLE "category" (
 CREATE TABLE "subcategory" (
  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
  "name" VARCHAR NOT NULL,
- "category" INTEGER,
+ "category" INTEGER NOT NULL,
  FOREIGN KEY(category) references category(id)
 );
 

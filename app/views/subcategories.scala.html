@@ -1,0 +1,12 @@
+@(subcategories: Seq[SubCategory])(implicit request: MessagesRequestHeader, flash: Flash)
+
+
+@if(subcategories.nonEmpty){
+    <ul>
+        @for(subcat <- subcategories){
+            <li>
+                <a href="/subcategories/@subcat.id">@subcat.name</a>
+            </li>
+        }
+    </ul>
+}

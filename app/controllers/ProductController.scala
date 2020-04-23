@@ -22,9 +22,9 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
       "description" -> nonEmptyText,
       "price" -> number,
       "amount" -> number,
-      "manufacturer" -> number,
-      "category" -> number,
-      "subcategory" -> number,
+      "manufacturer" -> optional(number),
+      "category" -> optional(number),
+      "subcategory" -> optional(number),
     )(CreateProductForm.apply)(CreateProductForm.unapply)
   }
 
@@ -35,9 +35,9 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
       "description" -> nonEmptyText,
       "price" -> number,
       "amount" -> number,
-      "manufacturer" -> number,
-      "category" -> number,
-      "subcategory" -> number,
+      "manufacturer" -> optional(number),
+      "category" -> optional(number),
+      "subcategory" -> optional(number),
     )(UpdateProductForm.apply)(UpdateProductForm.unapply)
   }
 
@@ -90,7 +90,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
 
     result.map(res => {
       if(res._1.isEmpty){
-        Ok(views.html.index("Product not found"))
+        BadRequest(views.html.index("Product not found"))
       }
       else{
         Ok(views.html.product(res._1.head, reviewForm, res._2, res._3))
@@ -217,7 +217,6 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
         }
       }
     )
-
   }
 
   def updateManufacturer(id: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
@@ -247,7 +246,6 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
         }
       }
     )
-
   }
 
 
@@ -261,7 +259,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
           r3 <- users
     } yield (r1, r2, r3)
     
-    var res:(Seq[(Product, Manufacturer, Category, SubCategory)], Seq[(Review, User)], Seq[User]) = (Seq[(Product, Manufacturer, Category, SubCategory)](), Seq[(Review, User)](), Seq[User]())
+    var res:(Seq[(Product, Option[Manufacturer], Option[Category], Option[SubCategory])], Seq[(Review, User)], Seq[User]) = (Seq[(Product, Option[Manufacturer], Option[Category], Option[SubCategory])](), Seq[(Review, User)](), Seq[User]())
 
     result.onComplete{
       case Success(r) => res = r
@@ -336,6 +334,14 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     Ok(views.html.index("Product deleted"))
   }
 
+  def deleteManufacturer(id: Int) = Action { implicit request =>
+    val updateMan = productsRepo.deleteManufacturerId(id)
+    Await.result(updateMan, duration.Duration.Inf)
+    val del = manufacturerRepo.delete(id)
+    Await.result(del, duration.Duration.Inf)
+    Ok(views.html.index("Manufacturer deleted"))
+  }
+
   def manufacturers() = Action.async { implicit request: MessagesRequest[AnyContent] =>
   val manufacturers = manufacturerRepo.list()
     manufacturers.map(cat => {
@@ -382,8 +388,8 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
 
 }
 
-case class CreateProductForm(name: String, description: String, price: Int, amount: Int, manufacturer: Int, category: Int, subcategory: Int)
-case class UpdateProductForm(id: Int, name: String, description: String, price: Int, amount: Int, manufacturer: Int, category: Int, subcategory: Int)
+case class CreateProductForm(name: String, description: String, price: Int, amount: Int, manufacturer: Option[Int], category: Option[Int], subcategory: Option[Int])
+case class UpdateProductForm(id: Int, name: String, description: String, price: Int, amount: Int, manufacturer: Option[Int], category: Option[Int], subcategory: Option[Int])
 case class CreateManufacturerForm(name: String)
 case class UpdateManufacturerForm(id: Int, name: String)
 case class CreateReviewForm(description: String, user: Int, product: Int)

@@ -37,7 +37,16 @@ class SubCategoryRepository @Inject() (dbConfigProvider: DatabaseConfigProvider,
     subcategory.result
   }
 
-  def getById(id: Int): Future[SubCategory] = db.run {
-    subcategory.filter(_.id === id).result.head
+  def getById(id: Int): Future[Option[SubCategory]] = db.run {
+    subcategory.filter(_.id === id).result.headOption
   }
+
+  def update(id: Int, new_subcategory: SubCategory): Future[Unit] = {
+    val subCategoryToUpdate: SubCategory = new_subcategory.copy(id)
+    db.run(subcategory.filter(_.id === id).update(subCategoryToUpdate)).map(_ => ())
+  }
+
+  def delete(id: Int): Future[Unit] = db.run(subcategory.filter(_.id === id).delete).map(_ => ())
+
+  def deleteByCategoryId(id: Int): Future[Unit] = db.run(subcategory.filter(_.category === id).delete).map(_ => ())
 }

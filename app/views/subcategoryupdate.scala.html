@@ -1,0 +1,26 @@
+@import scala.concurrent.{ExecutionContext, Future}
+
+@(subcategory: Form[UpdateSubCategoryForm], categories: Seq[Category])(implicit request: MessagesRequestHeader, flash: Flash)
+
+@import helper._
+@flash.get("success").getOrElse("")
+
+
+@form(routes.CategoryController.updateSubCategoryHandle()) {
+@helper.CSRF.formField
+<input name="id" id="id" value="@subcategory("id").value" type="hidden" />
+@inputText(subcategory("name"))
+<select name="category" id="category">
+    @for(cat <- categories){
+        @if(cat.id.toString==subcategory("category").value.getOrElse(0)) {
+            <option value="@cat.id" selected>@cat.name</option>
+        }
+        else{
+            <option value="@cat.id">@cat.name</option>
+        }
+    }
+</select>
+<div class="buttons">
+    <input type="submit" value="Update Subcategory"/>
+</div>
+}

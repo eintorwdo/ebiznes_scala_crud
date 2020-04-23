@@ -21,10 +21,21 @@ GET     /updateReview/:id           controllers.ProductController.updateReview(i
 POST    /updateReviewHandle         controllers.ProductController.updateReviewHandle
 GET     /deleteReview/:id           controllers.ProductController.deleteReview(id: Int)
 GET     /deleteProduct/:id          controllers.ProductController.deleteProduct(id: Int)
+GET     /deleteManufacturer/:id     controllers.ProductController.deleteManufacturer(id: Int)
 GET     /categories                 controllers.CategoryController.categories
-GET     /categories/:cat            controllers.CategoryController.category(cat)
+GET     /categories/:cat            controllers.CategoryController.category(cat: Int)
 GET     /subcategories              controllers.CategoryController.subcategories()
-GET     /subcategories/:cat         controllers.CategoryController.subcategory(cat)
+GET     /subcategories/:cat         controllers.CategoryController.subcategory(cat: Int)
+GET     /addCategory                controllers.CategoryController.addCategory
+POST    /addCategoryHandle          controllers.CategoryController.addCategoryHandle
+GET     /updateCategory/:id         controllers.CategoryController.updateCategory(id: Int)
+POST    /updateCategoryHandle       controllers.CategoryController.updateCategoryHandle
+GET     /addSubCategory             controllers.CategoryController.addSubCategory
+POST    /addSubCategoryHandle       controllers.CategoryController.addSubCategoryHandle
+GET     /updateSubCategory/:id      controllers.CategoryController.updateSubCategory(id: Int)
+POST    /updateSubCategoryHandle    controllers.CategoryController.updateSubCategoryHandle
+GET     /deleteCategory/:id         controllers.CategoryController.deleteCategory(id: Int)
+GET     /deleteSubCategory/:id      controllers.CategoryController.deleteSubCategory(id: Int)
 GET     /manufacturers              controllers.ProductController.manufacturers
 GET     /manufacturers/:id          controllers.ProductController.manufacturer(id)
 GET     /reviews                    controllers.ProductController.reviews

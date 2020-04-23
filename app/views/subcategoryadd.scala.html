@@ -1,0 +1,20 @@
+@import scala.concurrent.{ExecutionContext, Future}
+
+@(subcategory: Form[CreateSubCategoryForm], categories: Seq[Category])(implicit request: MessagesRequestHeader, flash: Flash)
+
+@import helper._
+@flash.get("success").getOrElse("")
+
+
+@form(routes.CategoryController.addSubCategoryHandle()) {
+@helper.CSRF.formField
+@inputText(subcategory("name"))
+<select name="category" id="category">
+    @for(cat <- categories){
+      <option value="@cat.id">@cat.name</option>
+    }
+</select>
+<div class="buttons">
+    <input type="submit" value="Add Subategory"/>
+</div>
+}

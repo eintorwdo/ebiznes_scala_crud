@@ -1,0 +1,28 @@
+@import scala.concurrent.{ExecutionContext, Future}
+
+@(user: Form[UpdateUserForm])(implicit request: MessagesRequestHeader, flash: Flash)
+
+@import helper._
+
+@flash.get("success").getOrElse("")
+
+
+@form(routes.UserController.updateUserHandle()) {
+@helper.CSRF.formField
+<input name="id" id="id" value="@user("id").value" type="hidden" />
+<div>
+    <label for="name">Name:</label>
+    <input id="name" name="name" value="@user("name").value">
+</div>
+<div>
+    <label for="email">Email:</label>
+    <input id="email" name="email" value="@user("email").value">
+</div>
+<div>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" value="@user("password").value">
+</div>
+<div class="buttons">
+    <input type="submit" value="Update User"/>
+</div>
+}

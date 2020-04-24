@@ -59,4 +59,6 @@ class ReviewRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val 
   def delete(id: Int): Future[Unit] = db.run(review.filter(_.id === id).delete).map(_ => ())
 
   def deleteByProductId(id: Int): Future[Unit] = db.run(review.filter(_.product === id).delete).map(_ => ())
+
+  def deleteByUserId(id: Int): Future[Unit] = db.run(review.filter(_.user === id).delete).map(_ => ())
 }

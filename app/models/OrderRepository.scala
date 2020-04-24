@@ -117,4 +117,6 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
 
      db.run(paymentyQuery.update(None)).map(_ => ())
   }
+
+  def deleteByUserId(id: Int): Future[Unit] = db.run(order.filter(_.user === id).delete).map(_ => ())
 }

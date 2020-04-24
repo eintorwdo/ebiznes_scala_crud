@@ -62,6 +62,11 @@ GET     /reviews                    controllers.ProductController.reviews
 GET     /reviews/:id                controllers.ProductController.review(id)
 GET     /users                      controllers.UserController.users
 GET     /users/:id                  controllers.UserController.user(id)
+GET     /addUser                    controllers.UserController.addUser
+POST    /addUserHandle              controllers.UserController.addUserHandle
+GET     /updateUser/:id             controllers.UserController.updateUser(id: Int)
+GET     /deleteUser/:id             controllers.UserController.deleteUser(id: Int)
+POST    /updateUserHandle           controllers.UserController.updateUserHandle
 POST    /cart/add/:id               controllers.ProductController.addToCart(id)
 DELETE  /cart/remove/:id            controllers.ProductController.removeFromCart(id)
 GET     /cart                       controllers.ProductController.cart

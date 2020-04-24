@@ -33,7 +33,14 @@ class DeliveryRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(im
     delivery.result
   }
 
-  def getById(id: Int): Future[Delivery] = db.run {
-    delivery.filter(_.id === id).result.head
+  def getById(id: Int): Future[Option[Delivery]] = db.run {
+    delivery.filter(_.id === id).result.headOption
   }
+
+  def update(id: Int, new_delivery: Delivery): Future[Unit] = {
+    val deliveryToUpdate: Delivery = new_delivery.copy(id)
+    db.run(delivery.filter(_.id === id).update(deliveryToUpdate)).map(_ => ())
+  }
+
+  def delete(id: Int): Future[Unit] = db.run(delivery.filter(_.id === id).delete).map(_ => ())
 }

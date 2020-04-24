@@ -1,0 +1,28 @@
+@(order: ((Order, User, Option[Payment], Option[Delivery]), Seq[(OrderDetail, Option[Product])]))
+
+    <ul>
+            <li>
+                <p>id: @order._1._1.id</p>
+                <p>username: @order._1._2.name</p>
+                <p>userid: @order._1._2.id</p>
+                <p>data: @order._1._1.date</p>
+                @if(order._1._3.nonEmpty){
+                    <p>platnosc: @order._1._3.get.name</p>
+                }
+                @if(order._1._4.nonEmpty){
+                    <p>dostawa: @order._1._4.get.name</p>
+                }
+                <p>adres: @order._1._1.address</p>
+                <p>cena: @order._1._1.price</p>
+            </li>
+            <p><b>Szczegóły zamówienia:</b></p>
+            <li>
+                @for(orderdetail <- order._2){
+                    <p>id: @orderdetail._1.id</p>
+                    <p>cena: @orderdetail._1.price</p>
+                    @if(orderdetail._2.nonEmpty){
+                        <p>nazwa produktu: @orderdetail._2.get.name</p>
+                    }
+                }
+            </li>
+    </ul>

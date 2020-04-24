@@ -1,0 +1,15 @@
+@(orders: Seq[Order])
+
+<b>Zamówienia:</b>
+
+@if(orders.nonEmpty){
+    <ul>
+        @for(order <- orders){
+            <li>
+                <p>id: @order.id</p>
+                <p>user: @order.user</p>
+                <p>date: @order.date</p>
+            </li>
+        }
+    </ul>
+}

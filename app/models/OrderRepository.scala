@@ -30,9 +30,9 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
 
     def user = column[Int]("user")
 
-    def payment = column[Int]("payment")
+    def payment = column[Option[Int]]("payment")
 
-    def delivery = column[Int]("delivery")
+    def delivery = column[Option[Int]]("delivery")
 
     def user_fk = foreignKey("usr_fk", user, usr)(_.id)
 
@@ -67,7 +67,7 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
    * This is an asynchronous operation, it will return a future of the created person, which can be used to obtain the
    * id for that person.
    */
-  def create(price: Int, date: String, address: String, sent: Int, user: Int, payment: Int, delivery: Int): Future[Order] = db.run {
+  def create(price: Int, date: String, address: String, sent: Int, user: Int, payment: Option[Int], delivery: Option[Int]): Future[Order] = db.run {
     (order.map(p => (p.price,p.date,p.address,p.sent,p.user,p.payment,p.delivery))
       returning order.map(_.id)
       into {case ((price,date,address,sent,user,payment,delivery),id) => Order(id,price,date,address,sent,user,payment,delivery)}
@@ -96,10 +96,25 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
     db.run(order.filter(_.id === id).update(orderToUpdate)).map(_ => ())
   }
 
-  def getById(id: Int): Future[Seq[(Order, User, Payment, Delivery)]] = db.run {
+  def getById(id: Int): Future[Seq[(Order, User, Option[Payment], Option[Delivery])]] = db.run {
     (for {
-      (((order, user), payment), delivery) <- order join usr on (_.user === _.id) join pmt on (_._1.payment === _.id) join dlv on (_._1._1.delivery === _.id)
+      (((order, user), payment), delivery) <- order.filter(_.id === id) join usr on (_.user === _.id) joinLeft pmt on (_._1.payment === _.id) joinLeft dlv on (_._1._1.delivery === _.id)
     } yield (order, user, payment, delivery)).result
   }
 
+  def deleteDeliveryId(id: Int): Future[Unit] = {
+    val deliveryQuery = for{
+      o <- order if o.delivery === id
+    } yield o.delivery
+
+     db.run(deliveryQuery.update(None)).map(_ => ())
+  }
+
+  def deletePaymentId(id: Int): Future[Unit] = {
+    val paymentyQuery = for{
+      o <- order if o.payment === id
+    } yield o.payment
+
+     db.run(paymentyQuery.update(None)).map(_ => ())
+  }
 }

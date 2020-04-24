@@ -32,7 +32,14 @@ class PaymentRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(imp
     payment.result
   }
 
-  def getById(id: Int): Future[Payment] = db.run {
-    payment.filter(_.id === id).result.head
+  def getById(id: Int): Future[Option[Payment]] = db.run {
+    payment.filter(_.id === id).result.headOption
   }
+
+  def update(id: Int, new_payment: Payment): Future[Unit] = {
+    val paymentToUpdate: Payment = new_payment.copy(id)
+    db.run(payment.filter(_.id === id).update(paymentToUpdate)).map(_ => ())
+  }
+
+  def delete(id: Int): Future[Unit] = db.run(payment.filter(_.id === id).delete).map(_ => ())
 }

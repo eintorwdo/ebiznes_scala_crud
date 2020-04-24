@@ -1,0 +1,23 @@
+
+@(order: Form[CreateOrderDetailForm], orders: Seq[Order], products: Seq[Product])(implicit request: MessagesRequestHeader, flash: Flash)
+
+@import helper._
+@flash.get("success").getOrElse("")
+
+@form(routes.OrderController.addOrderDetailHandle()) {
+    @helper.CSRF.formField
+    @inputText(order("price"))
+    <select name="order" id="order">
+        @for(ord <- orders){
+            <option value="@ord.id">@ord.id</option>
+        }
+    </select>
+    <select name="product" id="product">
+        @for(prd <- products){
+            <option value="@prd.id">@prd.name</option>
+        }
+    </select>
+    <div class="buttons">
+        <input type="submit" value="Add Order detail"/>
+    </div>
+}

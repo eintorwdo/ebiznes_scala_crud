@@ -36,6 +36,26 @@ GET     /updateSubCategory/:id      controllers.CategoryController.updateSubCate
 POST    /updateSubCategoryHandle    controllers.CategoryController.updateSubCategoryHandle
 GET     /deleteCategory/:id         controllers.CategoryController.deleteCategory(id: Int)
 GET     /deleteSubCategory/:id      controllers.CategoryController.deleteSubCategory(id: Int)
+GET     /addOrder                   controllers.OrderController.addOrder
+POST    /addOrderHandle             controllers.OrderController.addOrderHandle
+GET     /updateOrder/:id            controllers.OrderController.updateOrder(id: Int)
+POST    /updateOrderHandle          controllers.OrderController.updateOrderHandle
+GET     /addOrderDetail             controllers.OrderController.addOrderDetail
+POST    /addOrdeDetailHandle        controllers.OrderController.addOrderDetailHandle
+GET     /updateOrderDetail/:id      controllers.OrderController.updateOrderDetail(id: Int)
+POST    /updateOrderDetailHandle    controllers.OrderController.updateOrderDetailHandle
+GET     /addDelivery                controllers.OrderController.addDelivery
+POST    /addDeliveryHandle          controllers.OrderController.addDeliveryHandle
+GET     /updateDelivery/:id         controllers.OrderController.updateDelivery(id: Int)
+POST    /updateDeliveryHandle       controllers.OrderController.updateDeliveryHandle
+GET     /addPayment                 controllers.OrderController.addPayment
+POST    /addPaymentHandle           controllers.OrderController.addPaymentHandle
+GET     /updatePayment/:id          controllers.OrderController.updatePayment(id: Int)
+POST    /updatePaymentHandle        controllers.OrderController.updatePaymentHandle
+GET     /deleteOrder/:id            controllers.OrderController.deleteOrder(id: Int)
+GET     /deleteOrderDetail/:id      controllers.OrderController.deleteOrderDetail(id: Int)
+GET     /deleteDelivery/:id         controllers.OrderController.deleteDelivery(id: Int)
+GET     /deletePayment/:id          controllers.OrderController.deletePayment(id: Int)
 GET     /manufacturers              controllers.ProductController.manufacturers
 GET     /manufacturers/:id          controllers.ProductController.manufacturer(id)
 GET     /reviews                    controllers.ProductController.reviews
@@ -48,7 +68,7 @@ GET     /cart                       controllers.ProductController.cart
 GET     /contact                    controllers.HomeController.contact
 POST    /checkout                   controllers.ProductController.checkout
 GET     /orders                     controllers.OrderController.orders
-GET     /orders/:id                 controllers.OrderController.order(id)
+GET     /orders/:id                 controllers.OrderController.order(id: Int)
 GET     /deliveries                 controllers.OrderController.deliveries
 GET     /deliveries/:id             controllers.OrderController.delivery(id)
 GET     /payments                   controllers.OrderController.payments

@@ -41,8 +41,14 @@ class OrderDetailRepository @Inject() (dbConfigProvider: DatabaseConfigProvider,
     orderdetail.result
   }
 
-  def getByOrderId(id: Int): Future[Seq[OrderDetail]] = db.run {
-    orderdetail.filter(_.order === id).result
+  def getByOrderId(id: Int): Future[Seq[(OrderDetail, Option[Product])]] = db.run {
+    (for {
+      (detail, product) <- orderdetail.filter(_.order === id) joinLeft prd on (_.product === _.id)
+    } yield (detail, product)).result
+  }
+
+  def getById(id: Int): Future[Option[OrderDetail]] = db.run {
+    orderdetail.filter(_.id === id).result.headOption
   }
 
   def deleteProductId(id: Int): Future[Unit] = {
@@ -52,4 +58,13 @@ class OrderDetailRepository @Inject() (dbConfigProvider: DatabaseConfigProvider,
 
      db.run(orderDetailQuery.update(None)).map(_ => ())
   }
+
+  def update(id: Int, new_orderdetail: OrderDetail): Future[Unit] = {
+    val orderDetailToUpdate: OrderDetail = new_orderdetail.copy(id)
+    db.run(orderdetail.filter(_.id === id).update(orderDetailToUpdate)).map(_ => ())
+  }
+
+  def deleteByOrderId(id: Int): Future[Unit] = db.run(orderdetail.filter(_.order === id).delete).map(_ => ())
+
+  def delete(id: Int): Future[Unit] = db.run(orderdetail.filter(_.id === id).delete).map(_ => ())
 }

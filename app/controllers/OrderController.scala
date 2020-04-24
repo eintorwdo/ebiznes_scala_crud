@@ -190,39 +190,39 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       )
   }
 
-  def addOrderDetail() = Action { implicit request: MessagesRequest[AnyContent] =>
-    val orders = orderRepo.list()
-    val res = Await.result(orders, duration.Duration.Inf)
+  def addOrderDetail(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val order = orderRepo.getByIdOption(id)
+    val res = Await.result(order, duration.Duration.Inf)
     val products = productRepo.list()
     val res2 = Await.result(products, duration.Duration.Inf)
     if(res.nonEmpty){
-      Ok(views.html.orderdetailadd(orderDetailForm, res, res2))
+      Ok(views.html.orderdetailadd(orderDetailForm, id, res2))
     }
     else{
       BadRequest(views.html.index("No orders found"))
     }
   }
 
-  def addOrderDetailHandle = Action.async { implicit request =>
-    val orders = orderRepo.list()
-    val res = Await.result(orders, duration.Duration.Inf)
+  def addOrderDetailHandle(id: Int) = Action.async { implicit request =>
     val products = productRepo.list()
     val res2 = Await.result(products, duration.Duration.Inf)
     orderDetailForm.bindFromRequest.fold(
       errorForm => {
         Future.successful(
-          BadRequest(views.html.orderdetailadd(errorForm, res, res2))
+          BadRequest(views.html.orderdetailadd(errorForm, id, res2))
         )
       },
       orderdetail => {
+        val order = orderRepo.getByIdOption(id)
+        val res = Await.result(order, duration.Duration.Inf)
         if(res.nonEmpty){
           orderDetailRepo.create(orderdetail.price, orderdetail.order, orderdetail.product).map { _ =>
-            Redirect(routes.OrderController.addOrderDetail()).flashing("success" -> "Order detail created")
+            Redirect(routes.OrderController.order(id))
           }
         }
         else{
           Future.successful(
-            BadRequest(views.html.index("No orders found"))
+            BadRequest(views.html.index("Order not found"))
           )
         }
       }
@@ -261,7 +261,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
         val res3 = Await.result(ord, duration.Duration.Inf)
         if(res3.nonEmpty){
           orderDetailRepo.update(orderdetail.id, OrderDetail(orderdetail.id, orderdetail.price, orderdetail.order, orderdetail.product)).map { _ =>
-            Redirect(routes.OrderController.updateOrderDetail(orderdetail.id)).flashing("success" -> "Order detail updated")
+            Redirect(routes.OrderController.order(orderdetail.order))
           }
         }
         else{

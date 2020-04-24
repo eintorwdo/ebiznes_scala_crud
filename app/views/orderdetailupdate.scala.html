@@ -8,6 +8,7 @@
     @helper.CSRF.formField
     <input name="id" id="id" value="@order("id").value" type="hidden" />
     @inputText(order("price"))
+    <label for="order">Order id:</label>
     <select name="order" id="order">
         @for(ord <- orders){
             @if(ord.id.toString==order("id").value.getOrElse(0)){
@@ -18,6 +19,7 @@
             }
         }
     </select>
+    <label for="product">Product:</label>
     <select name="product" id="product">
         @for(prd <- products){
             @if(prd.id.toString==order("product").value.getOrElse(0)){
@@ -32,3 +34,5 @@
         <input type="submit" value="Update Order detail"/>
     </div>
 }
+
+@footer()

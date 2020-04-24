@@ -61,6 +61,7 @@
 @form(routes.ProductController.addReviewHandle(product._1.id)) {
 @helper.CSRF.formField
 @inputText(reviewForm("description"))
+<label for="user">User:</label>
 <select name="user" id="user">
     @for(usr <- users){
         <option value="@usr.id">@usr.name</option>
@@ -71,3 +72,5 @@
     <input type="submit" value="Add Review"/>
 </div>
 }
+
+@footer()

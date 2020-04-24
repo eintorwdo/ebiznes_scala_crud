@@ -9,10 +9,12 @@
     <input name="id" id="id" value="@order("id").value" type="hidden" />
     @inputText(order("price"))
     @inputText(order("address"))
+    <label for="sent">Sent:</label>
     <select name="sent" id="sent">
         <option value=0 selected>No</option>
         <option value=1>Yes</option>
     </select>
+    <label for="payment">Payment:</label>
     <select name="payment" id="payment">
         @for(pmt <- payments){
             @if(pmt.id.toString==order("payment").value.getOrElse(0)) {
@@ -23,6 +25,7 @@
             }
         }
     </select>
+    <label for="delivery">Delivery:</label>
     <select name="delivery" id="delivery">
         @for(dlv <- deliveries){
             @if(dlv.id.toString==order("delivery").value.getOrElse(0)) {
@@ -37,3 +40,5 @@
         <input type="submit" value="Update Order"/>
     </div>
 }
+
+@footer()

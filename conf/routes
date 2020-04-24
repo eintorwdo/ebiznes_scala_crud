@@ -40,8 +40,8 @@ GET     /addOrder                   controllers.OrderController.addOrder
 POST    /addOrderHandle             controllers.OrderController.addOrderHandle
 GET     /updateOrder/:id            controllers.OrderController.updateOrder(id: Int)
 POST    /updateOrderHandle          controllers.OrderController.updateOrderHandle
-GET     /addOrderDetail             controllers.OrderController.addOrderDetail
-POST    /addOrdeDetailHandle        controllers.OrderController.addOrderDetailHandle
+GET     /addOrderDetail/:id         controllers.OrderController.addOrderDetail(id: Int)
+POST    /addOrdeDetailHandle/:id    controllers.OrderController.addOrderDetailHandle(id: Int)
 GET     /updateOrderDetail/:id      controllers.OrderController.updateOrderDetail(id: Int)
 POST    /updateOrderDetailHandle    controllers.OrderController.updateOrderDetailHandle
 GET     /addDelivery                controllers.OrderController.addDelivery

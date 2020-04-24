@@ -13,18 +13,21 @@
 @inputText(product("price"))
 @inputText(product("amount"))
 
+<label for="manufacturer">Manufacturer:</label>
 <select name="manufacturer" id="manufacturer">
     @for(man <- result._3){
     <option value="@man.id">@man.name</option>
     }
 </select>
 
+<label for="category">Category:</label>
 <select name="category" id="category">
     @for(cat <- result._1){
       <option value="@cat.id">@cat.name</option>
     }
 </select>
 
+<label for="subcategory">Subcategory:</label>
 <select name="subcategory" id="subcategory">
 @for(subcat <- result._2){
     <option value="@subcat.id">@subcat.name</option>
@@ -35,3 +38,5 @@
     <input type="submit" value="Add Product"/>
 </div>
 }
+
+@footer()

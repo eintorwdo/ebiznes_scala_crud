@@ -1,10 +1,12 @@
 @(products: Seq[Product])
+
+<a href="/addProduct">Dodaj produkt</a>
 <ul>
     @for(product <- products) {
         <li>
             <ul>
                 <li>
-                    <span><b>@product.name</b></span>
+                    <span><b><a href="/products/@product.id">@product.name</a></b></span>
                 </li>
                 <li>
                     <span>Opis: @product.description</span>
@@ -19,3 +21,5 @@
         </li>
       }
 </ul>
+
+@footer()

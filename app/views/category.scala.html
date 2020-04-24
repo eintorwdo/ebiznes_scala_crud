@@ -1,6 +1,7 @@
 @(category: Category, products: Seq[Product])
 
 <b>Kategoria: @category.name</b>
+<a href="/updateCategory/@category.id">Edytuj kategorię</a>
 
 @if(products.nonEmpty){
     <ul>
@@ -8,7 +9,7 @@
             <li>
                 <ul>
                     <li>
-                        <span><b>@product.name</b></span>
+                        <span><b><a href="/products/@product.id">@product.name</a></b></span>
                     </li>
                     <li>
                         <span>Opis: @product.description</span>
@@ -24,3 +25,5 @@
         }
     </ul>
 }
+
+@footer()

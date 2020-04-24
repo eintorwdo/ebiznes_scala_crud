@@ -9,6 +9,7 @@
 @form(routes.CategoryController.addSubCategoryHandle()) {
 @helper.CSRF.formField
 @inputText(subcategory("name"))
+<label for="category">Category:</label>
 <select name="category" id="category">
     @for(cat <- categories){
       <option value="@cat.id">@cat.name</option>
@@ -18,3 +19,5 @@
     <input type="submit" value="Add Subategory"/>
 </div>
 }
+
+@footer()

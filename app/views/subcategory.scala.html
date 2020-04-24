@@ -1,7 +1,7 @@
 @(subcategory: SubCategory, products: Seq[Product])
 
 <b>Podkategoria: @subcategory.name</b>
-
+<a href="/updateSubCategory/@subcategory.id">Edytuj podkategorię</a>
 @if(products.nonEmpty){
     <ul>
         @for(product <- products) {
@@ -24,3 +24,5 @@
         }
     </ul>
 }
+
+@footer()

@@ -1,5 +1,7 @@
 @(order: ((Order, User, Option[Payment], Option[Delivery]), Seq[(OrderDetail, Option[Product])]))
 
+    <a href="/updateOrder/@order._1._1.id">Edytuj zamówienie</a>
+    <a href="/addOrderDetail/@order._1._1.id">Dodaj produkty do zamówienia</a>
     <ul>
             <li>
                 <p>id: @order._1._1.id</p>
@@ -18,6 +20,7 @@
             <p><b>Szczegóły zamówienia:</b></p>
             <li>
                 @for(orderdetail <- order._2){
+                    <a href="/updateOrderDetail/@orderdetail._1.id">Edytuj szczegóły zamówienia</a>
                     <p>id: @orderdetail._1.id</p>
                     <p>cena: @orderdetail._1.price</p>
                     @if(orderdetail._2.nonEmpty){
@@ -26,3 +29,5 @@
                 }
             </li>
     </ul>
+
+    @footer()

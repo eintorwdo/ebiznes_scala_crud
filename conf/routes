@@ -4,6 +4,42 @@
 # ~~~~
 
 # An example controller showing a sample home page
+GET     /api/categories             controllers.CategoryController.categoriesJson
+POST    /api/category               controllers.CategoryController.addCategoryJson
+GET     /api/category/:id           controllers.CategoryController.categoryJson(id: Int)
+PUT     /api/category/:id           controllers.CategoryController.updateCategoryJson(id: Int)
+GET     /api/subcategories          controllers.CategoryController.subCategoriesJson
+GET     /api/subcategory/:id        controllers.CategoryController.subCategoryJson(id: Int)
+POST    /api/subcategory            controllers.CategoryController.addSubCategoryJson
+PUT     /api/subcategory/:id        controllers.CategoryController.updateSubCategoryJson(id: Int)
+GET     /api/orders                 controllers.OrderController.ordersJson
+GET     /api/order/:id              controllers.OrderController.orderJson(id: Int)
+POST    /api/order                  controllers.OrderController.addOrderJson
+PUT     /api/order/:id              controllers.OrderController.updateOrderJson(id: Int)
+POST    /api/orderdetail/:id        controllers.OrderController.addOrderDetailJson(id: Int)
+PUT     /api/orderdetail/:id        controllers.OrderController.updateOrderDetailJson(id: Int)
+GET     /api/orderdetails           controllers.OrderController.orderDetailsJson
+GET     /api/orderdetail/:id        controllers.OrderController.orderDetailJson(id: Int)
+GET     /api/deliveries             controllers.OrderController.deliveriesJson
+GET     /api/delivery/:id           controllers.OrderController.deliveryJson(id: Int)
+POST    /api/delivery               controllers.OrderController.addDeliveryJson
+PUT     /api/delivery/:id           controllers.OrderController.updateDeliveryJson(id: Int)
+GET     /api/payments               controllers.OrderController.paymentsJson
+GET     /api/payment/:id            controllers.OrderController.paymentJson(id: Int)
+POST    /api/payment                controllers.OrderController.addPaymentJson
+PUT     /api/payment/:id            controllers.OrderController.updatePaymentJson(id: Int)
+GET     /api/products               controllers.ProductController.productsJson
+GET     /api/product/:id            controllers.ProductController.productJson(id: Int)
+POST    /api/product                controllers.ProductController.addProductJson
+PUT     /api/product/:id            controllers.ProductController.updateProductJson(id: Int)
+GET     /api/manufacturers          controllers.ProductController.manufacturersJson
+GET     /api/manufacturer/:id       controllers.ProductController.manufacturerJson(id: Int)
+POST    /api/manufacturer           controllers.ProductController.addManufacturerJson
+PUT     /api/manufacturer/:id       controllers.ProductController.updateManufacturerJson(id: Int)
+GET     /api/reviews                controllers.ProductController.reviewsJson
+GET     /api/review/:id             controllers.ProductController.reviewJson(id: Int)
+POST    /api/review                 controllers.ProductController.addReviewJson
+PUT     /api/review/:id             controllers.ProductController.updateReviewJson(id: Int)
 GET     /                           controllers.HomeController.index
 GET     /search                     controllers.HomeController.search(query)
 GET     /products                   controllers.ProductController.products

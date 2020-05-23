@@ -8,6 +8,8 @@ import play.api.data.Form
 import play.api.data.Forms._
 import scala.concurrent._
 import scala.util.{Failure, Success}
+import akka.protobufv3.internal.Duration
+import play.api.libs.json._
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -69,6 +71,120 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
       "user" -> number,
       "product" -> number
     )(CreateReviewForm.apply)(CreateReviewForm.unapply)
+  }
+
+  def productsJson() = Action { implicit request: MessagesRequest[AnyContent] =>
+    val query = productsRepo.list()
+    val products = Await.result(query, duration.Duration.Inf)
+    Ok(Json.toJson(products))
+  }
+
+  def productJson(id: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
+    val product = productsRepo.getById(id)
+    val reviews = reviewRepo.listByProdId(id)
+    val result = for {
+          r1 <- product
+          r2 <- reviews
+    } yield (r1, r2)
+    result.map(res => {
+      if(res._1.isEmpty){
+        BadRequest(Json.obj("message" -> "Product not found"))
+      }
+      else{
+        val revs = res._2.map(x => {Json.obj("id" -> x._1.id, "description" -> x._1.description, "userid" -> x._1.user, "username" -> x._2.name)})
+        Ok(Json.obj("product" -> Json.obj("info" -> res._1.head._1, "manufacturer" -> res._1.head._2, "category" -> res._1.head._3, "subcategory" -> res._1.head._4),
+                    "reviews" -> revs))
+      }
+    })
+  }
+
+  def addProductJson() = Action { implicit request: MessagesRequest[AnyContent] =>
+    val json = request.body.asJson
+    if(json.nonEmpty){
+      val body = json.get
+      val catIdJs = (body \ "category").validate[Int]
+      val subIdJs = (body \ "subcategory").validate[Int]
+      val manIdJs = (body \ "manufacturer").validate[Int]
+      val nameJs = (body \ "name").validate[String]
+      val dscJs = (body \ "description").validate[String]
+      val prcJs = (body \ "price").validate[Int]
+      val amountJs = (body \ "amount").validate[Int]
+      val catId = catIdJs.getOrElse(0)
+      val subId = subIdJs.getOrElse(0)
+      val manId = manIdJs.getOrElse(0)
+      val name = nameJs.getOrElse("")
+      val description = dscJs.getOrElse("")
+      val price = prcJs.getOrElse(0)
+      val amount = amountJs.getOrElse(-1)
+      if(catId == 0 || subId == 0 || manId == 0 || name == "" || description == "" || price <= 0 || amount < 0){
+        BadRequest(Json.obj("message" -> "Invalid request body"))
+      }
+      else{
+        val catQuery = categoryRepo.getById(catId)
+        val subQuery = subCategoryRepository.getById(subId)
+        val manQuery = manufacturerRepo.getById(manId)
+        val category = Await.result(catQuery, duration.Duration.Inf)
+        val subcat = Await.result(subQuery, duration.Duration.Inf)
+        val man = Await.result(manQuery, duration.Duration.Inf)
+        if(category.isEmpty || subcat.isEmpty || man.isEmpty){
+          BadRequest(Json.obj("message" -> "Invalid request body"))
+        }
+        else{
+          val newPrd = productsRepo.create(name, description, price, amount, Option(manId), Option(catId), Option(subId))
+          val product = Await.result(newPrd, duration.Duration.Inf)
+          Ok(Json.toJson(product))
+        }
+      }
+    }
+    else{
+      BadRequest(Json.obj("message" -> "Empty request body"))
+    }
+  }
+
+  def updateProductJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val json = request.body.asJson
+    val query = productsRepo.getById(id)
+    val oldProduct = Await.result(query, duration.Duration.Inf)
+    if(json.nonEmpty && oldProduct.nonEmpty){
+      val body = json.get
+      val catIdJs = (body \ "category").validate[Int]
+      val subIdJs = (body \ "subcategory").validate[Int]
+      val manIdJs = (body \ "manufacturer").validate[Int]
+      val nameJs = (body \ "name").validate[String]
+      val dscJs = (body \ "description").validate[String]
+      val prcJs = (body \ "price").validate[Int]
+      val amountJs = (body \ "amount").validate[Int]
+      val catId = catIdJs.getOrElse(0)
+      val subId = subIdJs.getOrElse(0)
+      val manId = manIdJs.getOrElse(0)
+      val name = nameJs.getOrElse("")
+      val description = dscJs.getOrElse("")
+      val price = prcJs.getOrElse(0)
+      val amount = amountJs.getOrElse(-1)
+      if(catId == 0 || subId == 0 || manId == 0 || name == "" || description == "" || price <= 0 || amount < 0){
+        BadRequest(Json.obj("message" -> "Invalid request body"))
+      }
+      else{
+        val catQuery = categoryRepo.getById(catId)
+        val subQuery = subCategoryRepository.getById(subId)
+        val manQuery = manufacturerRepo.getById(manId)
+        val category = Await.result(catQuery, duration.Duration.Inf)
+        val subcat = Await.result(subQuery, duration.Duration.Inf)
+        val man = Await.result(manQuery, duration.Duration.Inf)
+        if(category.isEmpty || subcat.isEmpty || man.isEmpty){
+          BadRequest(Json.obj("message" -> "Invalid request body"))
+        }
+        else{
+          val newProduct = Product(oldProduct.head._1.id, name, description, price, amount, Option(manId), Option(catId), Option(subId))
+          val updateQuery = productsRepo.update(oldProduct.head._1.id, newProduct)
+          Await.result(updateQuery, duration.Duration.Inf)
+          Ok(Json.toJson(newProduct))
+        }
+      }
+    }
+    else{
+      BadRequest(Json.obj("message" -> "Empty request body or product not found"))
+    }
   }
 
   def products() = Action.async { implicit request: MessagesRequest[AnyContent] =>
@@ -200,6 +316,66 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
 
   }
 
+  def manufacturersJson() = Action { implicit request: MessagesRequest[AnyContent] =>
+    val query = manufacturerRepo.list()
+    val manufacturers = Await.result(query, duration.Duration.Inf)
+    Ok(Json.toJson(manufacturers))
+  }
+
+  def manufacturerJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val query = manufacturerRepo.getById(id)
+    val manufacturer = Await.result(query, duration.Duration.Inf)
+    if(manufacturer.nonEmpty){
+      Ok(Json.toJson(manufacturer.get))
+    }
+    else{
+      BadRequest(Json.obj("message" -> "Manufacturer not found"))
+    }
+  }
+
+  def addManufacturerJson() = Action { implicit request: MessagesRequest[AnyContent] =>
+      val json = request.body.asJson
+      if(json.nonEmpty){
+        val body = json.get
+        val nameJs = (body \ "name").validate[String]
+        val name = nameJs.getOrElse("")
+        if(name == ""){
+          BadRequest(Json.obj("message" -> "Invalid name parameter"))
+        }
+        else{
+          val query = manufacturerRepo.create(name)
+          val result = Await.result(query, duration.Duration.Inf)
+          Ok(Json.toJson(result))
+        }
+      }
+      else{
+        BadRequest(Json.obj("message" -> "Empty request body"))
+      }
+  }
+
+  def updateManufacturerJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+      val manQuery = manufacturerRepo.getById(id)
+      val oldMan = Await.result(manQuery, duration.Duration.Inf)
+      val json = request.body.asJson
+      if(json.nonEmpty && oldMan.nonEmpty){
+        val body = json.get
+        val nameJs = (body \ "name").validate[String]
+        val name = nameJs.getOrElse("")
+        if(name == ""){
+          BadRequest(Json.obj("message" -> "Invalid name parameter"))
+        }
+        else{
+          val newMan = Manufacturer(id, name)
+          val query = manufacturerRepo.update(id, newMan)
+          Await.result(query, duration.Duration.Inf)
+          Ok(Json.toJson(newMan))
+        }
+      }
+      else{
+        BadRequest(Json.obj("message" -> "Empty request body"))
+      }
+  }
+
   def addManufacturer() = Action { implicit request: MessagesRequest[AnyContent] =>
       Ok(views.html.manufactureradd(manufacturerForm))
   }
@@ -248,6 +424,91 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     )
   }
 
+  def reviewsJson() = Action { implicit request: MessagesRequest[AnyContent] =>
+    val query = reviewRepo.list()
+    val reviews = Await.result(query, duration.Duration.Inf)
+    Ok(Json.toJson(reviews))
+  }
+
+  def reviewJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val query = reviewRepo.getById(id)
+    val review = Await.result(query, duration.Duration.Inf)
+    if(review.nonEmpty){
+      Ok(Json.toJson(review.get))
+    }
+    else{
+      BadRequest(Json.obj("message" -> "Review not found"))
+    }
+  }
+
+  def addReviewJson() = Action { implicit request: MessagesRequest[AnyContent] =>
+    val json = request.body.asJson
+    if(json.nonEmpty){
+      val body = json.get
+      val dscJs = (body \ "description").validate[String]
+      val userJs = (body \ "user").validate[Int]
+      val prdJs = (body \ "product").validate[Int]
+      val description = dscJs.getOrElse("")
+      val user = userJs.getOrElse(0)
+      val product = prdJs.getOrElse(0)
+      if(description == "" || user == 0 || product == 0){
+        BadRequest(Json.obj("message" -> "Invalid request body"))
+      }
+      else{
+        val prdQuery = productsRepo.getById(product)
+        val usrQuery = userRepo.getById(user)
+        val userRes = Await.result(usrQuery, duration.Duration.Inf)
+        val prdRes = Await.result(prdQuery, duration.Duration.Inf)
+        if(userRes.nonEmpty && prdRes.nonEmpty){
+          val createRev = reviewRepo.create(description, user, product)
+          val rev = Await.result(createRev, duration.Duration.Inf)
+          Ok(Json.toJson(rev))
+        }
+        else{
+          BadRequest(Json.obj("message" -> "Invalid request body"))
+        }
+      }
+    }
+    else{
+      BadRequest(Json.obj("message" -> "Empty request body"))
+    }
+  }
+
+  def updateReviewJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val oldRevQuery = reviewRepo.getById(id)
+    val oldRev = Await.result(oldRevQuery, duration.Duration.Inf)
+    val json = request.body.asJson
+    if(json.nonEmpty && oldRev.nonEmpty){
+      val body = json.get
+      val dscJs = (body \ "description").validate[String]
+      val userJs = (body \ "user").validate[Int]
+      val prdJs = (body \ "product").validate[Int]
+      val description = dscJs.getOrElse("")
+      val user = userJs.getOrElse(0)
+      val product = prdJs.getOrElse(0)
+      if(description == "" || user == 0 || product == 0){
+        BadRequest(Json.obj("message" -> "Invalid request body"))
+      }
+      else{
+        val prdQuery = productsRepo.getById(product)
+        val usrQuery = userRepo.getById(user)
+        val userRes = Await.result(usrQuery, duration.Duration.Inf)
+        val prdRes = Await.result(prdQuery, duration.Duration.Inf)
+        if(userRes.nonEmpty && prdRes.nonEmpty){
+          val newRev = Review(id, description, user, product)
+          val updateRev = reviewRepo.update(id, newRev)
+          Await.result(updateRev, duration.Duration.Inf)
+          Ok(Json.toJson(newRev))
+        }
+        else{
+          BadRequest(Json.obj("message" -> "Invalid request body"))
+        }
+      }
+    }
+    else{
+      BadRequest(Json.obj("message" -> "Empty request body or review not found"))
+    }
+  }
 
   def addReviewHandle(id: Int) = Action.async { implicit request =>  //review form is integrated with product page
     val produkt = productsRepo.getById(id)

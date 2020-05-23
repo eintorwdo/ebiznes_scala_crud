@@ -7,9 +7,11 @@ import play.api.mvc._
 import scala.concurrent._
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.libs.json._
 
 // import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+// import play.api.libs.json.JsString
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -54,6 +56,13 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
     })
   }
 
+  def categoriesJson(): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
+    val categories = categoryRepo.list()
+    categories.map(cat => {
+      Ok(Json.toJson(cat))
+    })
+  }
+
   def category(cat: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
     val category = categoryRepo.getById(cat)
     val products = productsRepo.getByCategory(cat)
@@ -71,8 +80,47 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
     })
   }
 
+  def categoryJson(cat: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
+    val category = categoryRepo.getById(cat)
+    val products = productsRepo.getByCategory(cat)
+    val result = for {
+          r1 <- category
+          r2 <- products
+    } yield (r1, r2)
+    result.map(x => {
+      if(x._1.nonEmpty){
+        Ok(Json.obj("category" -> x._1.get,
+                    "products" -> x._2))
+      }
+      else{
+        BadRequest(views.html.index("Category not found"))
+      }
+    })
+  }
+
+  def addCategoryJson() = Action { implicit request: MessagesRequest[AnyContent] =>
+    val body: AnyContent = request.body
+    val jsonBody: Option[JsValue] = body.asJson
+    if(jsonBody.nonEmpty){
+      val obj = jsonBody.get
+      val nameLookup = (obj \ "name").validate[String]
+      val name = nameLookup.getOrElse("")
+      if(name.length == 0){
+        BadRequest(Json.obj("message" -> "Invalid name"))
+      }
+      else{
+        val createCat = categoryRepo.create(name)
+        val res = Await.result(createCat, duration.Duration.Inf)
+        Ok(Json.toJson(res))
+      }
+    }
+    else{
+      BadRequest(Json.obj("message" -> "Empty body"))
+    }
+  }
+
   def addCategory() = Action { implicit request: MessagesRequest[AnyContent] =>
-      Ok(views.html.categoryadd(categoryForm))
+    Ok(views.html.categoryadd(categoryForm))
   }
 
   def addCategoryHandle = Action.async { implicit request =>
@@ -104,6 +152,39 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
     })
   }
 
+  def updateCategoryJson(id: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
+    val category = categoryRepo.getById(id)
+    val body: AnyContent = request.body
+    val jsonBody: Option[JsValue] = body.asJson
+    if(jsonBody.nonEmpty){
+      val obj = jsonBody.get
+      category.map(x => {
+        if(x.nonEmpty){
+          val cat = x.get
+          val nameLookup = (obj \ "name").validate[String]
+          val newName = nameLookup.getOrElse("")
+          if(newName.length == 0){
+            BadRequest(Json.obj("message" -> "Invalid name"))
+          }
+          else{
+            val newCat = Category(cat.id, newName)
+            val updateCat = categoryRepo.update(id, newCat)
+            val res = Await.result(updateCat, duration.Duration.Inf)
+            Ok(Json.toJson(newCat))
+          }
+        }
+        else{
+          BadRequest(Json.obj("message" -> "Category not found"))
+        }
+      })
+    }
+    else{
+      Future.successful(
+        BadRequest(Json.obj("message" -> "Empty body"))
+      )
+    }
+  }
+
   def updateCategoryHandle = Action.async { implicit request =>
     updateCategoryForm.bindFromRequest.fold(
       errorForm => {
@@ -129,6 +210,36 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
         BadRequest(views.html.index("No categories found. Cannot add subcategory"))
       }
     })
+  }
+
+  def addSubCategoryJson() = Action { implicit request: MessagesRequest[AnyContent] =>
+    val body: AnyContent = request.body
+    val jsonBody: Option[JsValue] = body.asJson
+    if(jsonBody.nonEmpty){
+      val obj = jsonBody.get
+      val nameLookup = (obj \ "name").validate[String]
+      val categoryLookup = (obj \ "category").validate[Int]
+      val name = nameLookup.getOrElse("")
+      val category = categoryLookup.getOrElse(0)
+      if(name.length == 0 || category == 0){
+        BadRequest(Json.obj("message" -> "Incorrect name or category id"))
+      }
+      else{
+        val catQuery = categoryRepo.getById(category)
+        val catQueryRes = Await.result(catQuery, duration.Duration.Inf)
+        if(catQueryRes.nonEmpty){
+          val createSubCat = subCategoryRepo.create(name, category)
+          val res = Await.result(createSubCat, duration.Duration.Inf)
+          Ok(Json.toJson(res))
+        }
+        else{
+          BadRequest(Json.obj("message" -> "Invalid category id"))
+        }
+      }
+    }
+    else{
+      BadRequest(Json.obj("message" -> "Empty body"))
+    }
   }
 
   def addSubCategoryHandle = Action.async { implicit request =>
@@ -164,6 +275,48 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
     })
   }
 
+  def updateSubCategoryJson(id: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
+    val subcategory = subCategoryRepo.getById(id)
+    val body: AnyContent = request.body
+    val jsonBody: Option[JsValue] = body.asJson
+    if(jsonBody.nonEmpty){
+      val obj = jsonBody.get
+      subcategory.map(x => {
+        if(x.nonEmpty){
+          val subcat = x.get
+          val nameLookup = (obj \ "name").validate[String]
+          val categoryLookup = (obj \ "category").validate[Int]
+          val newName = nameLookup.getOrElse("")
+          val newCategoryId = categoryLookup.getOrElse(0)
+          if(newName.length == 0 || newCategoryId == 0){
+            BadRequest(Json.obj("message" -> "Invalid name or category id"))
+          }
+          else{
+            val catQuery = categoryRepo.getById(newCategoryId)
+            val catQueryRes = Await.result(catQuery, duration.Duration.Inf)
+            if(catQueryRes.nonEmpty){
+              val newSubCat = SubCategory(subcat.id, newName, newCategoryId)
+              val updateSubCat = subCategoryRepo.update(id, newSubCat)
+              val res = Await.result(updateSubCat, duration.Duration.Inf)
+              Ok(Json.toJson(newSubCat))
+            }
+            else{
+              BadRequest(Json.obj("message" -> "Invalid category id"))
+            }
+          }
+        }
+        else{
+          BadRequest(views.html.index("Category not found"))
+        }
+      })
+    }
+    else{
+      Future.successful(
+        BadRequest(Json.obj("message" -> "Empty body"))
+      )
+    }
+  }
+
   def updateSubCategoryHandle = Action.async { implicit request =>
     val categories = categoryRepo.list()
     val res = Await.result(categories, duration.Duration.Inf)
@@ -188,6 +341,13 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
     })
   }
 
+  def subCategoriesJson(): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
+    val subcategories = subCategoryRepo.list()
+    subcategories.map(subcat => {
+      Ok(Json.toJson(subcat))
+    })
+  }
+
   def subcategory(cat: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
     val subcategory = subCategoryRepo.getById(cat)
     val products = productsRepo.getBySubCategory(cat)
@@ -201,6 +361,27 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
       }
       else{
         BadRequest(views.html.index("Subcategory not found"))
+      }
+    })
+  }
+
+  def subCategoryJson(subcat: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
+    val subcategory = subCategoryRepo.getById(subcat)
+    val products = productsRepo.getBySubCategory(subcat)
+    val result = for {
+          r1 <- subcategory
+          r2 <- products
+    } yield (r1, r2)
+    result.map(x => {
+      if(x._1.nonEmpty){
+        val category = categoryRepo.getById(x._1.get.category)
+        val catResult = Await.result(category, duration.Duration.Inf)
+        Ok(Json.obj("category" -> catResult.get,
+                    "subcategory" -> x._1.get,
+                    "products" -> x._2))
+      }
+      else{
+        BadRequest(Json.obj("message" -> "Subcategory not found"))
       }
     })
   }

@@ -36,9 +36,9 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
 
     def user_fk = foreignKey("usr_fk", user, usr)(_.id)
 
-    def payment_fk = foreignKey("pmt_fk", payment, pmt)(_.id)
+    def payment_fk = foreignKey("pmt_fk", payment, pmt)(_.id?)
 
-    def delivery_fk = foreignKey("dlv_fk", delivery, dlv)(_.id)
+    def delivery_fk = foreignKey("dlv_fk", delivery, dlv)(_.id?)
 
     def * = (id, price, date, address, sent, user, payment, delivery) <> ((Order.apply _).tupled, Order.unapply)
 

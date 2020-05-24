@@ -3,7 +3,7 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-# An example controller showing a sample home page
+# Api routes
 GET     /api/categories             controllers.CategoryController.categoriesJson
 POST    /api/category               controllers.CategoryController.addCategoryJson
 GET     /api/category/:id           controllers.CategoryController.categoryJson(id: Int)
@@ -40,6 +40,10 @@ GET     /api/reviews                controllers.ProductController.reviewsJson
 GET     /api/review/:id             controllers.ProductController.reviewJson(id: Int)
 POST    /api/review                 controllers.ProductController.addReviewJson
 PUT     /api/review/:id             controllers.ProductController.updateReviewJson(id: Int)
+GET     /api/users                  controllers.UserController.usersJson
+GET     /api/user/:id               controllers.UserController.userJson(id: Int)
+
+#View routes
 GET     /                           controllers.HomeController.index
 GET     /search                     controllers.HomeController.search(query)
 GET     /products                   controllers.ProductController.products

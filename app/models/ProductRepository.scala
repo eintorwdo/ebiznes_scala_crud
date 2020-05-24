@@ -34,11 +34,11 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
 
     def subcategory = column[Option[Int]]("subcategory")
 
-    def subcategory_fk = foreignKey("subcat_fk", subcategory, subcat)(_.id)
+    def subcategory_fk = foreignKey("subcat_fk", subcategory, subcat)(_.id?)
 
-    def category_fk = foreignKey("cat_fk", category, subcat)(_.id)
+    def category_fk = foreignKey("cat_fk", category, subcat)(_.id?)
 
-    def manufacturer_fk = foreignKey("man_fk", manufacturer, man)(_.id)
+    def manufacturer_fk = foreignKey("man_fk", manufacturer, man)(_.id?)
 
     def * = (id, name, description, price, amount, manufacturer, category, subcategory) <> ((Product.apply _).tupled, Product.unapply)
 

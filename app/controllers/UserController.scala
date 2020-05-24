@@ -9,7 +9,7 @@ import play.api.data.Forms._
 
 import scala.concurrent._
 import scala.util.{Failure, Success}
-
+import play.api.libs.json._
 
 @Singleton
 class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderRepository, reviewRepo: ReviewRepository, cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
@@ -32,6 +32,25 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
   }
 
 
+
+  def usersJson() = Action { implicit request: MessagesRequest[AnyContent] =>
+    val usrQuery = userRepo.list()
+    val users = Await.result(usrQuery, duration.Duration.Inf)
+    val usersNoPwd = users.map(x => {Json.obj("id" -> x.id, "name" -> x.name, "email" -> x.email)})
+    Ok(Json.obj("users" -> usersNoPwd))
+  }
+
+  def userJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val usrQuery = userRepo.getById(id)
+    val user = Await.result(usrQuery, duration.Duration.Inf)
+    if(user.nonEmpty){
+      val userNoPwd = Json.obj("id" -> user.get.id, "name" -> user.get.name, "email" -> user.get.email)
+      Ok(userNoPwd)
+    }
+    else{
+      BadRequest(Json.obj("message" -> "User not found"))
+    }
+  }
 
   def users() = Action.async { implicit request: MessagesRequest[AnyContent] =>
   val usrs = userRepo.list()

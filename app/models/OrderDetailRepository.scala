@@ -19,7 +19,7 @@ class OrderDetailRepository @Inject() (dbConfigProvider: DatabaseConfigProvider,
     def order = column[Int]("order_")
     def product = column[Option[Int]]("product")
     def order_fk = foreignKey("order_fk", order, ord)(_.id)
-    def product_fk = foreignKey("prd_fk", product, prd)(_.id)
+    def product_fk = foreignKey("prd_fk", product, prd)(_.id?)
     def * = (id, price, order, product) <> ((OrderDetail.apply _).tupled, OrderDetail.unapply)
   }
 

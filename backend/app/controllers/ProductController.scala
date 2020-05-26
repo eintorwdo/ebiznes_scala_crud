@@ -73,10 +73,19 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     )(CreateReviewForm.apply)(CreateReviewForm.unapply)
   }
 
-  def productsJson() = Action { implicit request: MessagesRequest[AnyContent] =>
-    val query = productsRepo.list()
-    val products = Await.result(query, duration.Duration.Inf)
-    Ok(Json.toJson(products))
+  def productsJson(query: Option[String]) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val searchQuery = query.getOrElse("")
+    var dbQuery = productsRepo.list()
+    if(searchQuery != ""){
+      dbQuery = productsRepo.search(searchQuery)
+    }
+    val products = Await.result(dbQuery, duration.Duration.Inf)
+    val productsWithMan = products.map(p => {
+      val manQuery = manufacturerRepo.getById(p.manufacturer.getOrElse(0))
+      val manufacturer = Await.result(manQuery, duration.Duration.Inf)
+      Json.obj("id" -> p.id, "name" -> p.name, "price" -> p.price, "amount" -> p.amount, "manufacturer" -> manufacturer.getOrElse(Manufacturer(0, "")).name)
+    })
+    Ok(Json.obj("products" -> productsWithMan))
   }
 
   def productJson(id: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>

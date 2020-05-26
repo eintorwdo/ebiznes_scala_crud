@@ -28,7 +28,7 @@ GET     /api/payments               controllers.OrderController.paymentsJson
 GET     /api/payment/:id            controllers.OrderController.paymentJson(id: Int)
 POST    /api/payment                controllers.OrderController.addPaymentJson
 PUT     /api/payment/:id            controllers.OrderController.updatePaymentJson(id: Int)
-GET     /api/products               controllers.ProductController.productsJson
+GET     /api/products               controllers.ProductController.productsJson(query: Option[String])
 GET     /api/product/:id            controllers.ProductController.productJson(id: Int)
 POST    /api/product                controllers.ProductController.addProductJson
 PUT     /api/product/:id            controllers.ProductController.updateProductJson(id: Int)

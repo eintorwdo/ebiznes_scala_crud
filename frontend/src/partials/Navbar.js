@@ -8,6 +8,8 @@ import NavDropdown from 'react-bootstrap/NavDropdown'
 import NavItem from 'react-bootstrap/NavItem';
 import Dropdown from 'react-bootstrap/Dropdown'
 import DropdownButton from 'react-bootstrap/DropdownButton'
+
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 // import ButtonGroup from 'react-bootstrap/ButtonGroup'
 // import Row from 'react-bootstrap/Row'
 // import Col from 'react-bootstrap/Col'
@@ -22,13 +24,28 @@ let getCategories = async () => {
 class MyNavbar extends React.Component {
     constructor(){
         super();
-        this.state = {loggedIn: false, username: "testname@gmail.com", categories: []};
+        this.state = {loggedIn: false, username: "testname@gmail.com", categories: [], query: ""};
     }
 
     componentDidMount(){
         getCategories().then(data => {
-            this.setState({categories: data})
+            this.setState({categories: data});
         });
+    }
+
+    searchClick = (e) => {
+        e.preventDefault();
+        var q = document.getElementById("searchBar").value;
+        if(q.length > 0){
+            this.setState({query: `/search?query=${q}`}, ()=>{
+                document.getElementById("srcLink").click();
+            });
+        }
+        else{
+            this.setState({query: '#'}, ()=>{
+                document.getElementById("srcLink").click();
+            });
+        }
     }
 
     render(){
@@ -59,7 +76,7 @@ class MyNavbar extends React.Component {
         return(
             <>
             <Navbar bg="dark" variant="dark" expand="lg">
-                <Navbar.Brand href="#home">Store</Navbar.Brand>
+                <Navbar.Brand href="/">Store</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
@@ -71,8 +88,9 @@ class MyNavbar extends React.Component {
                     </Nav>
                     <Nav >
                         <Form inline className="p-2 mr-md-2 justify-content-center">
-                            <FormControl type="text" placeholder="Search" className="mr-sm-2 mr-xs-0 mb-sm-0 mb-2" />
-                            <Button variant="outline-info">Search</Button>
+                            <FormControl type="text" placeholder="Search" id="searchBar" className="mr-sm-2 mr-xs-0 mb-sm-0 mb-2" />
+                            <Button onClick={this.searchClick} variant="outline-info">Search</Button>
+                            <Link to={this.state.query} style={{display: "none"}} id='srcLink'></Link>
                         </Form>
                         <Button className="m-2"><i className="fas fa-shopping-cart"></i></Button>
                         {userInfo}

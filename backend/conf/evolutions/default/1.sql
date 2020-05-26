@@ -44,6 +44,7 @@ CREATE TABLE "review" (
  "description" TEXT NOT NULL,
  "user" INTEGER,
  "product" INTEGER NOT NULL,
+ "date" TEXT NOT NULL,
  FOREIGN KEY(user) references user(id),
  FOREIGN KEY(product) references product(id)
 );

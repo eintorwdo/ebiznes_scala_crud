@@ -18,9 +18,10 @@ class ReviewRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val 
     def description = column[String]("description")
     def user = column[Int]("user")
     def product = column[Int]("product")
+    def date = column[String]("date")
     def user_fk = foreignKey("usr_fk", user, usr)(_.id)
     def product_fk = foreignKey("prd_fk", product, prd)(_.id)
-    def * = (id, description, user, product) <> ((Review.apply _).tupled, Review.unapply)
+    def * = (id, description, user, product, date) <> ((Review.apply _).tupled, Review.unapply)
   }
 
   import productRepository.ProductTable
@@ -30,11 +31,11 @@ class ReviewRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val 
   val prd = TableQuery[ProductTable]
   val usr = TableQuery[UserTable]
 
-  def create(description: String, user: Int, product: Int): Future[Review] = db.run {
-    (review.map(c => (c.description,c.user,c.product))
+  def create(description: String, user: Int, product: Int, date: String): Future[Review] = db.run {
+    (review.map(c => (c.description,c.user,c.product,c.date))
       returning review.map(_.id)
-      into {case ((description, user, product), id) => Review(id, description, user, product)}
-      ) += (description, user, product)
+      into {case ((description, user, product, date), id) => Review(id, description, user, product, date)}
+      ) += (description, user, product, date)
   }
 
   def listByProdId(id: Int): Future[Seq[(Review, User)]] = db.run {

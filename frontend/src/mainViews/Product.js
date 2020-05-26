@@ -1,9 +1,12 @@
 import React from 'react';
 
-import Button from 'react-bootstrap/Button'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
+import Button from 'react-bootstrap/Button';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
+// import Overlay from 'react-bootstrap/Overlay';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 let getProduct = async (id) => {
@@ -15,18 +18,37 @@ let getProduct = async (id) => {
 class Product extends React.Component {
     constructor(props){
         super(props);
-        this.state = {product: undefined, id: this.props.match.params.id, reviews: []};
+        this.state = {product: undefined, id: this.props.match.params.id, reviews: [], loading: true, loggedIn: false};
     }
 
     componentDidMount(){
         getProduct(this.state.id).then(p => {
-            this.setState({product: p.product, reviews: p.reviews});
+            this.setState({product: p.product, reviews: p.reviews, loading: false});
         });
     }
 
     render(){
         let prd;
         let description;
+        let reviews;
+        let addReviewButton = <Button>Add review</Button>;
+
+        if(this.state.loading === false && this.state.loggedIn === false){
+            addReviewButton = (
+                <OverlayTrigger
+                    key="right"
+                    placement="right"
+                    overlay={
+                    <Tooltip>
+                        Log in to add reviews
+                    </Tooltip>
+                    }
+                >
+                    <Button>Add review</Button>
+                </OverlayTrigger>
+            );
+        }
+
         if(this.state.product){
             description = <p><span className="font-weight-bold">Product description:</span> {this.state.product.info.description}</p>;
             prd = (
@@ -65,11 +87,40 @@ class Product extends React.Component {
                 </>
             );
         }
+
+        if(this.state.reviews.length > 0){
+            reviews = this.state.reviews.map(r => {
+                return (
+                    <>
+                    <Row key={r.id} className="text-left">
+                        <Col>
+                            <p className="mb-0">{r.username}:</p>
+                        </Col>
+                    </Row>
+                    <Row key={r.id} className="text-left mt-2">
+                        <Col>
+                            <h6 className="mb-0">{r.description}</h6>
+                        </Col>
+                    </Row>
+                    <Row key={r.id} className="text-left">
+                        <Col>
+                            <p className="mb-0">{r.date}</p>
+                            <hr></hr>
+                        </Col>
+                    </Row>
+                    </>
+                );
+            });
+        }
+        else if(this.state.reviews.length === 0 && this.state.loading === false){
+            reviews = <h4>No reviews</h4>
+        }
+
         return(
             <>
             <Row className="mt-3">
                 <Container className="pt-3 pb-3 d-flex justify-content-center flex-wrap productListItem">
-                    <Col >
+                    <Col>
                         <img id="productImage" src="https://dimensionmill.org/wp-content/uploads/2019/03/square-placeholder.jpg"></img>
                     </Col>
                     <Col md={6} xs={12} className="w-50 pt-md-4 pt-0 pb-4">
@@ -80,6 +131,27 @@ class Product extends React.Component {
                             {description}
                         </Col>
                     </Row>
+                </Container>
+            </Row>
+            <Row className="mt-3">
+                <Container>
+                    <Col sm={12}className="text-sm-center text-lg-left">
+                        <h3>Reviews:</h3>
+                    </Col>
+                </Container>
+            </Row>
+            <Row className="mt-1">
+                <Container>
+                    <Col sm={12}className="text-sm-center text-lg-left">
+                        {addReviewButton}
+                    </Col>
+                </Container>
+            </Row>
+            <Row className="mt-3">
+                <Container className="pt-3 pb-3 d-flex justify-content-center flex-wrap productListItem">
+                    <Col sm={12}>
+                        {reviews}
+                    </Col>
                 </Container>
             </Row>
             </>

@@ -61,7 +61,8 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
       "id" -> number,
       "description" -> nonEmptyText,
       "user" -> number,
-      "product" -> number
+      "product" -> number,
+      "date" -> nonEmptyText
     )(UpdateReviewForm.apply)(UpdateReviewForm.unapply)
   }
 
@@ -100,7 +101,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
         BadRequest(Json.obj("message" -> "Product not found"))
       }
       else{
-        val revs = res._2.map(x => {Json.obj("id" -> x._1.id, "description" -> x._1.description, "userid" -> x._1.user, "username" -> x._2.name)})
+        val revs = res._2.map(x => {Json.obj("id" -> x._1.id, "description" -> x._1.description, "userid" -> x._1.user, "username" -> x._2.name, "date" -> x._1.date)})
         Ok(Json.obj("product" -> Json.obj("info" -> res._1.head._1, "manufacturer" -> res._1.head._2, "category" -> res._1.head._3, "subcategory" -> res._1.head._4),
                     "reviews" -> revs))
       }
@@ -469,7 +470,8 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
         val userRes = Await.result(usrQuery, duration.Duration.Inf)
         val prdRes = Await.result(prdQuery, duration.Duration.Inf)
         if(userRes.nonEmpty && prdRes.nonEmpty){
-          val createRev = reviewRepo.create(description, user, product)
+          val date = java.time.LocalDate.now.toString
+          val createRev = reviewRepo.create(description, user, product, date)
           val rev = Await.result(createRev, duration.Duration.Inf)
           Ok(Json.toJson(rev))
         }
@@ -504,7 +506,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
         val userRes = Await.result(usrQuery, duration.Duration.Inf)
         val prdRes = Await.result(prdQuery, duration.Duration.Inf)
         if(userRes.nonEmpty && prdRes.nonEmpty){
-          val newRev = Review(id, description, user, product)
+          val newRev = Review(id, description, user, product, oldRev.get.date)
           val updateRev = reviewRepo.update(id, newRev)
           Await.result(updateRev, duration.Duration.Inf)
           Ok(Json.toJson(newRev))
@@ -550,7 +552,8 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
         }
       },
       review => {
-        reviewRepo.create(review.description, review.user, review.product).map { _ =>
+        val date = java.time.LocalDate.now.toString
+        reviewRepo.create(review.description, review.user, review.product, date).map { _ =>
           Redirect(routes.ProductController.product(review.product)).flashing("success" -> "review created")
         }
       }
@@ -563,7 +566,8 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     review.map(x => {
       if(x.nonEmpty){
         val rev = x.get
-        val revForm = updateReviewForm.fill(UpdateReviewForm(rev.id, rev.description, rev.user, rev.product))
+        val date = java.time.LocalDate.now.toString
+        val revForm = updateReviewForm.fill(UpdateReviewForm(rev.id, rev.description, rev.user, rev.product, date))
         Ok(views.html.reviewupdate(revForm))
       }
       else{
@@ -580,7 +584,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
         )
       },
       review => {
-        reviewRepo.update(review.id, Review(review.id, review.description, review.user, review.product)).map { _ =>
+        reviewRepo.update(review.id, Review(review.id, review.description, review.user, review.product, review.date)).map { _ =>
           Redirect(routes.ProductController.product(review.product)).flashing("success" -> "review updated")
         }
       }
@@ -663,4 +667,4 @@ case class UpdateProductForm(id: Int, name: String, description: String, price: 
 case class CreateManufacturerForm(name: String)
 case class UpdateManufacturerForm(id: Int, name: String)
 case class CreateReviewForm(description: String, user: Int, product: Int)
-case class UpdateReviewForm(id: Int, description: String, user: Int, product: Int)
+case class UpdateReviewForm(id: Int, description: String, user: Int, product: Int, date: String)

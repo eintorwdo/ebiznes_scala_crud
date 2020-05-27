@@ -29,7 +29,7 @@ class MyNavbar extends React.Component {
 
     componentDidMount(){
         getCategories().then(data => {
-            this.setState({categories: data});
+            this.setState({categories: data.categories});
         });
     }
 
@@ -70,7 +70,20 @@ class MyNavbar extends React.Component {
         }
 
         categoryList = this.state.categories.map(cat => {
-            return <NavDropdown.Item key={cat.id} id={cat.id} href={`/category/${cat.id}`}>{cat.name}</NavDropdown.Item>;
+            return (
+                <NavDropdown.Item key={cat.category.id} id={cat.category.id} href={`/category/${cat.category.id}`}>
+                    {/* <NavDropdown title={cat.category.name} id="dropdown-menu" className="w-100"> */}
+                        {/* {cat.subcategories.map(subcat => {
+                            return (
+                                <NavDropdown.Item key={subcat.id} id={subcat.id} href={`/subcategory/${subcat.id}`}>
+                                    {subcat.name}
+                                </NavDropdown.Item>
+                            );
+                        })} */}
+                        {cat.category.name}
+                    {/* </NavDropdown> */}
+                </NavDropdown.Item>
+            );
         });
 
         return(

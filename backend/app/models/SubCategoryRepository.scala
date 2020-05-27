@@ -7,7 +7,7 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubCategoryRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val categoryRepository: CategoryRepository)(implicit ec: ExecutionContext) {
+class SubCategoryRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   val dbConfig = dbConfigProvider.get[JdbcProfile]
 
   import dbConfig._
@@ -21,10 +21,8 @@ class SubCategoryRepository @Inject() (dbConfigProvider: DatabaseConfigProvider,
     def * = (id, name, category) <> ((SubCategory.apply _).tupled, SubCategory.unapply)
   }
 
-  import categoryRepository.CategoryTable
 
   val subcategory = TableQuery[SubCategoryTable]
-  val category = TableQuery[CategoryTable]
 
   def create(name: String, category: Int): Future[SubCategory] = db.run {
     (subcategory.map(c => (c.name,c.category))
@@ -39,6 +37,10 @@ class SubCategoryRepository @Inject() (dbConfigProvider: DatabaseConfigProvider,
 
   def getById(id: Int): Future[Option[SubCategory]] = db.run {
     subcategory.filter(_.id === id).result.headOption
+  }
+
+  def getByCategoryId(id: Int): Future[Seq[SubCategory]] = db.run {
+    subcategory.filter(_.category === id).result
   }
 
   def update(id: Int, new_subcategory: SubCategory): Future[Unit] = {

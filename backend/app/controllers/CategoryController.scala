@@ -56,11 +56,15 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
     })
   }
 
-  def categoriesJson(): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
+  def categoriesJson(): Action[AnyContent] = Action { implicit request: MessagesRequest[AnyContent] =>
     val categories = categoryRepo.list()
-    categories.map(cat => {
-      Ok(Json.toJson(cat))
+    val res = Await.result(categories, duration.Duration.Inf)
+    val catsWithSubcats = res.map(cat => {
+      val subcats = subCategoryRepo.getByCategoryId(cat.id)
+      val res2 = Await.result(subcats, duration.Duration.Inf)
+      Json.obj("category" -> cat, "subcategories" -> res2)
     })
+    Ok(Json.obj("categories" -> catsWithSubcats))
   }
 
   def category(cat: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>

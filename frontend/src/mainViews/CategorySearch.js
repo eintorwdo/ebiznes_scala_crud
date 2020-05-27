@@ -4,8 +4,8 @@ import queryString from 'query-string';
 
 import SearchList from '../partials/SearchList.js';
 
-let getProducts = async (query) => {
-    let products = await fetch(`http://localhost:9000/api/products?query=${query}`);
+let getProducts = async (catId) => {
+    let products = await fetch(`http://localhost:9000/api/category/${catId}`);
     let productsJson = await products.json();
     return productsJson;
 }
@@ -13,13 +13,11 @@ let getProducts = async (query) => {
 class Search extends React.Component {
     constructor(props){
         super(props);
-        this.state = {query: "", products: null};
-        this.state.query = this.props.location.search;
+        this.state = {id: this.props.match.params.id, products: null};
     }
 
     componentDidMount(){
-        let q = queryString.parse(this.props.location.search);
-        getProducts(q.query).then(p => {
+        getProducts(this.state.id).then(p => {
             this.setState({products: p.products});
         });
     }

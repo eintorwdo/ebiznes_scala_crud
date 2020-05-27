@@ -70,7 +70,7 @@ class MyNavbar extends React.Component {
         }
 
         categoryList = this.state.categories.map(cat => {
-            return <NavDropdown.Item key={cat.id} id={cat.id}>{cat.name}</NavDropdown.Item>;
+            return <NavDropdown.Item key={cat.id} id={cat.id} href={`/category/${cat.id}`}>{cat.name}</NavDropdown.Item>;
         });
 
         return(

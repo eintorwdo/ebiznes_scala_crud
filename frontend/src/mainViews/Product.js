@@ -91,24 +91,24 @@ class Product extends React.Component {
         if(this.state.reviews.length > 0){
             reviews = this.state.reviews.map(r => {
                 return (
-                    <>
-                    <Row key={r.id} className="text-left">
+                    <div key={r.id}>
+                    <Row className="text-left">
                         <Col>
                             <p className="mb-0">{r.username}:</p>
                         </Col>
                     </Row>
-                    <Row key={r.id} className="text-left mt-2">
+                    <Row className="text-left mt-2">
                         <Col>
                             <h6 className="mb-0">{r.description}</h6>
                         </Col>
                     </Row>
-                    <Row key={r.id} className="text-left">
+                    <Row className="text-left">
                         <Col>
                             <p className="mb-0">{r.date}</p>
                             <hr></hr>
                         </Col>
                     </Row>
-                    </>
+                    </div>
                 );
             });
         }

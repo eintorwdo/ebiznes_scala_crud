@@ -17,7 +17,8 @@ class Home extends React.Component {
                 <MyNavbar />
                 <Container fluid id="mainDiv">
                     <Route path="/search" component={Search}/>
-                    <Route path="/category/:id" component={CategorySearch}/>
+                    <Route path="/category/:id" render={(props) => <CategorySearch {...props} type="category"/>}/>
+                    <Route path="/subcategory/:id" render={(props) => <CategorySearch {...props} type="subcategory"/>}/>
                     <Route path="/product/:id" component={Product} />
                 </Container>
             </Router>

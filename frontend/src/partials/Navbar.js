@@ -70,20 +70,29 @@ class MyNavbar extends React.Component {
         }
 
         categoryList = this.state.categories.map(cat => {
-            return (
-                <NavDropdown.Item key={cat.category.id} id={cat.category.id} href={`/category/${cat.category.id}`}>
-                    {/* <NavDropdown title={cat.category.name} id="dropdown-menu" className="w-100"> */}
-                        {/* {cat.subcategories.map(subcat => {
+            if(cat.subcategories.length > 0){
+                return (
+                    <NavDropdown.Item key={cat.category.id} id={cat.category.id} href={`/category/${cat.category.id}`} as="div" className="subdropdown_wrapper category_dropdown">
+                        <Link to={`/category/${cat.category.id}`} className="dropdown-toggle" data-toggle="dropdown">{cat.category.name}</Link>
+                        <ul className="dropdown-menu">
+                        {cat.subcategories.map(subcat => {
                             return (
-                                <NavDropdown.Item key={subcat.id} id={subcat.id} href={`/subcategory/${subcat.id}`}>
-                                    {subcat.name}
-                                </NavDropdown.Item>
+                                <li key={subcat.id} href={`/subcategory/${subcat.id}`} className="dropdown-item category_dropdown">
+                                    <Link to={`/subcategory/${subcat.id}`}>{subcat.name}</Link>
+                                </li>
                             );
-                        })} */}
-                        {cat.category.name}
-                    {/* </NavDropdown> */}
-                </NavDropdown.Item>
-            );
+                        })}
+                        </ul>
+                    </NavDropdown.Item>
+                );
+            }
+            else{
+                return (
+                    <NavDropdown.Item key={cat.category.id} id={cat.category.id} href={`/category/${cat.category.id}`} as="div" className="category_dropdown">
+                        <Link to={`/category/${cat.category.id}`}>{cat.category.name}</Link>
+                    </NavDropdown.Item>
+                );
+            }
         });
 
         return(
@@ -94,14 +103,14 @@ class MyNavbar extends React.Component {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
                         <NavItem className="d-flex align-items-center justify-content-center m-2">
-                            <NavDropdown title="Categories" id="dropdown-menu" className="w-100">
+                            <NavDropdown title="Categories" id="dropdown-menu">
                                 {categoryList}
                             </NavDropdown>
                         </NavItem>
                     </Nav>
                     <Nav >
                         <Form inline className="p-2 mr-md-2 justify-content-center">
-                            <FormControl type="text" placeholder="Search" id="searchBar" className="mr-sm-2 mr-xs-0 mb-sm-0 mb-2" />
+                            <FormControl type="text" placeholder="Search" id="searchBar" className="mr-sm-2 mr-xs-0 mb-sm-0 mb-2" style={{display: "flex", flexGrow: "1"}}/>
                             <Button onClick={this.searchClick} variant="outline-info">Search</Button>
                             <Link to={this.state.query} style={{display: "none"}} id='srcLink'></Link>
                         </Form>

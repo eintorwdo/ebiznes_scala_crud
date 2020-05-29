@@ -6,12 +6,21 @@ import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Button from 'react-bootstrap/Button';
 
+import _ from 'lodash';
+// import chunk from 'lodash/chunk';
+
 class SearchList extends React.Component {
     constructor(props){
         super(props);
         this.state = {products: this.props.products};
-        console.log(this.state);
     }
+
+    componentDidUpdate(prevProps){
+        if(!_.isEqual(prevProps.products, this.props.products)){
+            this.setState({products: this.props.products});
+        }
+    }
+
     render(){
         let productNodes = this.state.products.map(p => {
             return (

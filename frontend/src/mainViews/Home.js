@@ -3,6 +3,7 @@ import MyNavbar from '../partials/Navbar.js';
 import Search from '../mainViews/Search.js';
 import CategorySearch from '../mainViews/CategorySearch.js';
 import Product from '../mainViews/Product.js';
+import Main from '../mainViews/Main.js';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 // import Row from 'react-bootstrap/Row'
@@ -16,6 +17,7 @@ class Home extends React.Component {
             <Router>
                 <MyNavbar />
                 <Container fluid id="mainDiv">
+                    <Route exact path="/" component={Main}/>
                     <Route path="/search" component={Search}/>
                     <Route path="/category/:id" render={(props) => <CategorySearch {...props} type="category"/>}/>
                     <Route path="/subcategory/:id" render={(props) => <CategorySearch {...props} type="subcategory"/>}/>

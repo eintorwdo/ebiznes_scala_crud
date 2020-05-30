@@ -74,6 +74,15 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     )(CreateReviewForm.apply)(CreateReviewForm.unapply)
   }
 
+  def randProductsJson() = Action { implicit request: MessagesRequest[AnyContent] =>
+    var dbQuery = productsRepo.getRandomProducts()
+    val products = Await.result(dbQuery, duration.Duration.Inf)
+    val productsJs = products.map(p => {
+      Json.obj("id" -> p._1, "name" -> p._2, "description" -> p._3, "price" -> p._4, "amount" -> p._5, "category" -> p._7)
+    })
+    Ok(Json.obj("products" -> productsJs))
+  }
+
   def productsJson(query: Option[String]) = Action { implicit request: MessagesRequest[AnyContent] =>
     val searchQuery = query.getOrElse("")
     var dbQuery = productsRepo.list()

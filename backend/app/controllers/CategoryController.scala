@@ -1,6 +1,6 @@
 package controllers
 
-import models.{Category, CategoryRepository, SubCategory, SubCategoryRepository, Product, ProductRepository}
+import models.{Category, CategoryRepository, SubCategory, SubCategoryRepository, Product, ProductRepository, Manufacturer, ManufacturerRepository}
 import javax.inject._
 import play.api._
 import play.api.mvc._
@@ -18,7 +18,7 @@ import scala.util.{Failure, Success}
  * application's home page.
  */
 @Singleton
-class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategoryRepo: SubCategoryRepository, productsRepo: ProductRepository, cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
+class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategoryRepo: SubCategoryRepository, productsRepo: ProductRepository, manufacturerRepo: ManufacturerRepository, cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
 
   val updateCategoryForm: Form[UpdateCategoryForm] = Form {
     mapping(
@@ -84,22 +84,22 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
     })
   }
 
-  def categoryJson(cat: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
-    val category = categoryRepo.getById(cat)
-    val products = productsRepo.getByCategory(cat)
-    val result = for {
-          r1 <- category
-          r2 <- products
-    } yield (r1, r2)
-    result.map(x => {
-      if(x._1.nonEmpty){
-        Ok(Json.obj("category" -> x._1.get,
-                    "products" -> x._2))
-      }
-      else{
-        BadRequest(views.html.index("Category not found"))
-      }
-    })
+  def categoryJson(cat: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val catQuery = categoryRepo.getById(cat)
+    val prodQuery = productsRepo.getByCategory(cat)
+    val products = Await.result(prodQuery, duration.Duration.Inf)
+    val category = Await.result(catQuery, duration.Duration.Inf)
+    if(category.nonEmpty){
+      val productsWithMan = products.map(p => {
+        val manQuery = manufacturerRepo.getById(p.manufacturer.getOrElse(0))
+        val manufacturer = Await.result(manQuery, duration.Duration.Inf)
+        Json.obj("id" -> p.id, "name" -> p.name, "price" -> p.price, "amount" -> p.amount, "manufacturer" -> manufacturer.getOrElse(Manufacturer(0, "")).name)
+      })
+      Ok(Json.obj("category" -> category.get, "products" -> productsWithMan))
+    }
+    else{
+      BadRequest(Json.obj("message" -> "Category not found"))
+    }
   }
 
   def addCategoryJson() = Action { implicit request: MessagesRequest[AnyContent] =>

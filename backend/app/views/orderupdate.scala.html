@@ -36,6 +36,18 @@
             }
         }
     </select>
+    <label for="paid">Paid:</label>
+    <select name="paid" id="paid">
+        @if(order("paid").value.getOrElse(0) == "1") {
+            <option value=1 selected>True</option>
+            <option value=0>False</option>
+        }
+        @if(order("paid").value.getOrElse(0) == "0"){
+            <option value=0 selected>False</option>
+            <option value=1>True</option>
+        }
+    </select>
+    @inputText(order("packageNr"))
     <div class="buttons">
         <input type="submit" value="Update Order"/>
     </div>

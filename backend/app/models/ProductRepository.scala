@@ -146,7 +146,7 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
      db.run(subCatQuery.update(None)).map(_ => ())
   }
 
-  def getRandomProducts(): Future[Seq[(Int, String, String, Int, Int, Option[Int], Option[Int], Option[Int])]] = db.run{
-    sql"SELECT * FROM product ORDER BY RANDOM() LIMIT 3".as[(Int, String, String, Int, Int, Option[Int], Option[Int], Option[Int])]
+  def getRandomProducts(category: Int): Future[Seq[(Int, String, String, Int, Int, Option[Int], Option[Int], Option[Int])]] = db.run{
+    sql"SELECT * FROM product WHERE category=$category ORDER BY RANDOM() LIMIT 3".as[(Int, String, String, Int, Int, Option[Int], Option[Int], Option[Int])]
   }
 }

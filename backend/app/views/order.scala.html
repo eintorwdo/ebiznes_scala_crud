@@ -16,6 +16,13 @@
                 }
                 <p>adres: @order._1._1.address</p>
                 <p>cena: @order._1._1.price</p>
+                @if(order._1._1.paid == 1){
+                    <p>oplacono: tak</p>
+                }
+                @if(order._1._1.paid == 0){
+                    <p>oplacono: nie</p>
+                }
+                <p>nr. paczki: @order._1._1.packageNr</p>
             </li>
             <p><b>Szczegóły zamówienia:</b></p>
             <li>

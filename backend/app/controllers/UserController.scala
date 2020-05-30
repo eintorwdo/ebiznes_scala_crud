@@ -44,7 +44,9 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
     val usrQuery = userRepo.getById(id)
     val user = Await.result(usrQuery, duration.Duration.Inf)
     if(user.nonEmpty){
-      val userNoPwd = Json.obj("id" -> user.get.id, "name" -> user.get.name, "email" -> user.get.email)
+      val ordQuery = orderRepo.getByUserId(id)
+      val orders = Await.result(ordQuery, duration.Duration.Inf)
+      val userNoPwd = Json.obj("id" -> user.get.id, "name" -> user.get.name, "email" -> user.get.email, "orders" -> orders)
       Ok(userNoPwd)
     }
     else{

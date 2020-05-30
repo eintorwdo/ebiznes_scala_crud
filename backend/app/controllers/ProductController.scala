@@ -74,13 +74,38 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     )(CreateReviewForm.apply)(CreateReviewForm.unapply)
   }
 
-  def randProductsJson() = Action { implicit request: MessagesRequest[AnyContent] =>
-    var dbQuery = productsRepo.getRandomProducts()
-    val products = Await.result(dbQuery, duration.Duration.Inf)
-    val productsJs = products.map(p => {
-      Json.obj("id" -> p._1, "name" -> p._2, "description" -> p._3, "price" -> p._4, "amount" -> p._5, "category" -> p._7)
-    })
-    Ok(Json.obj("products" -> productsJs))
+  def mapProduct(p: (Int, String, String, Int, Int, Option[Int], Option[Int], Option[Int]), category: String) = {
+    Json.obj("id" -> p._1, "name" -> p._2, "description" -> p._3, "price" -> p._4, "amount" -> p._5, "category" -> category)
+  }
+
+  def randProductsJson(cat1: Option[Int], cat2: Option[Int], cat3: Option[Int]) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val id1 = cat1.getOrElse(0)
+    val id2 = cat2.getOrElse(0)
+    val id3 = cat3.getOrElse(0)
+    if(id1 == 0 || id2 == 0 || id3 == 0){
+      BadRequest(Json.obj("message" -> "Invalid request body"))
+    }
+    else{
+    val catQuery1 = categoryRepo.getById(id1)
+    val catQuery2 = categoryRepo.getById(id2)
+    val catQuery3 = categoryRepo.getById(id3)
+    val category1 = Await.result(catQuery1, duration.Duration.Inf)
+    val category2 = Await.result(catQuery2, duration.Duration.Inf)
+    val category3 = Await.result(catQuery3, duration.Duration.Inf)
+    val cat1Name = category1.getOrElse(Category(0, "")).name
+    val cat2Name = category2.getOrElse(Category(0, "")).name
+    val cat3Name = category3.getOrElse(Category(0, "")).name
+    val dbQuery1 = productsRepo.getRandomProducts(id1)
+    val dbQuery2 = productsRepo.getRandomProducts(id2)
+    val dbQuery3 = productsRepo.getRandomProducts(id3)
+    val products1 = Await.result(dbQuery1, duration.Duration.Inf)
+    val products2 = Await.result(dbQuery2, duration.Duration.Inf)
+    val products3 = Await.result(dbQuery3, duration.Duration.Inf)
+    val products1Js = products1.map(p => mapProduct(p, cat1Name))
+    val products2Js = products2.map(p => mapProduct(p, cat2Name))
+    val products3Js = products3.map(p => mapProduct(p, cat3Name))
+    Ok(Json.obj("products1" -> products1Js, "products2" -> products2Js, "products3" -> products3Js, "categories" -> JsArray(Seq(Json.obj("name" -> cat1Name), Json.obj("name" -> cat2Name), Json.obj("name" -> cat3Name)))))
+    }
   }
 
   def productsJson(query: Option[String]) = Action { implicit request: MessagesRequest[AnyContent] =>
@@ -180,7 +205,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
       val description = dscJs.getOrElse("")
       val price = prcJs.getOrElse(0)
       val amount = amountJs.getOrElse(-1)
-      if(catId == 0 || subId == 0 || manId == 0 || name == "" || description == "" || price <= 0 || amount < 0){
+      if(catId == 0 || manId == 0 || name == "" || description == "" || price <= 0 || amount < 0){
         BadRequest(Json.obj("message" -> "Invalid request body"))
       }
       else{
@@ -190,7 +215,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
         val category = Await.result(catQuery, duration.Duration.Inf)
         val subcat = Await.result(subQuery, duration.Duration.Inf)
         val man = Await.result(manQuery, duration.Duration.Inf)
-        if(category.isEmpty || subcat.isEmpty || man.isEmpty){
+        if(category.isEmpty || man.isEmpty){
           BadRequest(Json.obj("message" -> "Invalid request body"))
         }
         else{

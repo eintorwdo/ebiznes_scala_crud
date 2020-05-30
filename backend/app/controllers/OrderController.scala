@@ -42,7 +42,9 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       "address" -> nonEmptyText,
       "sent" -> number,
       "payment" -> optional(number),
-      "delivery" -> optional(number)
+      "delivery" -> optional(number),
+      "paid" -> number,
+      "packageNr" -> nonEmptyText
     )(UpdateOrderForm.apply)(UpdateOrderForm.unapply)
   }
 
@@ -129,12 +131,16 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
 
     result.map(c => {
       if(c._1.nonEmpty){
-        var resJson = Json.obj("order" -> c._1.head._1)
+        val details = c._2.map(d => {
+          val prd = d._2.getOrElse(Product(0, "", "", 0, 0, Option(0), Option(0), Option(0)))
+          Json.obj("name" -> prd.name, "price" -> d._1.price)
+        })
+        var resJson = Json.obj("info" -> c._1.head._1)
         resJson = resJson + ("user" -> Json.toJson(c._1.head._2))
         if(c._1.head._3.isDefined) resJson = resJson + ("payment" -> Json.toJson(c._1.head._3.get)) else resJson = resJson + ("payment" -> JsNull)
         if(c._1.head._4.isDefined) resJson = resJson + ("delivery" -> Json.toJson(c._1.head._4.get)) else resJson = resJson + ("delivery" -> JsNull)
         Ok(Json.obj("order" -> resJson,
-                    "details" -> c._2))
+                    "details" -> details))
       }
       else{
         BadRequest(Json.obj("message" -> "Order not found"))
@@ -190,7 +196,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
     val date = java.time.LocalDate.now.toString
     if(res.nonEmpty){
       val ord = res.head
-      val ordForm = updateOrderForm.fill(UpdateOrderForm(ord._1.id, ord._1.price, ord._1.address, ord._1.sent, ord._1.payment, ord._1.delivery))
+      val ordForm = updateOrderForm.fill(UpdateOrderForm(ord._1.id, ord._1.price, ord._1.address, ord._1.sent, ord._1.payment, ord._1.delivery, ord._1.paid, ord._1.packageNr))
       Ok(views.html.orderupdate(ordForm, res3, res2))
     }
     else{
@@ -209,13 +215,17 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       val addrJs = (body \ "address").validate[String]
       val sntJs = (body \ "sent").validate[Int]
       val prcJs = (body \ "price").validate[Int]
+      val paidJs = (body \ "paid").validate[Int]
+      val packageJs = (body \ "packageNr").validate[String]
       val delId = delIdJs.getOrElse(0)
       val pmtId = pmtIdJs.getOrElse(0)
       val addr = addrJs.getOrElse("")
       val snt = sntJs.getOrElse(-1)
       val prc = prcJs.getOrElse(-1)
+      val paid = paidJs.getOrElse(-1)
+      val packageNr = packageJs.getOrElse("")
       val ord = res.head
-      if(delId == 0 || pmtId == 0 || addr == "" || snt == -1 || prc < 0){
+      if(delId == 0 || pmtId == 0 || addr == "" || snt == -1 || prc < 0 || paid < 0){
         BadRequest(Json.obj("message" -> "Invalid request body"))
       }
       else{
@@ -227,7 +237,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
           BadRequest(Json.obj("message" -> "Invalid delivery or payment id"))
         }
         else{
-          val newOrd = Order(ord._1.id, prc, ord._1.date, addr, snt, ord._1.user, Option(pmtId), Option(delId))
+          val newOrd = Order(ord._1.id, prc, ord._1.date, addr, snt, ord._1.user, Option(pmtId), Option(delId), paid, packageNr)
           val orderUpdate = orderRepo.update(id, newOrd)
           Await.result(orderUpdate, duration.Duration.Inf)
           Ok(Json.toJson(newOrd))
@@ -254,7 +264,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
           val ord = orderRepo.getById(order.id)
           val res = Await.result(ord, duration.Duration.Inf)
           if(res.nonEmpty){
-            orderRepo.update(order.id, Order(order.id, order.price, res.head._1.date, order.address, order.sent, res.head._1.user, order.payment, order.delivery)).map { _ =>
+            orderRepo.update(order.id, Order(order.id, order.price, res.head._1.date, order.address, order.sent, res.head._1.user, order.payment, order.delivery, order.paid, order.packageNr)).map { _ =>
               Redirect(routes.OrderController.updateOrder(order.id)).flashing("success" -> "Order updated")
             }
           }
@@ -296,7 +306,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
         val createDetail = orderDetailRepo.create(product.price, id, Option(product.id))
         val res3 = Await.result(createDetail, duration.Duration.Inf)
         val newPrice = res.get.price + product.price
-        val updateOrder = orderRepo.update(id, Order(res.get.id, newPrice, res.get.date, res.get.address, res.get.sent, res.get.user, res.get.payment, res.get.delivery))
+        val updateOrder = orderRepo.update(id, Order(res.get.id, newPrice, res.get.date, res.get.address, res.get.sent, res.get.user, res.get.payment, res.get.delivery, res.get.paid, res.get.packageNr))
         val res4 = Await.result(updateOrder, duration.Duration.Inf)
         Ok(Json.toJson(res3))
       }
@@ -370,7 +380,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
         val orderRes = Await.result(orderQuery, duration.Duration.Inf)
         val order = orderRes.head._1
         val newOrderPrice = order.price + (price-res3.get.price)
-        val newOrder = Order(order.id, newOrderPrice, order.date, order.address, order.sent, order.user, order.payment, order.delivery)
+        val newOrder = Order(order.id, newOrderPrice, order.date, order.address, order.sent, order.user, order.payment, order.delivery, order.paid, order.packageNr)
         val updateOrder = orderRepo.update(order.id, newOrder)
         Await.result(updateOrder, duration.Duration.Inf)
         Ok(Json.toJson(newDetail))
@@ -725,7 +735,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
 }
 
 case class CreateOrderForm(price: Int, address: String, sent: Int, user: Int, payment: Option[Int], delivery: Option[Int])
-case class UpdateOrderForm(id: Int, price: Int, address: String, sent: Int, payment: Option[Int], delivery: Option[Int])
+case class UpdateOrderForm(id: Int, price: Int, address: String, sent: Int, payment: Option[Int], delivery: Option[Int], paid: Int, packageNr: String)
 case class CreateOrderDetailForm(price: Int, order: Int, product: Option[Int])
 case class UpdateOrderDetailForm(id: Int, price: Int, order: Int, product: Option[Int])
 case class CreateDeliveryForm(name: String, price: Int)

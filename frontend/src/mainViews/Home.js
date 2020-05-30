@@ -4,6 +4,8 @@ import Search from '../mainViews/Search.js';
 import CategorySearch from '../mainViews/CategorySearch.js';
 import Product from '../mainViews/Product.js';
 import Main from '../mainViews/Main.js';
+import Profile from '../mainViews/Profile.js';
+import Order from '../mainViews/Order.js';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 // import Row from 'react-bootstrap/Row'
@@ -22,6 +24,8 @@ class Home extends React.Component {
                     <Route path="/category/:id" render={(props) => <CategorySearch {...props} type="category"/>}/>
                     <Route path="/subcategory/:id" render={(props) => <CategorySearch {...props} type="subcategory"/>}/>
                     <Route path="/product/:id" component={Product} />
+                    <Route path="/profile" component={Profile} />
+                    <Route path="/order/:id" component={Order} />
                 </Container>
             </Router>
             </>

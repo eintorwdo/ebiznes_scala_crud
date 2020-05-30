@@ -32,6 +32,7 @@ class Product extends React.Component {
         let description;
         let reviews;
         let addReviewButton = <Button>Add review</Button>;
+        let subcategory;
 
         if(this.state.loading === false && this.state.loggedIn === false){
             addReviewButton = (
@@ -51,6 +52,15 @@ class Product extends React.Component {
 
         if(this.state.product){
             description = <p><span className="font-weight-bold">Product description:</span> {this.state.product.info.description}</p>;
+            if(this.state.product.subcategory){
+                if(this.state.product.subcategory.id !== 0){
+                    subcategory = (
+                        <ul className="p-0 pl-md-4">
+                            <Link to={`/subcategory/${this.state.product.subcategory.id}`}><li><h6>{this.state.product.subcategory.name}</h6></li></Link>
+                        </ul>
+                    );
+                }
+            }
             prd = (
                 <>
                 <Row className="mt-lg-5 mt-0">
@@ -68,9 +78,8 @@ class Product extends React.Component {
                             <Col>
                                 <ul style={{listStyleType: "none"}} className="p-0">
                                     <Link to={`/category/${this.state.product.category.id}`}><li><h5>{this.state.product.category.name}</h5></li></Link>
-                                    <ul className="p-0 pl-md-4">
-                                        <Link to={`/subcategory/${this.state.product.subcategory.id}`}><li><h6>{this.state.product.subcategory.name}</h6></li></Link>
-                                    </ul>
+                                    {subcategory}
+                                    
                                 </ul>
                             </Col>
                         </Row>

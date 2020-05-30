@@ -40,7 +40,11 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
 
     def delivery_fk = foreignKey("dlv_fk", delivery, dlv)(_.id?)
 
-    def * = (id, price, date, address, sent, user, payment, delivery) <> ((Order.apply _).tupled, Order.unapply)
+    def paid = column[Int]("paid")
+
+    def packageNr = column[String]("packageNr")
+
+    def * = (id, price, date, address, sent, user, payment, delivery, paid, packageNr) <> ((Order.apply _).tupled, Order.unapply)
 
   }
 
@@ -68,10 +72,10 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
    * id for that person.
    */
   def create(price: Int, date: String, address: String, sent: Int, user: Int, payment: Option[Int], delivery: Option[Int]): Future[Order] = db.run {
-    (order.map(p => (p.price,p.date,p.address,p.sent,p.user,p.payment,p.delivery))
+    (order.map(p => (p.price,p.date,p.address,p.sent,p.user,p.payment,p.delivery, 0, ""))
       returning order.map(_.id)
-      into {case ((price,date,address,sent,user,payment,delivery),id) => Order(id,price,date,address,sent,user,payment,delivery)}
-      ) += (price, date, address, sent, user, payment, delivery)
+      into {case ((price,date,address,sent,user,payment,delivery, 0, ""),id) => Order(id,price,date,address,sent,user,payment,delivery, 0, "")}
+      ) += (price, date, address, sent, user, payment, delivery, 0, "")
   }
 
   /**
@@ -100,6 +104,10 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
     (for {
       (((order, user), payment), delivery) <- order.filter(_.id === id) join usr on (_.user === _.id) joinLeft pmt on (_._1.payment === _.id) joinLeft dlv on (_._1._1.delivery === _.id)
     } yield (order, user, payment, delivery)).result
+  }
+
+  def getByUserId(id: Int): Future[Seq[Order]] = db.run {
+    order.filter(_.user === id).result
   }
 
   def deleteDeliveryId(id: Int): Future[Unit] = {

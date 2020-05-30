@@ -69,6 +69,8 @@ CREATE TABLE "order_" (
  "user" INTEGER NOT NULL,
  "payment" INTEGER,
  "delivery" INTEGER,
+ "paid" INTEGER,
+ "packageNr" TEXT,
  FOREIGN KEY(user) references user(id),
  FOREIGN KEY(payment) references payment(id),
  FOREIGN KEY(delivery) references delivery(id)

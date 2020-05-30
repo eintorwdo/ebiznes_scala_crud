@@ -6,9 +6,11 @@ import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Jumbotron from 'react-bootstrap/Jumbotron';
 import Carousel from 'react-bootstrap/Carousel';
+import Tabs from 'react-bootstrap/Tabs'
+import Tab from 'react-bootstrap/Tab'
 
 let getProducts = async () => {
-    let products = await fetch('http://localhost:9000/api/recproducts');
+    let products = await fetch('http://localhost:9000/api/recproducts?cat1=1&cat2=2&cat3=3');
     let productsJson = await products.json();
     return productsJson;
 }
@@ -16,47 +18,54 @@ let getProducts = async () => {
 class Main extends React.Component {
     constructor(props){
         super(props);
-        this.state = {products: []};
+        this.state = {products: [], categories: []};
     }
 
     componentDidMount(){
         getProducts().then(prds => {
-            this.setState({products: prds.products});
+            this.setState({products: [prds.products1, prds.products2, prds.products3], categories: prds.categories});
         });
     }
 
     render(){
-        const products = this.state.products.map(p => {
+        const products = this.state.products.map((prds, i) => {
             return (
-                <Carousel.Item key={p.id}>
-                    <img
-                    className="d-block carousel-img"
-                    src="https://s28943.pcdn.co/wp-content/uploads/2019/09/placeholder.jpg"
-                    alt="First slide"
-                    />
-                    <Carousel.Caption>
-                        <Link to={`/product/${p.id}`}><h2>{p.name}</h2></Link>
-                        <h4>{p.price}zl</h4>
-                    </Carousel.Caption>
-                </Carousel.Item>
+                <Tab eventKey={this.state.categories[i].name} title={this.state.categories[i].name}>
+                    <Jumbotron fluid className="p-2 mt-0">
+                        <Container className="p-0">
+                            <Carousel>
+                                {
+                                    prds.map(p => {
+                                        return (
+                                            <Carousel.Item key={p.id}>
+                                                <img
+                                                className="d-block carousel-img"
+                                                src="https://s28943.pcdn.co/wp-content/uploads/2019/09/placeholder.jpg"
+                                                alt="First slide"
+                                                />
+                                                <Carousel.Caption>
+                                                    <Link to={`/product/${p.id}`}><h2>{p.name}</h2></Link>
+                                                    <h4>{p.price}zl</h4>
+                                                </Carousel.Caption>
+                                            </Carousel.Item>
+                                        );
+                                    })
+                                }
+                            </Carousel>
+                        </Container>
+                    </Jumbotron>
+                </Tab>
             );
         });
         return(
             <>
-            {/* <Container>
-                <Row className="productListItem mt-2 mb-2 p-4">
-                    <Col>
-                        <h2>Best deals:</h2>
-                    </Col>
-                </Row>
-            </Container> */}
-            <Jumbotron fluid className="p-2 mt-4">
-                <Container className="p-0">
-                    <Carousel>
-                        {products}
-                    </Carousel>
-                </Container>
-            </Jumbotron>
+            <Container fluid className="main mt-3">
+                <h4 className="mt-2 mb-2">Reccomended items:</h4>
+            
+            <Tabs id="uncontrolled-tab-example" className="d-flex justify-content-center mt-2">
+                {products}
+            </Tabs>
+            </Container>
             </>
         )
     }

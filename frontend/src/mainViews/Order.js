@@ -2,11 +2,11 @@ import React from 'react';
 
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
-import Container from 'react-bootstrap/Container'
-import Tabs from 'react-bootstrap/Tabs'
-import Tab from 'react-bootstrap/Tab'
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Container from 'react-bootstrap/Container';
+import Table from 'react-bootstrap/Table';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
 const getOrderInfo = async (id) => {
     const user = await fetch(`http://localhost:9000/api/order/${id}`);
@@ -28,47 +28,7 @@ class Order extends React.Component {
     }
 
     render(){
-        const orderInfo = this.state.order.info ? (
-            <>
-            <Row>
-                <Col><h5>Id: {this.state.order.info.id}</h5></Col>
-            </Row>
-            <Row>
-                <Col><h5>Total price: {this.state.order.info.price}</h5></Col>
-            </Row>
-            <Row>
-                <Col><h5>Ordered: {this.state.order.info.date}</h5></Col>
-            </Row>
-            <Row>
-                <Col><h5>Address: {this.state.order.info.address}</h5></Col>
-            </Row>
-            </>
-        ) : "";
-
-        const delivery = this.state.order.delivery ? (
-            <Row>
-                <Col><h5>Delivery provider: {this.state.order.delivery.name}</h5></Col>
-            </Row>
-        ) : "";
-
-        const payment = this.state.order.payment ? (
-            <Row>
-                <Col><h5>Payment method: {this.state.order.payment.name}</h5></Col>
-            </Row>
-        ) : "";
-
-        const paid = this.state.order.info ? (
-            <Row>
-                <Col><h5>Paid: {this.state.order.info.paid ? "yes" : "no"}</h5></Col>
-            </Row>
-        ) : "";
-
-        const packageNr = this.state.order.info ? (
-            <Row>
-                <Col><h5>Package number: {this.state.order.info.packageNr.length > 0 ? this.state.order.info.packageNr : "no packge number assigned"}</h5></Col>
-            </Row>
-        ) : "";
-
+        let orderInfo;
         let deliveryStatus;
         if(this.state.order.info){
             if(this.state.order.info.sent === 0){
@@ -80,43 +40,117 @@ class Order extends React.Component {
             else if(this.state.order.info.sent === 2){
                 deliveryStatus = "delivered";
             }
+            orderInfo = (
+                <>
+                <Row>
+                    <Col><h5><span className="boldy">Order id:</span> {this.state.order.info.id}</h5></Col>
+                </Row>
+                <Row>
+                    <Col><h5><span className="boldy">Total price:</span> {this.state.order.info.price}</h5></Col>
+                </Row>
+                <Row>
+                    <Col><h5><span className="boldy">Ordered:</span> {this.state.order.info.date}</h5></Col>
+                </Row>
+                <Row>
+                    <Col><h5><span className="boldy">Address:</span> {this.state.order.info.address}</h5></Col>
+                </Row>
+                <Row>
+                    <Col><h5><span className="boldy">Paid:</span> {this.state.order.info.paid ? "yes" : "no"}</h5></Col>
+                </Row>
+                <Row>
+                    <Col><h5><span className="boldy">Package number:</span> {this.state.order.info.packageNr.length > 0 ? this.state.order.info.packageNr : "no packge number assigned"}</h5></Col>
+                </Row>
+                <Row>
+                    <Col><h5><span className="boldy">Delivery status:</span> {deliveryStatus}</h5></Col>
+                </Row>
+                </>
+            );
         }
-        const deliveryStatusNode = this.state.order.info ? (
+
+        const delivery = this.state.order.delivery ? (
             <Row>
-                <Col><h5>Delivery status: {deliveryStatus}</h5></Col>
+                <Col><h5><span className="boldy">Delivery provider:</span> {this.state.order.delivery.name}</h5></Col>
             </Row>
         ) : "";
 
-        const details = this.state.details.map(o => {
+        const payment = this.state.order.payment ? (
+            <Row>
+                <Col><h5><span className="boldy">Payment method:</span> {this.state.order.payment.name}</h5></Col>
+            </Row>
+        ) : "";
+
+        const deliveryRow = this.state.order.delivery && this.state.details ? (
+            <tr>
+                <td>
+                    {this.state.details.length + 1}
+                </td>
+                <td>
+                    {this.state.order.delivery.name}
+                </td>
+                <td>
+                    {this.state.order.delivery.price}
+                </td>
+                <td>
+                    1
+                </td>
+            </tr>
+        ) : "";
+
+        const details = this.state.details.map((o, i) => {
             return (
-                <li className="pt-1 pb-1 orderListItem">
-                        <Row className="d-flex justify-content-start">
-                            <Col><h5>Product name: {o.name}</h5></Col>
-                        </Row>
-                        <Row className="d-flex justify-content-start">
-                            <Col><h5>Product price: {o.price}</h5></Col>
-                        </Row>
-                        <Row>
-                            <Col><hr></hr></Col>
-                        </Row>
-                </li>
+                <tr>
+                    <td>
+                        {i+1}
+                    </td>
+                    <td>
+                        {o.name}
+                    </td>
+                    <td>
+                        {o.price}
+                    </td>
+                    <td>
+                        {o.amount}
+                    </td>
+                </tr>
             );
         });
         return(
             <>
             <Container className="productListItem mt-3 p-3 order-info" fluid>
-                {orderInfo}
-                {delivery}
-                {payment}
-                {paid}
-                {packageNr}
-                {deliveryStatusNode}
-                <Row className="mt-4 p-1">
-                    <Col><h4 className="mb-0">Order details:</h4></Col>
+                <Breadcrumb>
+                    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                    <Breadcrumb.Item href="/profile">
+                        Profile
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item active>Order</Breadcrumb.Item>
+                </Breadcrumb>
+                <Row>
+                    <Col md={12} lg={6}>
+                            {orderInfo}
+                            {delivery}
+                            {payment}
+                            <hr className="hr-md"></hr>
+                    </Col>
+                    <Col>
+                        <Row className="pl-3 pr-3 pt-0 pb-0">
+                            <h4 className="mb-0">Order details:</h4>
+                            <Table striped bordered hover className="mt-2">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Product name</th>
+                                        <th>Price</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {details}
+                                    {deliveryRow}
+                                </tbody>
+                            </Table>
+                        </Row>
+                    </Col>
                 </Row>
-                <ul className="orderList mt-0 p-1">
-                    {details}
-                </ul>
             </Container>
             </>
         )

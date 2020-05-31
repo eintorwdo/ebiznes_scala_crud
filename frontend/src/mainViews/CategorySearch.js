@@ -13,12 +13,12 @@ class Search extends React.Component {
     constructor(props){
         super(props);
         const type = this.props.type === "category" || this.props.type === "subcategory" ? this.props.type : "category";
-        this.state = {id: this.props.match.params.id, products: null, type};
+        this.state = {id: this.props.match.params.id, products: null, type, category: null, subcategory: null};
     }
 
     componentDidMount(){
         getProducts(this.state.id, this.state.type).then(p => {
-            this.setState({products: p.products});
+            this.setState({products: p.products, category: p.category, subcategory: p.subcategory});
         });
     }
 
@@ -33,7 +33,7 @@ class Search extends React.Component {
     }
 
     render(){   
-        let productList = this.state.products ? <SearchList products={this.state.products}/> : null;
+        let productList = this.state.products ? <SearchList products={this.state.products} type={this.props.type} category={this.state.category} subcategory={this.state.subcategory}/> : null;
         return productList;
     }
 }

@@ -2,11 +2,14 @@ import React from 'react';
 
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
-import Container from 'react-bootstrap/Container'
-import Tabs from 'react-bootstrap/Tabs'
-import Tab from 'react-bootstrap/Tab'
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Container from 'react-bootstrap/Container';
+import Tabs from 'react-bootstrap/Tabs';
+import Tab from 'react-bootstrap/Tab';
+import Table from 'react-bootstrap/Table';
+import Button from 'react-bootstrap/Button';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
 const getUserInfo = async (id) => {
     const user = await fetch(`http://localhost:9000/api/user/${id}`);
@@ -28,50 +31,58 @@ class Profile extends React.Component {
     }
 
     render(){
-        const orders = this.state.orders.map(o => {
+        const orderList = this.state.orders.map((o,i) => {
             return (
-                <li className="pt-1 pb-1 orderListItem">
-                    <Link to={`/order/${o.id}`}>
-                        <Row className="d-flex justify-content-start">
-                            <Col><h5>Id: {o.id}</h5></Col>
-                        </Row>
-                        <Row className="d-flex justify-content-start">
-                            <Col><h5>Price: {o.price}</h5></Col>
-                        </Row>
-                        <Row className="d-flex justify-content-start">
-                            <Col><h5>Ordered: {o.date}</h5></Col>
-                        </Row>
-                        <Row>
-                            <Col><hr></hr></Col>
-                        </Row>
-                    </Link>
-                </li>
+                <tr>
+                    <td className="p-2">{i+1}</td>
+                    <td className="p-2"><Link to={`/order/${o.id}`}><Button className="w-50">{o.id}</Button></Link></td>
+                    <td className="p-2">{o.price}</td>
+                    <td className="p-2">{o.date}</td>
+                </tr>
             );
         });
+
         return(
             <>
-            <Container className="productListItem mt-3 pt-1 pb-1" fluid>
+            <Container className="productListItem mt-3 p-3" fluid>
+                <Breadcrumb>
+                    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                    <Breadcrumb.Item active>Profile</Breadcrumb.Item>
+                </Breadcrumb>
                 <Tabs defaultActiveKey="orders" id="uncontrolled-tab-example">
                     <Tab eventKey="orders" title="Your orders">
-                        <ul className="orderList m-0 p-1">
-                            {orders}
-                        </ul>
+                        <Table striped bordered hover className="mt-2">
+                            <thead>
+                                <tr>
+                                <th>#</th>
+                                <th>Order id</th>
+                                <th>Price</th>
+                                <th>Date of order</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {orderList}
+                            </tbody>
+                        </Table>
                     </Tab>
                     <Tab eventKey="profile" title="Profile information" className="profile-info pt-2 pb-2">
                         <Row>
                             <Col><h5>Name: {this.state.name}</h5></Col>
                         </Row>
                         <Row>
-                            <Col><h5>email: {this.state.email}</h5></Col>
+                            <Col>
+                                <h5>email: {this.state.email}</h5>
+                                <hr className="mt-3 mb-1"></hr>
+                            </Col>
                         </Row>
-                        <Row>
+                        {/* <Row>
                             <Col><hr></hr></Col>
-                        </Row>
+                        </Row> */}
                     </Tab>
                 </Tabs>
             </Container>
             </>
-        )
+        );
     }
 }
 

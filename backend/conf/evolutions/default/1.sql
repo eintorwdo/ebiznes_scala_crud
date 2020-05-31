@@ -81,6 +81,7 @@ CREATE TABLE "orderdetail" (
  "price" INTEGER NOT NULL,
  "order_" INTEGER NOT NULL,
  "product" INTEGER,
+ "amount" INTEGER,
  FOREIGN KEY(order_) references order_(id),
  FOREIGN KEY(product) references product(id)
 );

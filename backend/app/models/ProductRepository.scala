@@ -97,6 +97,24 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
     }
   }
 
+  def searchInCategory(query: String, category: Int): Future[Seq[Product]] = {
+    val src = for {
+      p <- product if (p.name like s"%${query}%") && p.category.getOrElse(0) === category
+    } yield (p)
+    db.run {
+      src.result
+    }
+  }
+
+  def searchInSubCategory(query: String, subcategory: Int): Future[Seq[Product]] = {
+    val src = for {
+      p <- product if (p.name like s"%${query}%") && (p.subcategory.getOrElse(0) === subcategory)
+    } yield (p)
+    db.run {
+      src.result
+    }
+  }
+
   def getByCategory(category_id: Int): Future[Seq[Product]] = db.run {
     product.filter(_.category === category_id).result
   }

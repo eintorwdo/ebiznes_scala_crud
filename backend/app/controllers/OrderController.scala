@@ -23,7 +23,8 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       "id" -> number,
       "price" -> number,
       "order" -> number,
-      "product" -> optional(number)
+      "product" -> optional(number),
+      "amount" -> number
     )(UpdateOrderDetailForm.apply)(UpdateOrderDetailForm.unapply)
   }
 
@@ -31,7 +32,8 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
     mapping(
       "price" -> number,
       "order" -> number,
-      "product" -> optional(number)
+      "product" -> optional(number),
+      "amount" -> number
     )(CreateOrderDetailForm.apply)(CreateOrderDetailForm.unapply)
   }
 
@@ -133,7 +135,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       if(c._1.nonEmpty){
         val details = c._2.map(d => {
           val prd = d._2.getOrElse(Product(0, "", "", 0, 0, Option(0), Option(0), Option(0)))
-          Json.obj("name" -> prd.name, "price" -> d._1.price)
+          Json.obj("name" -> prd.name, "price" -> d._1.price, "amount" -> d._1.amount)
         })
         var resJson = Json.obj("info" -> c._1.head._1)
         resJson = resJson + ("user" -> Json.toJson(c._1.head._2))
@@ -291,33 +293,33 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
   }
 
 
-  def addOrderDetailJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
-    val order = orderRepo.getByIdOption(id)
-    val res = Await.result(order, duration.Duration.Inf)
-    val json = request.body.asJson
-    if(res.nonEmpty && json.nonEmpty){
-      val body = json.get
-      val prdIdJs = (body \ "id").validate[Int]
-      val prdId = prdIdJs.getOrElse(0)
-      val productQuery = productRepo.getById(prdId)
-      val res2 = Await.result(productQuery, duration.Duration.Inf)
-      if(res2.nonEmpty){
-        val product = res2.head._1
-        val createDetail = orderDetailRepo.create(product.price, id, Option(product.id))
-        val res3 = Await.result(createDetail, duration.Duration.Inf)
-        val newPrice = res.get.price + product.price
-        val updateOrder = orderRepo.update(id, Order(res.get.id, newPrice, res.get.date, res.get.address, res.get.sent, res.get.user, res.get.payment, res.get.delivery, res.get.paid, res.get.packageNr))
-        val res4 = Await.result(updateOrder, duration.Duration.Inf)
-        Ok(Json.toJson(res3))
-      }
-      else{
-        BadRequest(Json.obj("message" -> "Did not find any products with given id"))
-      }
-    }
-    else{
-      BadRequest(Json.obj("message" -> "Order not found or request body empty"))
-    }
-  }
+  // def addOrderDetailJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+  //   val order = orderRepo.getByIdOption(id)
+  //   val res = Await.result(order, duration.Duration.Inf)
+  //   val json = request.body.asJson
+  //   if(res.nonEmpty && json.nonEmpty){
+  //     val body = json.get
+  //     val prdIdJs = (body \ "id").validate[Int]
+  //     val prdId = prdIdJs.getOrElse(0)
+  //     val productQuery = productRepo.getById(prdId)
+  //     val res2 = Await.result(productQuery, duration.Duration.Inf)
+  //     if(res2.nonEmpty){
+  //       val product = res2.head._1
+  //       val createDetail = orderDetailRepo.create(product.price, id, Option(product.id))
+  //       val res3 = Await.result(createDetail, duration.Duration.Inf)
+  //       val newPrice = res.get.price + product.price
+  //       val updateOrder = orderRepo.update(id, Order(res.get.id, newPrice, res.get.date, res.get.address, res.get.sent, res.get.user, res.get.payment, res.get.delivery, res.get.paid, res.get.packageNr))
+  //       val res4 = Await.result(updateOrder, duration.Duration.Inf)
+  //       Ok(Json.toJson(res3))
+  //     }
+  //     else{
+  //       BadRequest(Json.obj("message" -> "Did not find any products with given id"))
+  //     }
+  //   }
+  //   else{
+  //     BadRequest(Json.obj("message" -> "Order not found or request body empty"))
+  //   }
+  // }
 
   def addOrderDetailHandle(id: Int) = Action.async { implicit request =>
     val products = productRepo.list()
@@ -332,7 +334,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
         val order = orderRepo.getByIdOption(id)
         val res = Await.result(order, duration.Duration.Inf)
         if(res.nonEmpty){
-          orderDetailRepo.create(orderdetail.price, orderdetail.order, orderdetail.product).map { _ =>
+          orderDetailRepo.create(orderdetail.price, orderdetail.order, orderdetail.product, orderdetail.amount).map { _ =>
             Redirect(routes.OrderController.order(id))
           }
         }
@@ -353,7 +355,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
     val orderdetail = orderDetailRepo.getById(id)
     val res3 = Await.result(orderdetail, duration.Duration.Inf)
     if(res3.nonEmpty){
-      val ordForm = updateOrderDetailForm.fill(UpdateOrderDetailForm(res3.head.id, res3.head.price, res3.head.order, res3.head.product))
+      val ordForm = updateOrderDetailForm.fill(UpdateOrderDetailForm(res3.head.id, res3.head.price, res3.head.order, res3.head.product, res3.head.amount))
       Ok(views.html.orderdetailupdate(ordForm, res, res2))
     }
     else{
@@ -361,35 +363,35 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
     }
   }
 
-  def updateOrderDetailJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
-    val orderdetail = orderDetailRepo.getById(id)
-    val res3 = Await.result(orderdetail, duration.Duration.Inf)
-    val json = request.body.asJson
-    if(res3.nonEmpty && json.nonEmpty){
-      val body = json.get
-      val priceJs = (body \ "price").validate[Int]
-      val price = priceJs.getOrElse(-1)
-      if(price < 0){
-        BadRequest(Json.obj("message" -> "Invalid price value"))
-      }
-      else{
-        val newDetail = OrderDetail(res3.get.id, price, res3.get.order, res3.get.product)
-        val detailUpdate = orderDetailRepo.update(id, newDetail)
-        Await.result(detailUpdate, duration.Duration.Inf)
-        val orderQuery = orderRepo.getById(newDetail.order)
-        val orderRes = Await.result(orderQuery, duration.Duration.Inf)
-        val order = orderRes.head._1
-        val newOrderPrice = order.price + (price-res3.get.price)
-        val newOrder = Order(order.id, newOrderPrice, order.date, order.address, order.sent, order.user, order.payment, order.delivery, order.paid, order.packageNr)
-        val updateOrder = orderRepo.update(order.id, newOrder)
-        Await.result(updateOrder, duration.Duration.Inf)
-        Ok(Json.toJson(newDetail))
-      }
-    }
-    else{
-      BadRequest(Json.obj("message" -> "Order detail not found or empty request body"))
-    }
-  }
+  // def updateOrderDetailJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+  //   val orderdetail = orderDetailRepo.getById(id)
+  //   val res3 = Await.result(orderdetail, duration.Duration.Inf)
+  //   val json = request.body.asJson
+  //   if(res3.nonEmpty && json.nonEmpty){
+  //     val body = json.get
+  //     val priceJs = (body \ "price").validate[Int]
+  //     val price = priceJs.getOrElse(-1)
+  //     if(price < 0){
+  //       BadRequest(Json.obj("message" -> "Invalid price value"))
+  //     }
+  //     else{
+  //       val newDetail = OrderDetail(res3.get.id, price, res3.get.order, res3.get.product)
+  //       val detailUpdate = orderDetailRepo.update(id, newDetail)
+  //       Await.result(detailUpdate, duration.Duration.Inf)
+  //       val orderQuery = orderRepo.getById(newDetail.order)
+  //       val orderRes = Await.result(orderQuery, duration.Duration.Inf)
+  //       val order = orderRes.head._1
+  //       val newOrderPrice = order.price + (price-res3.get.price)
+  //       val newOrder = Order(order.id, newOrderPrice, order.date, order.address, order.sent, order.user, order.payment, order.delivery, order.paid, order.packageNr)
+  //       val updateOrder = orderRepo.update(order.id, newOrder)
+  //       Await.result(updateOrder, duration.Duration.Inf)
+  //       Ok(Json.toJson(newDetail))
+  //     }
+  //   }
+  //   else{
+  //     BadRequest(Json.obj("message" -> "Order detail not found or empty request body"))
+  //   }
+  // }
 
   def orderDetailsJson() = Action { implicit request: MessagesRequest[AnyContent] =>
     val query = orderDetailRepo.list()
@@ -423,7 +425,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
         val ord = orderDetailRepo.getById(orderdetail.id)
         val res3 = Await.result(ord, duration.Duration.Inf)
         if(res3.nonEmpty){
-          orderDetailRepo.update(orderdetail.id, OrderDetail(orderdetail.id, orderdetail.price, orderdetail.order, orderdetail.product)).map { _ =>
+          orderDetailRepo.update(orderdetail.id, OrderDetail(orderdetail.id, orderdetail.price, orderdetail.order, orderdetail.product, orderdetail.amount)).map { _ =>
             Redirect(routes.OrderController.order(orderdetail.order))
           }
         }
@@ -736,8 +738,8 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
 
 case class CreateOrderForm(price: Int, address: String, sent: Int, user: Int, payment: Option[Int], delivery: Option[Int])
 case class UpdateOrderForm(id: Int, price: Int, address: String, sent: Int, payment: Option[Int], delivery: Option[Int], paid: Int, packageNr: String)
-case class CreateOrderDetailForm(price: Int, order: Int, product: Option[Int])
-case class UpdateOrderDetailForm(id: Int, price: Int, order: Int, product: Option[Int])
+case class CreateOrderDetailForm(price: Int, order: Int, product: Option[Int], amount: Int)
+case class UpdateOrderDetailForm(id: Int, price: Int, order: Int, product: Option[Int], amount: Int)
 case class CreateDeliveryForm(name: String, price: Int)
 case class UpdateDeliveryForm(id: Int, name: String, price: Int)
 case class CreatePaymentForm(name: String)

@@ -108,11 +108,19 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     }
   }
 
-  def productsJson(query: Option[String]) = Action { implicit request: MessagesRequest[AnyContent] =>
+  def productsJson(query: Option[String], category: Option[Int], subcategory: Option[Int]) = Action { implicit request: MessagesRequest[AnyContent] =>
     val searchQuery = query.getOrElse("")
+    val cat = category.getOrElse(0)
+    val subcat = subcategory.getOrElse(0)
     var dbQuery = productsRepo.list()
     if(searchQuery != ""){
       dbQuery = productsRepo.search(searchQuery)
+    }
+    if(cat != 0){
+      dbQuery = productsRepo.searchInCategory(searchQuery, cat)
+    }
+    if(subcat != 0){
+      dbQuery = productsRepo.searchInSubCategory(searchQuery, subcat)
     }
     val products = Await.result(dbQuery, duration.Duration.Inf)
     val productsWithMan = products.map(p => {

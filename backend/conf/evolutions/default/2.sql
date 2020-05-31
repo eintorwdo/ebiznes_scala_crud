@@ -8,7 +8,7 @@ INSERT INTO "user"("name", "email", "password") VALUES("janusz123", "janusz@janu
 INSERT INTO "delivery"("name", "price") VALUES("inpost", 15);
 INSERT INTO "payment"("name") VALUES("blik");
 INSERT INTO "order_"("price", "date", "address", "sent", "user", "payment", "delivery", "paid", "packageNr") VALUES(9999, "2020-04-17", "ul. slonecznikowa 2, 38-929 bombolewo", 1, 1, 1, 1, 0, "");
-INSERT INTO "orderdetail"("price", "order_", "product") VALUES (9999, 1, 1);
+INSERT INTO "orderdetail"("price", "order_", "product", "amount") VALUES (9999, 1, 1, 1);
 
 # --- !Downs
 

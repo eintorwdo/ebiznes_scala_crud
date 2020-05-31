@@ -20,7 +20,8 @@ class OrderDetailRepository @Inject() (dbConfigProvider: DatabaseConfigProvider,
     def product = column[Option[Int]]("product")
     def order_fk = foreignKey("order_fk", order, ord)(_.id)
     def product_fk = foreignKey("prd_fk", product, prd)(_.id?)
-    def * = (id, price, order, product) <> ((OrderDetail.apply _).tupled, OrderDetail.unapply)
+    def amount = column[Int]("amount")
+    def * = (id, price, order, product, amount) <> ((OrderDetail.apply _).tupled, OrderDetail.unapply)
   }
 
   import orderRepository.OrderTable
@@ -30,11 +31,11 @@ class OrderDetailRepository @Inject() (dbConfigProvider: DatabaseConfigProvider,
   private val ord = TableQuery[OrderTable]
   private val prd = TableQuery[ProductTable]
 
-  def create(price: Int, order: Int, product: Option[Int]): Future[OrderDetail] = db.run {
-    (orderdetail.map(c => (c.price,c.order,c.product))
+  def create(price: Int, order: Int, product: Option[Int], amount: Int): Future[OrderDetail] = db.run {
+    (orderdetail.map(c => (c.price,c.order,c.product,c.amount))
       returning orderdetail.map(_.id)
-      into {case((price, order, product), id) => OrderDetail(id, price, order, product)}
-      ) += (price, order, product)
+      into {case((price, order, product, amount), id) => OrderDetail(id, price, order, product, amount)}
+      ) += (price, order, product, amount)
   }
 
   def list(): Future[Seq[OrderDetail]] = db.run {

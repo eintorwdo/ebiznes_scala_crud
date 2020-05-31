@@ -5,6 +5,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Button from 'react-bootstrap/Button';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
 import _ from 'lodash';
 // import chunk from 'lodash/chunk';
@@ -12,15 +13,15 @@ import _ from 'lodash';
 class SearchList extends React.Component {
     constructor(props){
         super(props);
-        this.state = {products: this.props.products};
+        this.state = {products: this.props.products, type: this.props.type, category: this.props.category, subcategory: this.props.subcategory};
     }
 
     componentDidUpdate(prevProps){
-        if(!_.isEqual(prevProps.products, this.props.products)){
-            this.setState({products: this.props.products});
+        if(!_.isEqual(prevProps.products, this.props.products) || !_.isEqual(prevProps.type, this.props.type) || !_.isEqual(prevProps.category, this.props.category) || !_.isEqual(prevProps.subcategory, this.props.subcategory)){
+            this.setState({products: this.props.products, type: this.props.type, category: this.props.category, subcategory: this.props.subcategory});
         }
     }
-
+    
     render(){
         let productNodes = this.state.products.map(p => {
             return (
@@ -54,9 +55,49 @@ class SearchList extends React.Component {
             );
         });
         
+        let breadcrumbItems;
+        if(this.state.category && !this.state.subcategory && this.state.products){
+            if(this.state.products.length > 0){
+                breadcrumbItems = (
+                    <>
+                    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                    <Breadcrumb.Item active>{this.state.category.name}</Breadcrumb.Item>
+                    </>
+                );
+            }
+        }
+        else if(this.state.subcategory && this.state.products){
+            if(this.state.products.length > 0){
+                breadcrumbItems = (
+                    <>
+                    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                    <Breadcrumb.Item href={`/category/${this.state.category.id}`}>{this.state.category.name}</Breadcrumb.Item>
+                    <Breadcrumb.Item active>{this.state.subcategory.name}</Breadcrumb.Item>
+                    </>
+                );
+            }
+        }
+        else{
+            if(this.state.products.length > 0){
+                breadcrumbItems = (
+                    <>
+                    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                    <Breadcrumb.Item active>All categories</Breadcrumb.Item>
+                    </>
+                );
+            }
+        }
+
         return(
             <>
-            <Row className="mt-3">
+            <Row>
+                <Col className="ml-5 mr-5 pl-3 pr-3 mt-3">
+                        <Breadcrumb className="mb-0 searchNav">
+                            {breadcrumbItems}
+                        </Breadcrumb>
+                </Col>
+            </Row>
+            <Row className="mt-0">
                 <Col>
                     {productNodes}
                 </Col>

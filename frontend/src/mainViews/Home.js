@@ -1,15 +1,14 @@
 import React from 'react';
-import MyNavbar from '../partials/Navbar.js';
+import ConnectNavbar from '../partials/Navbar.js';
 import Search from '../mainViews/Search.js';
 import CategorySearch from '../mainViews/CategorySearch.js';
-import Product from '../mainViews/Product.js';
+import ConnectProduct from '../mainViews/Product.js';
 import Main from '../mainViews/Main.js';
-import Profile from '../mainViews/Profile.js';
+import ConnectProfile from '../mainViews/Profile.js';
 import Order from '../mainViews/Order.js';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
-// import Row from 'react-bootstrap/Row'
-// import Col from 'react-bootstrap/Col'
+
 import Container from 'react-bootstrap/Container'
 
 class Home extends React.Component {
@@ -17,14 +16,14 @@ class Home extends React.Component {
         return(
             <>
             <Router>
-                <MyNavbar />
+                <ConnectNavbar />
                 <Container fluid id="mainDiv">
                     <Route exact path="/" component={Main}/>
                     <Route path="/search" component={Search}/>
                     <Route path="/category/:id" render={(props) => <CategorySearch {...props} type="category"/>}/>
                     <Route path="/subcategory/:id" render={(props) => <CategorySearch {...props} type="subcategory"/>}/>
-                    <Route path="/product/:id" component={Product} />
-                    <Route path="/profile" component={Profile} />
+                    <Route path="/product/:id" component={ConnectProduct} />
+                    <Route path="/profile" component={ConnectProfile} />
                     <Route path="/order/:id" component={Order} />
                 </Container>
             </Router>

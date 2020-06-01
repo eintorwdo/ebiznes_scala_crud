@@ -9,11 +9,16 @@ import NavItem from 'react-bootstrap/NavItem';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 
+import { connect } from "react-redux";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-// import ButtonGroup from 'react-bootstrap/ButtonGroup'
-// import Row from 'react-bootstrap/Row'
-// import Col from 'react-bootstrap/Col'
-// import Container from 'react-bootstrap/Container'
+
+function select(state){
+    return {
+        loggedIn: state.loggedIn,
+        userId: state.userId,
+        userName: state.userName
+    }
+}
 
 let getCategories = async () => {
     let categories = await fetch('http://localhost:9000/api/categories');
@@ -22,9 +27,9 @@ let getCategories = async () => {
 }
 
 class MyNavbar extends React.Component {
-    constructor(){
-        super();
-        this.state = {loggedIn: false, username: "testname@gmail.com", categories: [], query: ""};
+    constructor(props){
+        super(props);
+        this.state = {loggedIn: this.props.loggedIn, userName: this.props.userName, userId: this.props.userId, categories: [], query: ""};
         this.categoryRef = React.createRef();
     }
 
@@ -60,9 +65,8 @@ class MyNavbar extends React.Component {
             userInfo = (
                 <>
                 <NavItem className="d-flex align-items-center justify-content-center m-2">
-                    <DropdownButton alignRight title={this.state.username} id="dropdown-menu-align-right" className="w-100">
-                        <Dropdown.Item >Profile</Dropdown.Item>
-                        <Dropdown.Item >Orders</Dropdown.Item>
+                    <DropdownButton alignRight title={this.state.userName} id="dropdown-menu-align-right" className="w-100">
+                        <Dropdown.Item href="/profile">Profile</Dropdown.Item>
                         <Dropdown.Divider />
                         <Dropdown.Item >Log out</Dropdown.Item>
                     </DropdownButton>
@@ -139,4 +143,5 @@ class MyNavbar extends React.Component {
     }
 }
 
-export default MyNavbar;
+const ConnectNavbar = connect(select)(MyNavbar)
+export default ConnectNavbar;

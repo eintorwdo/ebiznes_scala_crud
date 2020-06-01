@@ -4,10 +4,17 @@ import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
-// import Overlay from 'react-bootstrap/Overlay';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
+
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { connect } from "react-redux";
+
+function select(state){
+    return {
+        loggedIn: state.loggedIn
+    }
+}
 
 let getProduct = async (id) => {
     let product = await fetch(`http://localhost:9000/api/product/${id}`);
@@ -18,7 +25,7 @@ let getProduct = async (id) => {
 class Product extends React.Component {
     constructor(props){
         super(props);
-        this.state = {product: undefined, id: this.props.match.params.id, reviews: [], loading: true, loggedIn: false};
+        this.state = {product: undefined, id: this.props.match.params.id, reviews: [], loading: true, loggedIn: this.props.loggedIn};
     }
 
     componentDidMount(){
@@ -168,4 +175,5 @@ class Product extends React.Component {
     }
 }
 
-export default Product;
+const ConnectProduct = connect(select)(Product)
+export default ConnectProduct;

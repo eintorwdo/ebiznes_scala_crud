@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { connect } from "react-redux";
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -11,6 +12,14 @@ import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
+function select(state){
+    return {
+        loggedIn: state.loggedIn,
+        userId: state.userId,
+        userName: state.userName
+    }
+}
+
 const getUserInfo = async (id) => {
     const user = await fetch(`http://localhost:9000/api/user/${id}`);
     const userJson = await user.json();
@@ -20,7 +29,7 @@ const getUserInfo = async (id) => {
 class Profile extends React.Component {
     constructor(props){
         super(props);
-        this.state = {id: 1, name: '', email: '', orders: []};
+        this.state = {id: this.props.userId, name: '', email: this.props.userName, orders: []};
     }
 
 
@@ -86,4 +95,5 @@ class Profile extends React.Component {
     }
 }
 
-export default Profile;
+const ConnectProfile = connect(select)(Profile)
+export default ConnectProfile;

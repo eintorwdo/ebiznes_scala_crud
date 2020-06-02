@@ -7,12 +7,15 @@ import Container from 'react-bootstrap/Container';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 
+import addToCartHandler from '../utils/addToCartHandler.js';
+
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { connect } from "react-redux";
 
-function select(state){
+function select(state, ownProps){
     return {
-        loggedIn: state.loggedIn
+        loggedIn: state.loggedIn,
+        cookies: ownProps.cookies
     }
 }
 
@@ -32,6 +35,12 @@ class Product extends React.Component {
         getProduct(this.state.id).then(p => {
             this.setState({product: p.product, reviews: p.reviews, loading: false});
         });
+    }
+
+    addToCart = (e) => {
+        e.preventDefault();
+        const { cookies } = this.props;
+        addToCartHandler(cookies, this.state);
     }
 
     render(){
@@ -96,7 +105,7 @@ class Product extends React.Component {
                             <Col sm={12}><h1>{this.state.product.info.price}zl</h1></Col>
                         </Row>
                         <Row className="d-flex justify-content-end">
-                            <Col><Button className="m-0">Add to cart</Button></Col>
+                            <Col><Button className="m-0" onClick={this.addToCart}>Add to cart</Button></Col>
                         </Row>
                     </Col>
                 </Row>

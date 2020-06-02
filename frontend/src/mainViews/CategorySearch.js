@@ -33,7 +33,7 @@ class Search extends React.Component {
     }
 
     render(){   
-        let productList = this.state.products ? <SearchList products={this.state.products} type={this.props.type} category={this.state.category} subcategory={this.state.subcategory}/> : null;
+        let productList = this.state.products ? <SearchList products={this.state.products} type={this.props.type} category={this.state.category} subcategory={this.state.subcategory} cookies={this.props.cookies}/> : null;
         return productList;
     }
 }

@@ -30,6 +30,7 @@ POST    /api/payment                controllers.OrderController.addPaymentJson
 PUT     /api/payment/:id            controllers.OrderController.updatePaymentJson(id: Int)
 GET     /api/recproducts            controllers.ProductController.randProductsJson(cat1: Option[Int], cat2: Option[Int], cat3: Option[Int])
 GET     /api/products               controllers.ProductController.productsJson(query: Option[String], category: Option[Int], subcategory: Option[Int])
+GET     /api/products/ids           controllers.ProductController.productsWithIdsJson(id: List[Int])
 GET     /api/product/:id            controllers.ProductController.productJson(id: Int)
 POST    /api/product                controllers.ProductController.addProductJson
 PUT     /api/product/:id            controllers.ProductController.updateProductJson(id: Int)

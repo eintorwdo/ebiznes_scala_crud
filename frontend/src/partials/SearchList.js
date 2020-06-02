@@ -7,6 +7,8 @@ import Container from 'react-bootstrap/Container';
 import Button from 'react-bootstrap/Button';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
+import addToCartHandler from '../utils/addToCartHandler.js';
+
 import _ from 'lodash';
 // import chunk from 'lodash/chunk';
 
@@ -22,6 +24,20 @@ class SearchList extends React.Component {
         }
     }
     
+    addToCart = (e) => {
+        e.preventDefault();
+        const { cookies } = this.props;
+        if(this.state.products){
+            const prd = this.state.products.find(p => p.id === parseInt(e.target.id));
+            const state = {
+                product: {
+                    info: prd
+                }
+            }
+            addToCartHandler(cookies, state);
+        }
+    }
+
     render(){
         let productNodes = this.state.products.map(p => {
             return (
@@ -48,7 +64,7 @@ class SearchList extends React.Component {
                             <Col><h4 className="text-left text-xl-right">Price: {p.price}zl</h4></Col>
                         </Row>
                         <Row>
-                            <Col className="d-flex justify-content-start justify-content-xl-end"><Button className="m-0 m-lg-2">Add to cart</Button></Col>
+                            <Col className="d-flex justify-content-start justify-content-xl-end"><Button className="m-0 m-lg-2" id={p.id} onClick={this.addToCart}>Add to cart</Button></Col>
                         </Row>
                     </Col>
                 </Row>

@@ -150,6 +150,12 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     })
   }
 
+  def productsWithIdsJson(id: List[Int]) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val query = productsRepo.productsWithIds(id)
+    val products = Await.result(query, duration.Duration.Inf)
+    Ok(Json.obj("products" -> products))
+  }
+
   def addProductJson() = Action { implicit request: MessagesRequest[AnyContent] =>
     val json = request.body.asJson
     if(json.nonEmpty){

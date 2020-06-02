@@ -12,11 +12,12 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
-function select(state){
+function select(state, ownProps){
     return {
         loggedIn: state.loggedIn,
         userId: state.userId,
-        userName: state.userName
+        userName: state.userName,
+        cookies: ownProps.cookies
     }
 }
 
@@ -31,6 +32,7 @@ class MyNavbar extends React.Component {
         super(props);
         this.state = {loggedIn: this.props.loggedIn, userName: this.props.userName, userId: this.props.userId, categories: [], query: ""};
         this.categoryRef = React.createRef();
+        const { cookies } = this.props;
     }
 
     componentDidMount(){
@@ -133,7 +135,7 @@ class MyNavbar extends React.Component {
                             <Button onClick={this.searchClick} variant="outline-info">Search</Button>
                             <Link to={this.state.query} style={{display: "none"}} id='srcLink'></Link>
                         </Form>
-                        <Button className="m-2"><i className="fas fa-shopping-cart"></i></Button>
+                        <Link to="/cart"><Button className="m-2"><i className="fas fa-shopping-cart"></i></Button></Link>
                         {userInfo}
                     </Nav>
                 </Navbar.Collapse>

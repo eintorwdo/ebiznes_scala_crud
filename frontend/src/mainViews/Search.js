@@ -55,7 +55,7 @@ class Search extends React.Component {
 
     render(){
         const type = this.state.category ? "category" : null;
-        let productList = this.state.products ? <SearchList products={this.state.products} type={type} category={this.state.category}/> : null;
+        let productList = this.state.products ? <SearchList products={this.state.products} type={type} category={this.state.category} cookies={this.props.cookies}/> : null;
         return productList;
     }
 }

@@ -163,7 +163,42 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
 
   def addOrderJson() = Action { implicit request: MessagesRequest[AnyContent] =>
     val date = java.time.LocalDate.now.toString
-    Ok(Json.obj("message" -> "orderadded"))
+    val json = request.body.asJson
+    if(json.nonEmpty){
+      val body = json.get
+      val detailsJs = (body \ "details").validate[Seq[JsObject]]
+      val addressJs = (body \ "address").validate[String]
+      val userJs = (body \ "userId").validate[Int]
+      val paymentJs = (body \ "payment").validate[Int]
+      val deliveryJs = (body \ "delivery").validate[Int]
+
+      val details = detailsJs.getOrElse(Seq())
+      val address = addressJs.getOrElse("")
+      val user = userJs.getOrElse(0)
+      val payment = paymentJs.getOrElse(0)
+      val delivery = deliveryJs.getOrElse(0)
+
+      if(details.nonEmpty && address != "" && user != 0 && payment != 0 && delivery != 0){
+        val ids = details.map(d => {
+          val idJs = (d \ "id").validate[Int]
+          idJs.getOrElse(0)
+        })
+        if(ids.contains(0)){
+          BadRequest(Json.obj("message" -> "Invalid product id"))
+        }
+        else{
+          val updateProducts = productRepo.updateProductsAfterOrder(ids)
+          val updatedRows = Await.result(updateProducts, duration.Duration.Inf)
+          Ok(Json.obj("updatedRows" -> updatedRows))
+        }
+      }
+      else{
+        BadRequest(Json.obj("message" -> "Invalid request body"))
+      }
+    }
+    else{
+      BadRequest(Json.obj("message" -> "Empty request body"))
+    }
   }
 
   def addOrderHandle = Action.async { implicit request =>

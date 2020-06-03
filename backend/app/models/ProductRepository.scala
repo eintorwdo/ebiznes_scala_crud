@@ -4,6 +4,7 @@ import javax.inject.{ Inject, Singleton }
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import scala.concurrent.{ Future, ExecutionContext }
+import org.sqlite.core.DB
 
 @Singleton
 class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val categoryRepository: CategoryRepository, val subCategoryRepository: SubCategoryRepository, val manufacturerRepository: ManufacturerRepository)(implicit ec: ExecutionContext) {
@@ -171,5 +172,14 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
   def productsWithIds(ids: List[Int]): Future[Seq[Product]] = {
     val query = product.filter(_.id.inSet(ids)).result
     db.run(query)
+  }
+
+  def updateProductsAfterOrder(ids: Seq[Int]) = {
+    val NUM = ids.length
+    val action = product.filter(x => (x.id.inSet(ids) && x.amount > 0)).length.result.flatMap {
+      case NUM => sqlu"""UPDATE product SET amount = amount - 1 WHERE id IN (#${ids.mkString(",")})"""
+      case _ => sqlu"""UPDATE product SET amount = amount WHERE id = 0"""
+    }.transactionally
+    db.run(action)
   }
 }

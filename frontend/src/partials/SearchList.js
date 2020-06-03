@@ -45,7 +45,7 @@ class SearchList extends React.Component {
                     <Col className="listItemImageWrapper">
                         <Container fluid className="listItemImage"></Container>
                     </Col>
-                    <Col xl={6} md={8}>
+                    <Col xl={6} md={8} style={{overflow: "hidden"}}>
                         <Link to={`/product/${p.id}`} className="d-flex w-100" style={{color: "initial"}}>
                             <Row>
                             <Col><h2 className="text-left">{p.name}</h2></Col>
@@ -64,7 +64,7 @@ class SearchList extends React.Component {
                             <Col><h4 className="text-left text-xl-right">Price: {p.price}zl</h4></Col>
                         </Row>
                         <Row>
-                            <Col className="d-flex justify-content-start justify-content-xl-end"><Button className="m-0 m-lg-2" id={p.id} onClick={this.addToCart}>Add to cart</Button></Col>
+                            <Col className="d-flex justify-content-start justify-content-xl-end"><Button className="mt-1 mt-xl-2" id={p.id} onClick={this.addToCart}>Add to cart</Button></Col>
                         </Row>
                     </Col>
                 </Row>

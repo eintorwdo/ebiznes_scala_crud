@@ -7,18 +7,12 @@ import Main from '../mainViews/Main.js';
 import ConnectProfile from '../mainViews/Profile.js';
 import Order from '../mainViews/Order.js';
 import Cart from '../mainViews/Cart.js';
+import ConnectBuy from '../mainViews/Buy.js';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-// import { connect } from "react-redux";
 
 import { withCookies } from 'react-cookie';
 
 import Container from 'react-bootstrap/Container';
-
-// function select(state, ownProps){
-//     return {
-//         cookies: ownProps.cookies
-//     }
-// }
 
 class Home extends React.Component {
     constructor(props){
@@ -43,7 +37,8 @@ class Home extends React.Component {
                     <Route path="/product/:id" render={(props) => <ConnectProduct {...props} cookies={this.props.cookies}/>}/>
                     <Route path="/profile" component={ConnectProfile} />
                     <Route path="/order/:id" component={Order} />
-                    <Route path="/cart" render={(props) => <Cart {...props} cookies={this.props.cookies}/>}/>
+                    <Route exact path="/cart" render={(props) => <Cart {...props} cookies={this.props.cookies}/>}/>
+                    <Route path="/cart/order" render={(props) => <ConnectBuy {...props} cookies={this.props.cookies}/>}/>
                 </Container>
             </Router>
             </>

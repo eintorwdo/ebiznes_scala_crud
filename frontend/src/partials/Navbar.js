@@ -135,7 +135,7 @@ class MyNavbar extends React.Component {
                             <Button onClick={this.searchClick} variant="outline-info">Search</Button>
                             <Link to={this.state.query} style={{display: "none"}} id='srcLink'></Link>
                         </Form>
-                        <Link to="/cart"><Button className="m-2"><i className="fas fa-shopping-cart"></i></Button></Link>
+                        <Link to="/cart" className="d-flex"><Button className="m-2 w-100"><i className="fas fa-shopping-cart"></i></Button></Link>
                         {userInfo}
                     </Nav>
                 </Navbar.Collapse>

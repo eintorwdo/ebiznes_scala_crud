@@ -204,15 +204,42 @@ td{
   box-shadow: 0px 0px 12px 2px rgba(138,138,138,1);
 }
 
+.cartNum{
+  -webkit-text-stroke: 2px white;
+  transition: color 0.2s;
+}
+
+.cartNum:hover{
+  color: rgb(0, 132, 255);
+  cursor: pointer;
+}
+
+.fa-trash-alt{
+  transition: color 0.2s;
+}
+
+.fa-trash-alt:hover{
+  color: rgb(143, 36, 36);
+  cursor: pointer;
+}
+
 @media (max-width: 767px){
   ul{
     list-style-type: none;
   }
+
+  .cartTotal{
+    border-top: 1px solid rgba(0,0,0,.1);
+  }
+}
+
+@media (min-width: 768px){
+  .cartTotal{
+    border-left: 1px solid rgba(0,0,0,.1);
+  }
 }
 
 @media (max-width: 991px){
-  
-
   .dropdown-menu .dropdown-toggle:after{
     display: none;
   }

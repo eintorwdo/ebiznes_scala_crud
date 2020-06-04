@@ -521,7 +521,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
           val date = java.time.LocalDate.now.toString
           val createRev = reviewRepo.create(description, user, product, date)
           val rev = Await.result(createRev, duration.Duration.Inf)
-          Ok(Json.toJson(rev))
+          Ok(Json.obj("username" -> userRes.get.name, "id" -> rev.id, "date" -> rev.date, "description" -> rev.description))
         }
         else{
           BadRequest(Json.obj("message" -> "Invalid request body"))

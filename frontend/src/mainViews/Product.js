@@ -6,16 +6,20 @@ import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
+import Modal from 'react-bootstrap/Modal';
+import Form from 'react-bootstrap/Form';
 
 import addToCartHandler from '../utils/addToCartHandler.js';
 
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 
 function select(state, ownProps){
     return {
         loggedIn: state.loggedIn,
-        cookies: ownProps.cookies
+        cookies: ownProps.cookies,
+        userId: state.userId
     }
 }
 
@@ -28,7 +32,7 @@ let getProduct = async (id) => {
 class Product extends React.Component {
     constructor(props){
         super(props);
-        this.state = {product: undefined, id: this.props.match.params.id, reviews: [], loading: true, loggedIn: this.props.loggedIn};
+        this.state = {userId: this.props.userId, product: undefined, id: this.props.match.params.id, reviews: [], loading: true, loggedIn: this.props.loggedIn, modalVisible: false, reviewValidated: null, redirect: null, errorMsg: null};
     }
 
     componentDidMount(){
@@ -43,11 +47,50 @@ class Product extends React.Component {
         addToCartHandler(cookies, this.state);
     }
 
+    addReview = (e) => {
+        e.preventDefault();
+        this.setState({modalVisible: true});
+    }
+
+    handleSubmit = async (e) => {
+        const form = e.currentTarget;
+        if (form.checkValidity() === false) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        else{
+            e.preventDefault();
+            e.stopPropagation();
+            const body = {
+                description: e.target.description.value,
+                product: this.state.product.info.id,
+                user: this.state.userId
+            }
+            const response = await fetch('http://localhost:9000/api/review', {
+                method: 'POST',
+                body: JSON.stringify(body),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const responseJson = await response.json();
+            if(response.status === 200){
+                let reviews = this.state.reviews;
+                reviews.push(responseJson);
+                this.setState({modalVisible: false, reviews});
+            }
+            else{
+                this.setState({redirect: '/error', errorMsg: responseJson.message});
+            }
+        }
+        this.setState({reviewValidated: true})
+    }
+
     render(){
         let prd;
         let description;
         let reviews;
-        let addReviewButton = <Button>Add review</Button>;
+        let addReviewButton = <Button onClick={this.addReview}>Add review</Button>;
         let subcategory;
 
         if(this.state.loading === false && this.state.loggedIn === false){
@@ -141,46 +184,77 @@ class Product extends React.Component {
             reviews = <h4>No reviews</h4>
         }
 
-        return(
-            <>
-            <Row className="mt-3">
-                <Container className="pt-3 pb-3 d-flex justify-content-center flex-wrap productListItem">
-                    <Col>
-                        <img id="productImage" src="https://dimensionmill.org/wp-content/uploads/2019/03/square-placeholder.jpg"></img>
-                    </Col>
-                    <Col md={6} xs={12} className="w-50 pt-md-4 pt-0 pb-4">
-                        {prd}
-                    </Col>
-                    <Row className="mt-3 w-100">
-                        <Col sm={12}>
-                            {description}
+        if(!this.state.redirect){
+            return(
+                <>
+                <Row className="mt-3">
+                    <Container className="pt-3 pb-3 d-flex justify-content-center flex-wrap productListItem">
+                        <Col>
+                            <img id="productImage" src="https://dimensionmill.org/wp-content/uploads/2019/03/square-placeholder.jpg"></img>
                         </Col>
-                    </Row>
-                </Container>
-            </Row>
-            <Row className="mt-3">
-                <Container>
-                    <Col sm={12}className="text-sm-center text-lg-left">
-                        <h3>Reviews:</h3>
-                    </Col>
-                </Container>
-            </Row>
-            <Row className="mt-1">
-                <Container>
-                    <Col sm={12}className="text-sm-center text-lg-left">
-                        {addReviewButton}
-                    </Col>
-                </Container>
-            </Row>
-            <Row className="mt-3">
-                <Container className="pt-3 pb-3 d-flex justify-content-center flex-wrap productListItem">
-                    <Col sm={12}>
-                        {reviews}
-                    </Col>
-                </Container>
-            </Row>
-            </>
-        );
+                        <Col md={6} xs={12} className="w-50 pt-md-4 pt-0 pb-4">
+                            {prd}
+                        </Col>
+                        <Row className="mt-3 w-100">
+                            <Col sm={12}>
+                                {description}
+                            </Col>
+                        </Row>
+                    </Container>
+                </Row>
+                <Row className="mt-3">
+                    <Container>
+                        <Col sm={12}className="text-sm-center text-lg-left">
+                            <h3>Reviews:</h3>
+                        </Col>
+                    </Container>
+                </Row>
+                <Row className="mt-1">
+                    <Container>
+                        <Col sm={12}className="text-sm-center text-lg-left">
+                            {addReviewButton}
+                        </Col>
+                    </Container>
+                </Row>
+                <Row className="mt-3">
+                    <Container className="pt-3 pb-3 d-flex justify-content-center flex-wrap productListItem">
+                        <Col sm={12}>
+                            {reviews}
+                        </Col>
+                    </Container>
+                </Row>
+                <Modal
+                    show={this.state.modalVisible}
+                    size="lg"
+                    aria-labelledby="contained-modal-title-vcenter"
+                    centered
+                    onHide={() => {this.setState({modalVisible: false})}}
+                    >
+                    <Modal.Header closeButton onClick={() => {this.setState({modalVisible: false})}}>
+                        <Modal.Title id="contained-modal-title-vcenter">
+                        Add review
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Form noValidate validated={this.state.reviewValidated} onSubmit={this.handleSubmit}>
+                        <Modal.Body>
+                            <Form.Group controlId="description">
+                                <Form.Label>Your review:</Form.Label>
+                                <Form.Control as="textarea" rows="3" required/>
+                            </Form.Group>
+                        </Modal.Body>
+                            <Modal.Footer>
+                                <Button variant="primary" type="submit" size="lg">
+                                    Submit Review
+                                </Button>
+                            </Modal.Footer>
+                    </Form>
+                </Modal>
+                </>
+            );
+        }
+        else{
+            return <Redirect to={{pathname: this.state.redirect, state: this.state.errorMsg}}/>
+        }
     }
 }
 

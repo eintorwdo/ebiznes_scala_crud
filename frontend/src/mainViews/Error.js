@@ -10,7 +10,6 @@ class Error extends React.Component {
     }
 
     render(){
-        console.log(this.props)
         return(
             <>
             <Container fluid className="main p-5 mt-5">

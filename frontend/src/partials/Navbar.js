@@ -12,6 +12,14 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
+import {logOut} from '../actions/index.js';
+
+function mapDispatchToProps(dispatch){
+    return {
+        logout: () => dispatch(logOut())
+    }
+}
+
 function select(state, ownProps){
     return {
         loggedIn: state.loggedIn,
@@ -41,6 +49,12 @@ class MyNavbar extends React.Component {
         });
     }
 
+    componentDidUpdate(prevProps){
+        if(prevProps.loggedIn !== this.props.loggedIn){
+            this.setState({loggedIn: this.props.loggedIn, userName: this.props.userName, userId: this.props.userId});
+        }
+    }
+
     searchClick = (e) => {
         e.preventDefault();
         var q = document.getElementById("searchBar").value;
@@ -59,6 +73,11 @@ class MyNavbar extends React.Component {
         }
     }
 
+    logOutHandler = (e) => {
+        e.preventDefault();
+        this.props.logout();
+    }
+
     render(){
         let userInfo;
         let categoryList;
@@ -70,7 +89,7 @@ class MyNavbar extends React.Component {
                     <DropdownButton alignRight title={this.state.userName} id="dropdown-menu-align-right" className="w-100">
                         <Dropdown.Item href="/profile">Profile</Dropdown.Item>
                         <Dropdown.Divider />
-                        <Dropdown.Item >Log out</Dropdown.Item>
+                        <Dropdown.Item onClick={this.logOutHandler}>Log out</Dropdown.Item>
                     </DropdownButton>
                 </NavItem>
                 </>
@@ -145,5 +164,5 @@ class MyNavbar extends React.Component {
     }
 }
 
-const ConnectNavbar = connect(select)(MyNavbar)
+const ConnectNavbar = connect(select, mapDispatchToProps)(MyNavbar)
 export default ConnectNavbar;

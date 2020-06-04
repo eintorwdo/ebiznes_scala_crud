@@ -8,6 +8,15 @@ import Container from 'react-bootstrap/Container';
 import Table from 'react-bootstrap/Table';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
+import { Redirect } from "react-router-dom";
+import { connect } from "react-redux";
+
+function select(state, ownProps){
+    return {
+        loggedIn: state.loggedIn
+    }
+}
+
 const getOrderInfo = async (id) => {
     const user = await fetch(`http://localhost:9000/api/order/${id}`);
     const userJson = await user.json();
@@ -17,7 +26,7 @@ const getOrderInfo = async (id) => {
 class Order extends React.Component {
     constructor(props){
         super(props);
-        this.state = {order: {}, details: []};
+        this.state = {order: {}, details: [], loggedIn: this.props.loggedIn};
     }
 
 
@@ -114,47 +123,53 @@ class Order extends React.Component {
                 </tr>
             );
         });
-        return(
-            <>
-            <Container className="productListItem mt-3 p-3 order-info" fluid>
-                <Breadcrumb>
-                    <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
-                    <Breadcrumb.Item href="/profile">
-                        Profile
-                    </Breadcrumb.Item>
-                    <Breadcrumb.Item active>Order</Breadcrumb.Item>
-                </Breadcrumb>
-                <Row>
-                    <Col md={12} lg={6}>
-                            {orderInfo}
-                            {delivery}
-                            {payment}
-                            <hr className="hr-md"></hr>
-                    </Col>
-                    <Col>
-                        <Row className="pl-3 pr-3 pt-0 pb-0">
-                            <h4 className="mb-0">Order details:</h4>
-                            <Table striped bordered hover className="mt-2">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Product name</th>
-                                        <th>Price</th>
-                                        <th>Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {details}
-                                    {deliveryRow}
-                                </tbody>
-                            </Table>
-                        </Row>
-                    </Col>
-                </Row>
-            </Container>
-            </>
-        )
+        if(this.state.loggedIn){
+            return(
+                <>
+                <Container className="productListItem mt-3 p-3 order-info" fluid>
+                    <Breadcrumb>
+                        <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/profile">
+                            Profile
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item active>Order</Breadcrumb.Item>
+                    </Breadcrumb>
+                    <Row>
+                        <Col md={12} lg={6}>
+                                {orderInfo}
+                                {delivery}
+                                {payment}
+                                <hr className="hr-md"></hr>
+                        </Col>
+                        <Col>
+                            <Row className="pl-3 pr-3 pt-0 pb-0">
+                                <h4 className="mb-0">Order details:</h4>
+                                <Table striped bordered hover className="mt-2">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Product name</th>
+                                            <th>Price</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {details}
+                                        {deliveryRow}
+                                    </tbody>
+                                </Table>
+                            </Row>
+                        </Col>
+                    </Row>
+                </Container>
+                </>
+            );
+        }
+        else{
+            return <Redirect to={{pathname: "/error", state: "You must log in to view this page"}}/>
+        }
     }
 }
 
-export default Order;
+const ConnectOrder = connect(select)(Order)
+export default ConnectOrder;

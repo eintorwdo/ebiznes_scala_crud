@@ -38,7 +38,7 @@ const getPayments = async () => {
 class Checkout extends React.Component {
     constructor(props){
         super(props);
-        this.state = {products: [], payments: [], deliveries: [], available: true, details: [], deliveryChosen: null, valid: false, redirect: null, errorMsg: null};
+        this.state = {products: [], payments: [], deliveries: [], available: true, details: [], deliveryChosen: null, valid: false, redirect: null, errorMsg: null, userId: this.props.userId};
         this.addressRef1 = React.createRef();
         this.addressRef2 = React.createRef();
         this.addressRef3 = React.createRef();
@@ -250,7 +250,7 @@ class Checkout extends React.Component {
             );
         }
         else{
-            return <Redirect to={{pathname: this.state.redirect, state: this.state.errorMsg}} />
+            return <Redirect to={{pathname: this.state.redirect, state: this.state.errorMsg || 'You must be logged in to view this page'}} />
         }
     }
 }

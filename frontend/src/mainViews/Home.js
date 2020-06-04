@@ -5,7 +5,7 @@ import CategorySearch from '../mainViews/CategorySearch.js';
 import ConnectProduct from '../mainViews/Product.js';
 import Main from '../mainViews/Main.js';
 import ConnectProfile from '../mainViews/Profile.js';
-import Order from '../mainViews/Order.js';
+import ConnectOrder from '../mainViews/Order.js';
 import Cart from '../mainViews/Cart.js';
 import ConnectCheckout from '../mainViews/Checkout.js';
 import Error from '../mainViews/Error.js';
@@ -37,7 +37,7 @@ class Home extends React.Component {
                     <Route path="/subcategory/:id" render={(props) => <CategorySearch {...props} type="subcategory" cookies={this.props.cookies}/>}/>
                     <Route path="/product/:id" render={(props) => <ConnectProduct {...props} cookies={this.props.cookies}/>}/>
                     <Route path="/profile" component={ConnectProfile} />
-                    <Route path="/order/:id" component={Order} />
+                    <Route path="/order/:id" component={ConnectOrder} />
                     <Route exact path="/cart" render={(props) => <Cart {...props} cookies={this.props.cookies}/>}/>
                     <Route path="/cart/checkout" render={(props) => <ConnectCheckout {...props} cookies={this.props.cookies}/>}/>
                     <Route path="/error" render={(props) => <Error {...props}/>}/>

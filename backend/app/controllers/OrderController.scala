@@ -10,6 +10,7 @@ import play.api.libs.json._
 
 import scala.concurrent._
 import scala.util.{Failure, Success}
+import slick.dbio.DBIOAction
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -181,15 +182,57 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       if(details.nonEmpty && address != "" && user != 0 && payment != 0 && delivery != 0){
         val ids = details.map(d => {
           val idJs = (d \ "id").validate[Int]
-          idJs.getOrElse(0)
+          val amountJs = (d \ "amount").validate[Int]
+          val id = idJs.getOrElse(0)
+          val amount = amountJs.getOrElse(0)
+          (id, amount)
         })
-        if(ids.contains(0)){
-          BadRequest(Json.obj("message" -> "Invalid product id"))
+        var areDetailsValid = true
+        ids.foreach(el => {
+          if(el._1 <= 0 || el._2 <= 0){
+            areDetailsValid = false
+          }
+        })
+        if(!areDetailsValid){
+          BadRequest(Json.obj("message" -> "Invalid product id or amount specified"))
         }
         else{
           val updateProducts = productRepo.updateProductsAfterOrder(ids)
           val updatedRows = Await.result(updateProducts, duration.Duration.Inf)
-          Ok(Json.obj("updatedRows" -> updatedRows))
+          updatedRows.length match {
+            case 0 => {
+              BadRequest(Json.obj("message" -> "One of the products is not available"))
+            }
+            case _ => {
+              var totalPrice = 0
+              val productQuery = productRepo.productsWithIds(ids.map(p => p._1).toList)
+              val products = Await.result(productQuery, duration.Duration.Inf)
+              val orderDetails = ids.map(i => {
+                val product = products.filter(p => p.id == i._1).head
+                totalPrice = totalPrice + product.price * i._2
+                (product.price, 0, product.id, i._2)
+              })
+              val deliveryQuery = deliveryRepo.getById(delivery)
+              val deliveryResult = Await.result(deliveryQuery, duration.Duration.Inf)
+              val paymentQuery = paymentRepo.getById(payment)
+              val paymentResult = Await.result(paymentQuery, duration.Duration.Inf)
+              if(deliveryResult.nonEmpty && paymentResult.nonEmpty){
+                totalPrice = totalPrice + deliveryResult.get.price
+                val paid = 0
+                val packageNr = ""
+                val sent = 0
+                val createOrderQuery = orderRepo.create(totalPrice, date, address, sent, user, Some(payment), Some(delivery), paid, packageNr)
+                val newOrder = Await.result(createOrderQuery, duration.Duration.Inf)
+                val detailsWithOrderId = orderDetails.map(d => (d._1, newOrder.id, Some(d._3), d._4))
+                val detailsInsertQuery = orderDetailRepo.insertMany(detailsWithOrderId)
+                val insertedDetails = Await.result(detailsInsertQuery, duration.Duration.Inf)
+                Ok(Json.obj("inserted" -> insertedDetails))
+              }
+              else{
+                BadRequest(Json.obj("message" -> "Invalid payment or delivery id"))
+              }
+            }
+          }
         }
       }
       else{
@@ -216,7 +259,9 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       },
       order => {
         val date = java.time.LocalDate.now.toString
-        orderRepo.create(order.price, date, order.address, order.sent, order.user, order.payment, order.delivery).map { _ =>
+        val paid = 0
+        val packageNr = ""
+        orderRepo.create(order.price, date, order.address, order.sent, order.user, order.payment, order.delivery, paid, packageNr).map { _ =>
           Redirect(routes.OrderController.addOrder()).flashing("success" -> "Order created")
         }
       }
@@ -326,35 +371,6 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       BadRequest(views.html.index("Order not found"))
     }
   }
-
-
-  // def addOrderDetailJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
-  //   val order = orderRepo.getByIdOption(id)
-  //   val res = Await.result(order, duration.Duration.Inf)
-  //   val json = request.body.asJson
-  //   if(res.nonEmpty && json.nonEmpty){
-  //     val body = json.get
-  //     val prdIdJs = (body \ "id").validate[Int]
-  //     val prdId = prdIdJs.getOrElse(0)
-  //     val productQuery = productRepo.getById(prdId)
-  //     val res2 = Await.result(productQuery, duration.Duration.Inf)
-  //     if(res2.nonEmpty){
-  //       val product = res2.head._1
-  //       val createDetail = orderDetailRepo.create(product.price, id, Option(product.id))
-  //       val res3 = Await.result(createDetail, duration.Duration.Inf)
-  //       val newPrice = res.get.price + product.price
-  //       val updateOrder = orderRepo.update(id, Order(res.get.id, newPrice, res.get.date, res.get.address, res.get.sent, res.get.user, res.get.payment, res.get.delivery, res.get.paid, res.get.packageNr))
-  //       val res4 = Await.result(updateOrder, duration.Duration.Inf)
-  //       Ok(Json.toJson(res3))
-  //     }
-  //     else{
-  //       BadRequest(Json.obj("message" -> "Did not find any products with given id"))
-  //     }
-  //   }
-  //   else{
-  //     BadRequest(Json.obj("message" -> "Order not found or request body empty"))
-  //   }
-  // }
 
   def addOrderDetailHandle(id: Int) = Action.async { implicit request =>
     val products = productRepo.list()

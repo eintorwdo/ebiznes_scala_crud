@@ -10,21 +10,21 @@ import Breadcrumb from 'react-bootstrap/Breadcrumb';
 // import addToCartHandler from '../utils/addToCartHandler.js';
 
 import _ from 'lodash';
-// import chunk from 'lodash/chunk';
+import getProducts from '../utils/getProducts.js';
 
-let getProducts = async (ids = []) => {
-    if(ids.length > 0){
-        let query = "?";
-        ids.forEach(id => {query+=`id=${id}&`});
-        query = query.slice(0, -1);
-        let products = await fetch(`http://localhost:9000/api/products/ids${query}`);
-        let productsJson = await products.json();
-        return productsJson;
-    }
-    else{
-        return new Promise(resolve => {resolve({products: []})});
-    }
-}
+// let getProducts = async (ids = []) => {
+//     if(ids.length > 0){
+//         let query = "?";
+//         ids.forEach(id => {query+=`id=${id}&`});
+//         query = query.slice(0, -1);
+//         let products = await fetch(`http://localhost:9000/api/products/ids${query}`);
+//         let productsJson = await products.json();
+//         return productsJson;
+//     }
+//     else{
+//         return new Promise(resolve => {resolve({products: []})});
+//     }
+// }
 
 class Cart extends React.Component {
     constructor(props){
@@ -39,10 +39,6 @@ class Cart extends React.Component {
         getProducts(this.state.ids).then(prds => {
             this.setState({products: prds.products});
         })
-    }
-
-    componentDidUpdate(prevProps){
-        
     }
 
     cartDecrement = (id) => {
@@ -73,7 +69,11 @@ class Cart extends React.Component {
         const index = cart.products.findIndex(product => product.id === id);
         if(index >= 0){
             cart.products.splice(index, 1);
-            cookies.set('cart', cart, { path: '/' });   
+            cookies.set('cart', cart, { path: '/' });
+            let products = this.state.products;
+            const stateIndex = products.findIndex(product => product.id === id);
+            products.splice(stateIndex, 1);
+            this.setState({products});
         }
     }
     
@@ -89,7 +89,7 @@ class Cart extends React.Component {
             }, 0);
         }
 
-        const products = this.state.products.map(p => {
+        const products = this.state.products.length > 0 ? this.state.products.map(p => {
             const index = cart.products.findIndex(product => product.id === p.id);
 
             if(index !== -1){
@@ -115,7 +115,10 @@ class Cart extends React.Component {
                     </Row>
                 );
             }
-        });
+        }) : <h3>The cart is empty</h3>;
+
+        const checkoutButton = cart.products.length > 0 ? <Link to="/cart/checkout"><Button>Finalize order</Button></Link> :
+            <Link to="#"><Button variant="secondary" disabled>Finalize order</Button></Link>
 
         return(
             <>
@@ -137,12 +140,12 @@ class Cart extends React.Component {
                     <Col className="cartTotal mt-4 mt-md-0 ml-3 mr-3">
                         <Row>
                             <Col>
-                                <h3 className="text-sm-center text-md-left mt-2 mt-md-0">Total: {totalSum}zl</h3>
+                                <h3 className="text-sm-center text-md-left mt-2 mt-md-0">Total: {totalSum ? totalSum : 0}zl</h3>
                             </Col>
                         </Row>
                         <Row>
                             <Col className="d-flex justify-content-center justify-content-md-start mt-2">
-                                <Link to="/cart/order"><Button>Finalize order</Button></Link>
+                                {checkoutButton}
                             </Col>
                         </Row>
                     </Col>

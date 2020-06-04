@@ -5,6 +5,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import scala.concurrent.{ Future, ExecutionContext }
 import org.sqlite.core.DB
+import slick.sql.SqlAction
 
 @Singleton
 class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val categoryRepository: CategoryRepository, val subCategoryRepository: SubCategoryRepository, val manufacturerRepository: ManufacturerRepository)(implicit ec: ExecutionContext) {
@@ -174,12 +175,23 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
     db.run(query)
   }
 
-  def updateProductsAfterOrder(ids: Seq[Int]) = {
-    val NUM = ids.length
-    val action = product.filter(x => (x.id.inSet(ids) && x.amount > 0)).length.result.flatMap {
-      case NUM => sqlu"""UPDATE product SET amount = amount - 1 WHERE id IN (#${ids.mkString(",")})"""
-      case _ => sqlu"""UPDATE product SET amount = amount WHERE id = 0"""
+  def updateProductsAfterOrder(prds: Seq[(Int, Int)]) = {
+    val NUM = prds.length
+    val ids = prds.map(p => p._1)
+
+    val updates = prds.map(p => {
+      sqlu"""UPDATE product SET amount = amount - ${p._2} WHERE id = ${p._1}"""
+    })
+
+    println(updates.mkString(";"))
+
+    val action = product.filter(x => (x.id.inSet(ids))).result.map(_.filter(y => y.amount - prds.filter(prd => prd._1 == y.id).head._2 >= 0)).map(p => p.length).flatMap{
+      case NUM => {
+        DBIO.sequence(updates)
+      }
+      case _ => {DBIO.sequence(Seq())}
     }.transactionally
+
     db.run(action)
   }
 }

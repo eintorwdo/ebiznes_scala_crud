@@ -7,7 +7,8 @@ import Main from '../mainViews/Main.js';
 import ConnectProfile from '../mainViews/Profile.js';
 import Order from '../mainViews/Order.js';
 import Cart from '../mainViews/Cart.js';
-import ConnectBuy from '../mainViews/Buy.js';
+import ConnectCheckout from '../mainViews/Checkout.js';
+import Error from '../mainViews/Error.js';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 import { withCookies } from 'react-cookie';
@@ -38,7 +39,8 @@ class Home extends React.Component {
                     <Route path="/profile" component={ConnectProfile} />
                     <Route path="/order/:id" component={Order} />
                     <Route exact path="/cart" render={(props) => <Cart {...props} cookies={this.props.cookies}/>}/>
-                    <Route path="/cart/order" render={(props) => <ConnectBuy {...props} cookies={this.props.cookies}/>}/>
+                    <Route path="/cart/checkout" render={(props) => <ConnectCheckout {...props} cookies={this.props.cookies}/>}/>
+                    <Route path="/error" render={(props) => <Error {...props}/>}/>
                 </Container>
             </Router>
             </>

@@ -34,15 +34,15 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
 
     def delivery = column[Option[Int]]("delivery")
 
+    def paid = column[Int]("paid")
+
+    def packageNr = column[String]("packageNr")
+
     def user_fk = foreignKey("usr_fk", user, usr)(_.id)
 
     def payment_fk = foreignKey("pmt_fk", payment, pmt)(_.id?)
 
     def delivery_fk = foreignKey("dlv_fk", delivery, dlv)(_.id?)
-
-    def paid = column[Int]("paid")
-
-    def packageNr = column[String]("packageNr")
 
     def * = (id, price, date, address, sent, user, payment, delivery, paid, packageNr) <> ((Order.apply _).tupled, Order.unapply)
 
@@ -71,11 +71,11 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
    * This is an asynchronous operation, it will return a future of the created person, which can be used to obtain the
    * id for that person.
    */
-  def create(price: Int, date: String, address: String, sent: Int, user: Int, payment: Option[Int], delivery: Option[Int]): Future[Order] = db.run {
-    (order.map(p => (p.price,p.date,p.address,p.sent,p.user,p.payment,p.delivery, 0, ""))
+  def create(price: Int, date: String, address: String, sent: Int, user: Int, payment: Option[Int], delivery: Option[Int], paid: Int, packageNr: String): Future[Order] = db.run {
+    (order.map(p => (p.price,p.date,p.address,p.sent,p.user,p.payment,p.delivery, p.paid, p.packageNr))
       returning order.map(_.id)
-      into {case ((price,date,address,sent,user,payment,delivery, 0, ""),id) => Order(id,price,date,address,sent,user,payment,delivery, 0, "")}
-      ) += (price, date, address, sent, user, payment, delivery, 0, "")
+      into {case ((price,date,address,sent,user,payment,delivery, paid, packageNr),id) => Order(id,price,date,address,sent,user,payment,delivery, paid, packageNr)}
+      ) += (price, date, address, sent, user, payment, delivery, paid, packageNr)
   }
 
   /**

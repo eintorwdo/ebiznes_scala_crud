@@ -38,6 +38,17 @@ class OrderDetailRepository @Inject() (dbConfigProvider: DatabaseConfigProvider,
       ) += (price, order, product, amount)
   }
 
+  def insertMany(details: Seq[(Int, Int, Option[Int], Int)]) = {
+    val actions = details.map(detail => {
+      (orderdetail.map(c => (c.price,c.order,c.product,c.amount))
+      returning orderdetail.map(_.id)
+      into {case((detail._1, detail._2, detail._3, detail._4), id) => OrderDetail(id, detail._1, detail._2, detail._3, detail._4)}
+      ) += (detail._1, detail._2, detail._3, detail._4)
+    })
+    val sequence = DBIO.sequence(actions)
+    db.run(sequence)
+  }
+
   def list(): Future[Seq[OrderDetail]] = db.run {
     orderdetail.result
   }

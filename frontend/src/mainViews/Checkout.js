@@ -19,7 +19,8 @@ function select(state, ownProps){
     return {
         userId: state.userId,
         userName: state.userName,
-        cookies: ownProps.cookies
+        cookies: ownProps.cookies,
+        loggedIn: state.loggedIn
     }
 }
 
@@ -38,7 +39,7 @@ const getPayments = async () => {
 class Checkout extends React.Component {
     constructor(props){
         super(props);
-        this.state = {products: [], payments: [], deliveries: [], available: true, details: [], deliveryChosen: null, valid: false, redirect: null, errorMsg: null, userId: this.props.userId};
+        this.state = {products: [], payments: [], deliveries: [], available: true, details: [], deliveryChosen: null, valid: false, redirect: null, errorMsg: null, userId: this.props.userId, loggedIn: this.props.loggedIn};
         this.addressRef1 = React.createRef();
         this.addressRef2 = React.createRef();
         this.addressRef3 = React.createRef();
@@ -163,7 +164,7 @@ class Checkout extends React.Component {
             );
         })
         
-        if(!this.state.redirect){
+        if(!this.state.redirect && this.state.loggedIn){
             return(
                 <>
                 <Container fluid className="main mt-3 p-3">
@@ -250,7 +251,7 @@ class Checkout extends React.Component {
             );
         }
         else{
-            return <Redirect to={{pathname: this.state.redirect, state: this.state.errorMsg || 'You must be logged in to view this page'}} />
+            return <Redirect to={{pathname: '/error', state: this.state.errorMsg || 'You must be logged in to view this page'}} />
         }
     }
 }

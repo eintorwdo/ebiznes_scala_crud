@@ -87,7 +87,7 @@ class MyNavbar extends React.Component {
                 <>
                 <NavItem className="d-flex align-items-center justify-content-center m-2">
                     <DropdownButton alignRight title={this.state.userName} id="dropdown-menu-align-right" className="w-100">
-                        <Dropdown.Item href="/profile">Profile</Dropdown.Item>
+                        <Dropdown.Item as={Link} to="/profile">Profile</Dropdown.Item>
                         <Dropdown.Divider />
                         <Dropdown.Item onClick={this.logOutHandler}>Log out</Dropdown.Item>
                     </DropdownButton>
@@ -134,7 +134,7 @@ class MyNavbar extends React.Component {
         return(
             <>
             <Navbar bg="dark" variant="dark" expand="lg">
-                <Navbar.Brand href="/">Store</Navbar.Brand>
+                <Navbar.Brand as={Link} to="/">Store</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">

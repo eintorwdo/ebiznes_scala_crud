@@ -39,7 +39,7 @@ class SearchList extends React.Component {
     }
 
     render(){
-        let productNodes = this.state.products.map(p => {
+        let productNodes = this.state.products.length > 0 ? this.state.products.map(p => {
             return (
                 <Row key={p.id} className="d-flex p-3 ml-5 mr-5 mb-4 mt-4 productListItem">
                     <Col className="listItemImageWrapper">
@@ -69,18 +69,18 @@ class SearchList extends React.Component {
                     </Col>
                 </Row>
             );
-        });
+        }) : <Row className="d-flex p-3 ml-5 mr-5 mb-4 mt-4 productListItem"><Col><h3>No products found</h3></Col></Row>;
         
         let breadcrumbItems;
         if(this.state.category && !this.state.subcategory && this.state.products){
-            if(this.state.products.length > 0){
+            // if(this.state.products.length > 0){
                 breadcrumbItems = (
                     <>
                     <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
                     <Breadcrumb.Item active>{this.state.category.name}</Breadcrumb.Item>
                     </>
                 );
-            }
+            // }
         }
         else if(this.state.subcategory && this.state.products){
             if(this.state.products.length > 0){
@@ -94,14 +94,14 @@ class SearchList extends React.Component {
             }
         }
         else{
-            if(this.state.products.length > 0){
+            // if(this.state.products.length > 0){
                 breadcrumbItems = (
                     <>
                     <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
                     <Breadcrumb.Item active>All categories</Breadcrumb.Item>
                     </>
                 );
-            }
+            // }
         }
 
         return(

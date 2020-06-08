@@ -223,6 +223,11 @@ td{
   cursor: pointer;
 }
 
+.loginProviderButton:hover{
+  cursor: pointer;
+  color: #0051ff;
+}
+
 @media (max-width: 767px){
   ul{
     list-style-type: none;

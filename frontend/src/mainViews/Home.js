@@ -1,19 +1,37 @@
 import React from 'react';
 import ConnectNavbar from '../partials/Navbar.js';
-import Search from '../mainViews/Search.js';
-import CategorySearch from '../mainViews/CategorySearch.js';
-import ConnectProduct from '../mainViews/Product.js';
-import Main from '../mainViews/Main.js';
-import ConnectProfile from '../mainViews/Profile.js';
-import ConnectOrder from '../mainViews/Order.js';
-import Cart from '../mainViews/Cart.js';
-import ConnectCheckout from '../mainViews/Checkout.js';
-import Error from '../mainViews/Error.js';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import Search from './Search.js';
+import CategorySearch from './CategorySearch.js';
+import ConnectProduct from './Product.js';
+import Main from './Main.js';
+import ConnectProfile from './Profile.js';
+import ConnectOrder from './Order.js';
+import Cart from './Cart.js';
+import ConnectCheckout from './Checkout.js';
+import Error from './Error.js';
 
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import Modal from 'react-bootstrap/Modal'
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+
+import { connect } from "react-redux";
 import { withCookies } from 'react-cookie';
+import {hideLogin} from '../actions/index.js';
 
 import Container from 'react-bootstrap/Container';
+
+function mapDispatchToProps(dispatch){
+    return {
+        hideLogin: () => dispatch(hideLogin())
+    }
+}
+
+function select(state){
+    return {
+        showLoginModal: state.showLoginModal
+    }
+}
 
 class Home extends React.Component {
     constructor(props){
@@ -23,6 +41,10 @@ class Home extends React.Component {
         if(!cart){
             cookies.set('cart', {products: []}, { path: '/' });
         }
+    }
+
+    handleLoginRequest = (e, provider) => {
+        console.log('xD')
     }
 
     render(){
@@ -41,6 +63,37 @@ class Home extends React.Component {
                     <Route exact path="/cart" render={(props) => <Cart {...props} cookies={this.props.cookies}/>}/>
                     <Route path="/cart/checkout" render={(props) => <ConnectCheckout {...props} cookies={this.props.cookies}/>}/>
                     <Route path="/error" render={(props) => <Error {...props}/>}/>
+                    
+                    <Modal
+                        show={this.props.showLoginModal}
+                        size="lg"
+                        aria-labelledby="contained-modal-title-vcenter"
+                        centered
+                        onHide={() => {this.props.hideLogin()}}
+                        >
+                        <Modal.Header closeButton onClick={() => {this.props.hideLogin()}}>
+                            <Modal.Title id="contained-modal-title-vcenter">
+                            Log in
+                            </Modal.Title>
+                        </Modal.Header>
+                            <Modal.Body>
+                                <Col>
+                                <Row className="mb-3">
+                                    <Col>
+                                        <div className="loginProviderButton" onClick={(e) => this.handleLoginRequest(e, "google")}><h3 className="text-center"><i className="fab fa-google"></i> Log in with Google</h3></div>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col>  
+                                        <div className="loginProviderButton"><h3 className="text-center"><i className="fab fa-facebook"></i> Log in with Facebook</h3></div>
+                                    </Col>
+                                </Row>
+                                </Col>
+                            </Modal.Body>
+                            <Modal.Footer>
+                                
+                            </Modal.Footer>
+                    </Modal>
                 </Container>
             </Router>
             </>
@@ -48,4 +101,5 @@ class Home extends React.Component {
     }
 }
 
-export default withCookies(Home);
+const ConnectHome = connect(select, mapDispatchToProps)(Home)
+export default withCookies(ConnectHome);

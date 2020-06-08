@@ -16,18 +16,22 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
   
   val updateUserForm: Form[UpdateUserForm] = Form {
     mapping(
-      "id" -> number,
-      "name" -> nonEmptyText,
+      "id" -> nonEmptyText,
+      "firstname" -> optional(text),
+      "lastname" -> optional(text),
       "email" -> email,
-      "password" -> nonEmptyText
+      "password" -> optional(text),
+      "role" -> nonEmptyText
     )(UpdateUserForm.apply)(UpdateUserForm.unapply)
   }
 
   val userForm: Form[CreateUserForm] = Form {
     mapping(
-      "name" -> nonEmptyText,
+      "firstname" -> optional(text),
+      "lastname" -> optional(text),
       "email" -> email,
-      "password" -> nonEmptyText
+      "password" -> optional(text),
+      "role" -> nonEmptyText
     )(CreateUserForm.apply)(CreateUserForm.unapply)
   }
 
@@ -36,17 +40,17 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
   def usersJson() = Action { implicit request: MessagesRequest[AnyContent] =>
     val usrQuery = userRepo.list()
     val users = Await.result(usrQuery, duration.Duration.Inf)
-    val usersNoPwd = users.map(x => {Json.obj("id" -> x.id, "name" -> x.name, "email" -> x.email)})
+    val usersNoPwd = users.map(x => {Json.obj("id" -> x.id, "name" -> x.firstname, "email" -> x.email)})
     Ok(Json.obj("users" -> usersNoPwd))
   }
 
-  def userJson(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+  def userJson(id: String) = Action { implicit request: MessagesRequest[AnyContent] =>
     val usrQuery = userRepo.getById(id)
     val user = Await.result(usrQuery, duration.Duration.Inf)
     if(user.nonEmpty){
       val ordQuery = orderRepo.getByUserId(id)
       val orders = Await.result(ordQuery, duration.Duration.Inf)
-      val userNoPwd = Json.obj("id" -> user.get.id, "name" -> user.get.name, "email" -> user.get.email, "orders" -> orders)
+      val userNoPwd = Json.obj("id" -> user.get.id, "name" -> user.get.firstname, "email" -> user.get.email, "orders" -> orders)
       Ok(userNoPwd)
     }
     else{
@@ -62,7 +66,7 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
   }
 
   def user(id: String) = Action.async { implicit request: MessagesRequest[AnyContent] =>
-    val usr = userRepo.getById(id.toInt)
+    val usr = userRepo.getById(id)
     usr.map(u => {
         if(u.nonEmpty){
           Ok(views.html.user(u.get))
@@ -85,19 +89,19 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
         )
       },
       user => {
-        userRepo.create(user.name, user.email, user.password).map { _ =>
+        userRepo.create(user.firstname, user.lastname, user.email, user.password, user.role).map { _ =>
           Redirect(routes.UserController.addUser()).flashing("success" -> "User created")
         }
       }
     )
   }
 
-  def updateUser(id: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
+  def updateUser(id: String) = Action.async { implicit request: MessagesRequest[AnyContent] =>
     val user = userRepo.getById(id)
     user.map(x => {
       if(x.nonEmpty){
         val usr = x.get
-        val usrForm = updateUserForm.fill(UpdateUserForm(usr.id, usr.name, usr.email, usr.password))
+        val usrForm = updateUserForm.fill(UpdateUserForm(usr.id, usr.firstname, usr.lastname, usr.email, usr.password, usr.role))
         Ok(views.html.userupdate(usrForm))
       }
       else{
@@ -114,14 +118,14 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
         )
       },
       user => {
-        userRepo.update(user.id, User(user.id, user.name, user.email, user.password)).map { _ =>
+        userRepo.update(user.id, User(user.id, user.firstname, user.lastname, user.email, user.password, user.role)).map { _ =>
           Redirect(routes.UserController.updateUser(user.id)).flashing("success" -> "User updated")
         }
       }
     )
   }
 
-  def deleteUser(id: Int) = Action { implicit request =>
+  def deleteUser(id: String) = Action { implicit request =>
     val deleteOrders = orderRepo.deleteByUserId(id)
     Await.result(deleteOrders, duration.Duration.Inf)
     val deleteReviews = reviewRepo.deleteByUserId(id)
@@ -133,5 +137,5 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
 }
 
 
-case class CreateUserForm(name: String, email: String, password: String)
-case class UpdateUserForm(id: Int, name: String, email: String, password: String)
+case class CreateUserForm(firstname: Option[String], lastname: Option[String], email: String, password: Option[String], role: String)
+case class UpdateUserForm(id: String, firstname: Option[String], lastname: Option[String], email: String, password: Option[String], role: String)

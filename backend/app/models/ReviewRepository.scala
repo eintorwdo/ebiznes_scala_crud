@@ -16,7 +16,7 @@ class ReviewRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val 
   class ReviewTable(tag: Tag) extends Table[Review](tag, "review") {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def description = column[String]("description")
-    def user = column[Int]("user")
+    def user = column[String]("user")
     def product = column[Int]("product")
     def date = column[String]("date")
     def user_fk = foreignKey("usr_fk", user, usr)(_.id)
@@ -31,7 +31,7 @@ class ReviewRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val 
   val prd = TableQuery[ProductTable]
   val usr = TableQuery[UserTable]
 
-  def create(description: String, user: Int, product: Int, date: String): Future[Review] = db.run {
+  def create(description: String, user: String, product: Int, date: String): Future[Review] = db.run {
     (review.map(c => (c.description,c.user,c.product,c.date))
       returning review.map(_.id)
       into {case ((description, user, product, date), id) => Review(id, description, user, product, date)}
@@ -61,5 +61,5 @@ class ReviewRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val 
 
   def deleteByProductId(id: Int): Future[Unit] = db.run(review.filter(_.product === id).delete).map(_ => ())
 
-  def deleteByUserId(id: Int): Future[Unit] = db.run(review.filter(_.user === id).delete).map(_ => ())
+  def deleteByUserId(id: String): Future[Unit] = db.run(review.filter(_.user === id).delete).map(_ => ())
 }

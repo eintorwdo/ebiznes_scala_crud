@@ -44,7 +44,7 @@
         <li>
             <ul>
                 <li>
-                    Użytkownik: @review._2.name :
+                    Użytkownik: @review._2.email :
                 </li>
                 <li>
                     @review._1.description
@@ -64,7 +64,7 @@
 <label for="user">User:</label>
 <select name="user" id="user">
     @for(usr <- users){
-        <option value="@usr.id">@usr.name</option>
+        <option value="@usr.id">@usr.email</option>
     }
 </select>
 <input name="product" id="product" value="@product._1.id" type="hidden" />

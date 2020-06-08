@@ -56,7 +56,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       "price" -> number,
       "address" -> nonEmptyText,
       "sent" -> number,
-      "user" -> number,
+      "user" -> nonEmptyText,
       "payment" -> optional(number),
       "delivery" -> optional(number)
     )(CreateOrderForm.apply)(CreateOrderForm.unapply)
@@ -169,17 +169,17 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       val body = json.get
       val detailsJs = (body \ "details").validate[Seq[JsObject]]
       val addressJs = (body \ "address").validate[String]
-      val userJs = (body \ "userId").validate[Int]
+      val userJs = (body \ "userId").validate[String]
       val paymentJs = (body \ "payment").validate[Int]
       val deliveryJs = (body \ "delivery").validate[Int]
 
       val details = detailsJs.getOrElse(Seq())
       val address = addressJs.getOrElse("")
-      val user = userJs.getOrElse(0)
+      val user = userJs.getOrElse("")
       val payment = paymentJs.getOrElse(0)
       val delivery = deliveryJs.getOrElse(0)
 
-      if(details.nonEmpty && address != "" && user != 0 && payment != 0 && delivery != 0){
+      if(details.nonEmpty && address != "" && user != "" && payment != 0 && delivery != 0){
         val ids = details.map(d => {
           val idJs = (d \ "id").validate[Int]
           val amountJs = (d \ "amount").validate[Int]
@@ -787,7 +787,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
   }
 }
 
-case class CreateOrderForm(price: Int, address: String, sent: Int, user: Int, payment: Option[Int], delivery: Option[Int])
+case class CreateOrderForm(price: Int, address: String, sent: Int, user: String, payment: Option[Int], delivery: Option[Int])
 case class UpdateOrderForm(id: Int, price: Int, address: String, sent: Int, payment: Option[Int], delivery: Option[Int], paid: Int, packageNr: String)
 case class CreateOrderDetailForm(price: Int, order: Int, product: Option[Int], amount: Int)
 case class UpdateOrderDetailForm(id: Int, price: Int, order: Int, product: Option[Int], amount: Int)

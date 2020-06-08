@@ -3,12 +3,13 @@ import React from 'react';
 import './App.css';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Home from './mainViews/Home.js'
+import ConnectHome from './mainViews/Home.js'
+
 
 function App() {
   return (
     <div className="App">
-      <Home />
+      <ConnectHome />
     </div>
   );
 }

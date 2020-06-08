@@ -28,7 +28,7 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
 
     def sent = column[Int]("sent")
 
-    def user = column[Int]("user")
+    def user = column[String]("user")
 
     def payment = column[Option[Int]]("payment")
 
@@ -71,7 +71,7 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
    * This is an asynchronous operation, it will return a future of the created person, which can be used to obtain the
    * id for that person.
    */
-  def create(price: Int, date: String, address: String, sent: Int, user: Int, payment: Option[Int], delivery: Option[Int], paid: Int, packageNr: String): Future[Order] = db.run {
+  def create(price: Int, date: String, address: String, sent: Int, user: String, payment: Option[Int], delivery: Option[Int], paid: Int, packageNr: String): Future[Order] = db.run {
     (order.map(p => (p.price,p.date,p.address,p.sent,p.user,p.payment,p.delivery, p.paid, p.packageNr))
       returning order.map(_.id)
       into {case ((price,date,address,sent,user,payment,delivery, paid, packageNr),id) => Order(id,price,date,address,sent,user,payment,delivery, paid, packageNr)}
@@ -106,7 +106,7 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
     } yield (order, user, payment, delivery)).result
   }
 
-  def getByUserId(id: Int): Future[Seq[Order]] = db.run {
+  def getByUserId(id: String): Future[Seq[Order]] = db.run {
     order.filter(_.user === id).result
   }
 
@@ -126,5 +126,5 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
      db.run(paymentyQuery.update(None)).map(_ => ())
   }
 
-  def deleteByUserId(id: Int): Future[Unit] = db.run(order.filter(_.user === id).delete).map(_ => ())
+  def deleteByUserId(id: String): Future[Unit] = db.run(order.filter(_.user === id).delete).map(_ => ())
 }

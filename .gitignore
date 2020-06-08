@@ -10,3 +10,4 @@ target
 .bloop
 *.sqlite
 *.vscode
+*.env

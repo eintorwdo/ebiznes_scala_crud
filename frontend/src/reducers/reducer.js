@@ -1,7 +1,8 @@
 const initialState = {
-    loggedIn: true,
-    userId: 1,
-    userName: "test123@test.pl"
+    loggedIn: false,
+    userId: null,
+    userName: null,
+    showLoginModal: false
 }
 
 export const rootReducer = (state = initialState, action) => {
@@ -17,6 +18,16 @@ export const rootReducer = (state = initialState, action) => {
             loggedIn: false,
             userId: null,
             userName: null
+        });
+    }
+    else if(action.type === "SHOW_LOGIN"){
+        return Object.assign({}, state, {
+            showLoginModal: true
+        });
+    }
+    else if(action.type === "HIDE_LOGIN"){
+        return Object.assign({}, state, {
+            showLoginModal: false
         });
     }
     return state;

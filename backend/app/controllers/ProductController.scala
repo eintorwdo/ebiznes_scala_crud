@@ -60,7 +60,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     mapping(
       "id" -> number,
       "description" -> nonEmptyText,
-      "user" -> number,
+      "user" -> nonEmptyText,
       "product" -> number,
       "date" -> nonEmptyText
     )(UpdateReviewForm.apply)(UpdateReviewForm.unapply)
@@ -69,7 +69,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
   val reviewForm: Form[CreateReviewForm] = Form {
     mapping(
       "description" -> nonEmptyText,
-      "user" -> number,
+      "user" -> nonEmptyText,
       "product" -> number
     )(CreateReviewForm.apply)(CreateReviewForm.unapply)
   }
@@ -143,7 +143,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
         BadRequest(Json.obj("message" -> "Product not found"))
       }
       else{
-        val revs = res._2.map(x => {Json.obj("id" -> x._1.id, "description" -> x._1.description, "userid" -> x._1.user, "username" -> x._2.name, "date" -> x._1.date)})
+        val revs = res._2.map(x => {Json.obj("id" -> x._1.id, "description" -> x._1.description, "userid" -> x._1.user, "username" -> x._2.firstname, "date" -> x._1.date)})
         Ok(Json.obj("product" -> Json.obj("info" -> res._1.head._1, "manufacturer" -> res._1.head._2, "category" -> res._1.head._3, "subcategory" -> res._1.head._4),
                     "reviews" -> revs))
       }
@@ -504,12 +504,12 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     if(json.nonEmpty){
       val body = json.get
       val dscJs = (body \ "description").validate[String]
-      val userJs = (body \ "user").validate[Int]
+      val userJs = (body \ "user").validate[String]
       val prdJs = (body \ "product").validate[Int]
       val description = dscJs.getOrElse("")
-      val user = userJs.getOrElse(0)
+      val user = userJs.getOrElse("")
       val product = prdJs.getOrElse(0)
-      if(description == "" || user == 0 || product == 0){
+      if(description == "" || user == "" || product == 0){
         BadRequest(Json.obj("message" -> "Invalid request body"))
       }
       else{
@@ -521,7 +521,7 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
           val date = java.time.LocalDate.now.toString
           val createRev = reviewRepo.create(description, user, product, date)
           val rev = Await.result(createRev, duration.Duration.Inf)
-          Ok(Json.obj("username" -> userRes.get.name, "id" -> rev.id, "date" -> rev.date, "description" -> rev.description))
+          Ok(Json.obj("username" -> userRes.get.firstname, "id" -> rev.id, "date" -> rev.date, "description" -> rev.description))
         }
         else{
           BadRequest(Json.obj("message" -> "Invalid request body"))
@@ -540,12 +540,12 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     if(json.nonEmpty && oldRev.nonEmpty){
       val body = json.get
       val dscJs = (body \ "description").validate[String]
-      val userJs = (body \ "user").validate[Int]
+      val userJs = (body \ "user").validate[String]
       val prdJs = (body \ "product").validate[Int]
       val description = dscJs.getOrElse("")
-      val user = userJs.getOrElse(0)
+      val user = userJs.getOrElse("")
       val product = prdJs.getOrElse(0)
-      if(description == "" || user == 0 || product == 0){
+      if(description == "" || user == "" || product == 0){
         BadRequest(Json.obj("message" -> "Invalid request body"))
       }
       else{
@@ -714,5 +714,5 @@ case class CreateProductForm(name: String, description: String, price: Int, amou
 case class UpdateProductForm(id: Int, name: String, description: String, price: Int, amount: Int, manufacturer: Option[Int], category: Option[Int], subcategory: Option[Int])
 case class CreateManufacturerForm(name: String)
 case class UpdateManufacturerForm(id: Int, name: String)
-case class CreateReviewForm(description: String, user: Int, product: Int)
-case class UpdateReviewForm(id: Int, description: String, user: Int, product: Int, date: String)
+case class CreateReviewForm(description: String, user: String, product: Int)
+case class UpdateReviewForm(id: Int, description: String, user: String, product: Int, date: String)

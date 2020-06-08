@@ -12,11 +12,12 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
-import {logOut} from '../actions/index.js';
+import {logOut, showLogin} from '../actions/index.js';
 
 function mapDispatchToProps(dispatch){
     return {
-        logout: () => dispatch(logOut())
+        logout: () => dispatch(logOut()),
+        showLogin: () => dispatch(showLogin())
     }
 }
 
@@ -96,7 +97,7 @@ class MyNavbar extends React.Component {
             );
         }
         else{
-            userInfo = <Button className="m-2">Log in</Button>
+            userInfo = <Button className="m-2" onClick={() => {this.props.showLogin()}}>Log in</Button>
         }
 
         categoryList = this.state.categories.map(cat => {

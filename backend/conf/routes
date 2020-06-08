@@ -43,7 +43,7 @@ GET     /api/review/:id             controllers.ProductController.reviewJson(id:
 POST    /api/review                 controllers.ProductController.addReviewJson
 PUT     /api/review/:id             controllers.ProductController.updateReviewJson(id: Int)
 GET     /api/users                  controllers.UserController.usersJson
-GET     /api/user/:id               controllers.UserController.userJson(id: Int)
+GET     /api/user/:id               controllers.UserController.userJson(id: String)
 
 #View routes
 GET     /                           controllers.HomeController.index
@@ -106,8 +106,8 @@ GET     /users                      controllers.UserController.users
 GET     /users/:id                  controllers.UserController.user(id)
 GET     /addUser                    controllers.UserController.addUser
 POST    /addUserHandle              controllers.UserController.addUserHandle
-GET     /updateUser/:id             controllers.UserController.updateUser(id: Int)
-GET     /deleteUser/:id             controllers.UserController.deleteUser(id: Int)
+GET     /updateUser/:id             controllers.UserController.updateUser(id: String)
+GET     /deleteUser/:id             controllers.UserController.deleteUser(id: String)
 POST    /updateUserHandle           controllers.UserController.updateUserHandle
 POST    /cart/add/:id               controllers.ProductController.addToCart(id)
 DELETE  /cart/remove/:id            controllers.ProductController.removeFromCart(id)

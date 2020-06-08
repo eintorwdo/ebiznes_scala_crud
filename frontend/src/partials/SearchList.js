@@ -83,7 +83,7 @@ class SearchList extends React.Component {
             // }
         }
         else if(this.state.subcategory && this.state.products){
-            if(this.state.products.length > 0){
+            // if(this.state.products.length > 0){
                 breadcrumbItems = (
                     <>
                     <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
@@ -91,7 +91,7 @@ class SearchList extends React.Component {
                     <Breadcrumb.Item active>{this.state.subcategory.name}</Breadcrumb.Item>
                     </>
                 );
-            }
+            // }
         }
         else{
             // if(this.state.products.length > 0){

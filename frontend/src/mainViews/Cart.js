@@ -7,24 +7,9 @@ import Container from 'react-bootstrap/Container';
 import Button from 'react-bootstrap/Button';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
-// import addToCartHandler from '../utils/addToCartHandler.js';
 
 import _ from 'lodash';
 import getProducts from '../utils/getProducts.js';
-
-// let getProducts = async (ids = []) => {
-//     if(ids.length > 0){
-//         let query = "?";
-//         ids.forEach(id => {query+=`id=${id}&`});
-//         query = query.slice(0, -1);
-//         let products = await fetch(`http://localhost:9000/api/products/ids${query}`);
-//         let productsJson = await products.json();
-//         return productsJson;
-//     }
-//     else{
-//         return new Promise(resolve => {resolve({products: []})});
-//     }
-// }
 
 class Cart extends React.Component {
     constructor(props){

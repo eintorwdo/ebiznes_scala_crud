@@ -33,16 +33,41 @@ CREATE TABLE "product" (
 );
 
 CREATE TABLE "user" (
- "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
- "name" VARCHAR NOT NULL,
+ "id" VARCHAR NOT NULL PRIMARY KEY,
+ "firstname" VARCHAR,
+ "lastname" VARCHAR,
  "email" VARCHAR NOT NULL,
- "password" VARCHAR NOT NULL
+ "password" VARCHAR,
+ "role" VARCHAR NOT NULL
+);
+
+CREATE TABLE "login_info" (
+ "id" VARCHAR NOT NULL PRIMARY KEY,
+ "provider_id" VARCHAR NOT NULL,
+ "provider_key" VARCHAR NOT NULL
+);
+
+CREATE TABLE "user_login_info" (
+ "user_id" VARCHAR NOT NULL,
+ "login_info_id" VARCHAR NOT NULL,
+ FOREIGN KEY(user_id) references user(id),
+ FOREIGN KEY(login_info_id) references login_info(id)
+);
+
+CREATE TABLE "oauth2_info" (
+  "id" VARCHAR NOT NULL PRIMARY KEY,
+  "access_token" VARCHAR NOT NULL,
+  "token_type" VARCHAR,
+  "expires_in" INTEGER,
+  "refresh_token" VARCHAR,
+  "login_info_id" VARCHAR NOT NULL,
+  FOREIGN KEY (login_info_id) REFERENCES login_info(id)
 );
 
 CREATE TABLE "review" (
  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
  "description" TEXT NOT NULL,
- "user" INTEGER,
+ "user" VARCHAR,
  "product" INTEGER NOT NULL,
  "date" TEXT NOT NULL,
  FOREIGN KEY(user) references user(id),
@@ -66,7 +91,7 @@ CREATE TABLE "order_" (
  "date" TEXT NOT NULL,
  "address" TEXT NOT NULL,
  "sent" TINYINT NOT NULL,
- "user" INTEGER NOT NULL,
+ "user" VARCHAR NOT NULL,
  "payment" INTEGER,
  "delivery" INTEGER,
  "paid" INTEGER,
@@ -93,6 +118,9 @@ DROP TABLE "subcategory"
 DROP TABLE "manufacturer"
 DROP TABLE "product"
 DROP TABLE "user"
+DROP TABLE "login_info"
+DROP TABLE "user_login_info"
+DROP TABLE "oauth2_info"
 DROP TABLE "review"
 DROP TABLE "delivery"
 DROP TABLE "payment"

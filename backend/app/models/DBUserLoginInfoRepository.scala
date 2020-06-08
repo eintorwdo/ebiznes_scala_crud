@@ -12,10 +12,4 @@ class DBUserLoginInfoRepository @Inject() (dbConfigProvider: DatabaseConfigProvi
 
     import dbConfig._
     import profile.api._
-
-    class UserLoginInfoTable(tag: Tag) extends Table[DBUserLoginInfo](tag, "user_login_info") {
-        def userID = column[String]("user_id")
-        def loginInfoId = column[String]("login_info_id")
-        def * = (userID, loginInfoId) <> (DBUserLoginInfo.tupled, DBUserLoginInfo.unapply)
-    }
 }

@@ -9,23 +9,13 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DBLoginInfoRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val userLoginInfoRepo: DBUserLoginInfoRepository, val userRepo: UserRepository)(implicit ec: ExecutionContext) {
+class DBLoginInfoRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val userRepo: UserRepository)(implicit ec: ExecutionContext) extends AuthTables {
     val dbConfig = dbConfigProvider.get[JdbcProfile]
 
     import dbConfig._
     import profile.api._
 
-    class LoginInfoTable(tag: Tag) extends Table[DBLoginInfo](tag, "login_info") {
-        def id = column[String]("id", O.PrimaryKey)
-        def providerID = column[String]("provider_id")
-        def providerKey = column[String]("provider_key")
-        def * = (id, providerID, providerKey) <> ((DBLoginInfo.apply _).tupled, DBLoginInfo.unapply)
-    }
-
-    import userLoginInfoRepo.UserLoginInfoTable
     import userRepo.UserTable
-    val userLoginInfos = TableQuery[UserLoginInfoTable]
-    val loginInfos = TableQuery[LoginInfoTable]
     val users = TableQuery[UserTable]
 
     def saveUserLoginInfo(userID: String, loginInfo: LoginInfo): Future[Unit] = {

@@ -17,6 +17,7 @@ libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
 
 libraryDependencies ++= Seq(
+  "com.iheart" %% "ficus" % "1.4.7",
   "com.typesafe.play" %% "play-slick" % "4.0.0",
   "com.typesafe.play" %% "play-slick-evolutions" % "4.0.0",
   "com.mohiva" %% "play-silhouette" % "6.1.0",
@@ -24,6 +25,8 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-persistence" % "6.1.0",
   "com.mohiva" %% "play-silhouette-crypto-jca" % "6.1.0",
   "com.mohiva" %% "play-silhouette-totp" % "6.1.0",
+  "com.mohiva" %% "play-silhouette-testkit" % "7.0.0" % "test",
+  "com.mohiva" %% "play-silhouette-cas" % "7.0.0",
   "net.codingwell" %% "scala-guice" % "4.1.0"
 )
 

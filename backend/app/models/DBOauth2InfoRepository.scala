@@ -8,9 +8,11 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.{ExecutionContext, Future}
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.providers.OAuth2Info
+import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
+import scala.reflect.ClassTag
 
 @Singleton
-class DBOAuth2InfoRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends AuthTables {
+class DBOAuth2InfoRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext, val classTag: ClassTag[OAuth2Info]) extends DelegableAuthInfoDAO[OAuth2Info] with AuthTables {
     val dbConfig = dbConfigProvider.get[JdbcProfile]
 
     import dbConfig._
@@ -38,4 +40,12 @@ class DBOAuth2InfoRepository @Inject() (dbConfigProvider: DatabaseConfigProvider
 
     db.run(action).map(_ => authInfo)
   }
+
+  override def update(loginInfo: LoginInfo, authInfo: OAuth2Info): Future[OAuth2Info] = ???
+
+  override def save(loginInfo: LoginInfo, authInfo: OAuth2Info): Future[OAuth2Info] = ???
+
+  override def remove(loginInfo: LoginInfo): Future[Unit] = ???
+
+  override def find(loginInfo: LoginInfo): Future[Option[OAuth2Info]] = ???
 }

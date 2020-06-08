@@ -53,7 +53,7 @@ class UserRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
     user.insertOrUpdate(userToSave).map(_ => userToSave)
   }
 
-  def update(updatedUser: User) = db.run {
+  def updateNoId(updatedUser: User) = db.run {
     user.filter(_.id === updatedUser.id).update(updatedUser).map(_ => updatedUser)
   }
 

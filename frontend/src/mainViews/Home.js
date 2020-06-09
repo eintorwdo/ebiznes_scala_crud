@@ -9,6 +9,7 @@ import ConnectOrder from './Order.js';
 import Cart from './Cart.js';
 import ConnectCheckout from './Checkout.js';
 import Error from './Error.js';
+import ConnectAuth from './Auth.js';
 
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import Modal from 'react-bootstrap/Modal'
@@ -17,13 +18,14 @@ import Col from 'react-bootstrap/Col';
 
 import { connect } from "react-redux";
 import { withCookies } from 'react-cookie';
-import {hideLogin} from '../actions/index.js';
+import {hideLogin, logIn} from '../actions/index.js';
 
 import Container from 'react-bootstrap/Container';
 
 function mapDispatchToProps(dispatch){
     return {
-        hideLogin: () => dispatch(hideLogin())
+        hideLogin: () => dispatch(hideLogin()),
+        login: (payload) => dispatch(logIn(payload))
     }
 }
 
@@ -41,10 +43,19 @@ class Home extends React.Component {
         if(!cart){
             cookies.set('cart', {products: []}, { path: '/' });
         }
+        // console.log(new Date(localStorage.getItem('tokenExpiry') * 1000));
+        if(localStorage.getItem('token') && new Date(localStorage.getItem('tokenExpiry') * 1000) > new Date()){
+            const payload = {
+                token: localStorage.getItem('token'),
+                tokenExpiry: localStorage.getItem('tokenExpiry'),
+                email: localStorage.getItem('email')
+            };
+            this.props.login(payload);
+        }
     }
 
-    handleLoginRequest = (e, provider) => {
-        console.log('xD')
+    handleLoginRequest = async (e, provider) => {
+        window.location = `http://localhost:9000/auth/provider/${provider}`;
     }
 
     render(){
@@ -63,7 +74,8 @@ class Home extends React.Component {
                     <Route exact path="/cart" render={(props) => <Cart {...props} cookies={this.props.cookies}/>}/>
                     <Route path="/cart/checkout" render={(props) => <ConnectCheckout {...props} cookies={this.props.cookies}/>}/>
                     <Route path="/error" render={(props) => <Error {...props}/>}/>
-                    
+                    <Route path="/auth" render={(props) => <ConnectAuth {...props}/>}/>
+
                     <Modal
                         show={this.props.showLoginModal}
                         size="lg"

@@ -46,6 +46,7 @@ GET     /api/review/:id             controllers.ProductController.reviewJson(id:
 POST    /api/review                 controllers.ProductController.addReviewJson
 PUT     /api/review/:id             controllers.ProductController.updateReviewJson(id: Int)
 GET     /api/users                  controllers.UserController.usersJson
+GET     /api/user                   controllers.UserController.getUserSecured
 GET     /api/user/:id               controllers.UserController.userJson(id: String)
 
 #View routes

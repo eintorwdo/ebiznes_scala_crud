@@ -76,6 +76,7 @@ class MyNavbar extends React.Component {
 
     logOutHandler = (e) => {
         e.preventDefault();
+        localStorage.clear();
         this.props.logout();
     }
 

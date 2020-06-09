@@ -1,5 +1,7 @@
 package controllers
 
+import silhouette._
+
 import com.mohiva.play.silhouette.api.exceptions.ProviderException
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.util.Clock
@@ -59,7 +61,7 @@ class SocialController @Inject()(cc: MessagesControllerComponents,
                   }
                 } else {
                   val msg="Email is in use"
-                  Future.successful(Redirect(s"http://localhost:3000/error/?msg=${msg}"))
+                  Future.successful(Redirect(s"http://localhost:3000/error?msg=${msg}"))
                 }
               }
             }
@@ -68,9 +70,9 @@ class SocialController @Inject()(cc: MessagesControllerComponents,
       }
       case None => Future.successful(Status(BAD_REQUEST)(Json.obj("error" -> s"No '$provider' provider")))
     }).recover {
-      case _: ProviderException => {
+      case e: ProviderException => {
         val msg = "Authentication error" // Unknown error
-        Redirect(s"http://localhost:3000/error/msg=${msg}")
+        Redirect(s"http://localhost:3000/error?msg=${e}")
       }
     }
   }

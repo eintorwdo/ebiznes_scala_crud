@@ -6,13 +6,16 @@ import play.api._
 import play.api.mvc._
 import play.api.data.Form
 import play.api.data.Forms._
+import com.mohiva.play.silhouette.api.Silhouette
+import com.mohiva.play.silhouette.api.actions.SecuredRequest
+import utils.DefaultEnv
 
 import scala.concurrent._
 import scala.util.{Failure, Success}
 import play.api.libs.json._
 
 @Singleton
-class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderRepository, reviewRepo: ReviewRepository, cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
+class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderRepository, reviewRepo: ReviewRepository, silhouette: Silhouette[DefaultEnv], cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
   
   val updateUserForm: Form[UpdateUserForm] = Form {
     mapping(
@@ -35,7 +38,19 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
     )(CreateUserForm.apply)(CreateUserForm.unapply)
   }
 
-
+  def getUserSecured() = silhouette.SecuredAction { implicit request =>
+    val usrQuery = userRepo.getById(request.identity.id)
+    val user = Await.result(usrQuery, duration.Duration.Inf)
+    if(user.nonEmpty){
+      val ordQuery = orderRepo.getByUserId(request.identity.id)
+      val orders = Await.result(ordQuery, duration.Duration.Inf)
+      val userNoPwd = Json.obj("id" -> user.get.id, "name" -> user.get.firstname, "email" -> user.get.email, "orders" -> orders)
+      Ok(userNoPwd)
+    }
+    else{
+      BadRequest(Json.obj("message" -> "User not found"))
+    }
+  }
 
   def usersJson() = Action { implicit request: MessagesRequest[AnyContent] =>
     val usrQuery = userRepo.list()

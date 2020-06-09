@@ -11,13 +11,16 @@ import play.api.libs.json._
 import scala.concurrent._
 import scala.util.{Failure, Success}
 import slick.dbio.DBIOAction
+import com.mohiva.play.silhouette.api.Silhouette
+import com.mohiva.play.silhouette.api.actions.SecuredRequest
+import utils.DefaultEnv
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
  * application's home page.
  */
 @Singleton
-class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRepository, orderRepo: OrderRepository, orderDetailRepo: OrderDetailRepository, deliveryRepo: DeliveryRepository, paymentRepo: PaymentRepository, cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
+class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRepository, orderRepo: OrderRepository, orderDetailRepo: OrderDetailRepository, deliveryRepo: DeliveryRepository, paymentRepo: PaymentRepository, silhouette: Silhouette[DefaultEnv], cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
   
   val updateOrderDetailForm: Form[UpdateOrderDetailForm] = Form {
     mapping(
@@ -162,24 +165,22 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
     Ok(views.html.orderadd(orderForm, res, res3, res2))
   }
 
-  def addOrderJson() = Action { implicit request: MessagesRequest[AnyContent] =>
+  def addOrderJson() = silhouette.SecuredAction { implicit request =>
     val date = java.time.LocalDate.now.toString
     val json = request.body.asJson
     if(json.nonEmpty){
       val body = json.get
       val detailsJs = (body \ "details").validate[Seq[JsObject]]
       val addressJs = (body \ "address").validate[String]
-      val userJs = (body \ "userId").validate[String]
       val paymentJs = (body \ "payment").validate[Int]
       val deliveryJs = (body \ "delivery").validate[Int]
 
       val details = detailsJs.getOrElse(Seq())
       val address = addressJs.getOrElse("")
-      val user = userJs.getOrElse("")
       val payment = paymentJs.getOrElse(0)
       val delivery = deliveryJs.getOrElse(0)
 
-      if(details.nonEmpty && address != "" && user != "" && payment != 0 && delivery != 0){
+      if(details.nonEmpty && address != "" && payment != 0 && delivery != 0){
         val ids = details.map(d => {
           val idJs = (d \ "id").validate[Int]
           val amountJs = (d \ "amount").validate[Int]
@@ -221,7 +222,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
                 val paid = 0
                 val packageNr = ""
                 val sent = 0
-                val createOrderQuery = orderRepo.create(totalPrice, date, address, sent, user, Some(payment), Some(delivery), paid, packageNr)
+                val createOrderQuery = orderRepo.create(totalPrice, date, address, sent, request.identity.id, Some(payment), Some(delivery), paid, packageNr)
                 val newOrder = Await.result(createOrderQuery, duration.Duration.Inf)
                 val detailsWithOrderId = orderDetails.map(d => (d._1, newOrder.id, Some(d._3), d._4))
                 val detailsInsertQuery = orderDetailRepo.insertMany(detailsWithOrderId)

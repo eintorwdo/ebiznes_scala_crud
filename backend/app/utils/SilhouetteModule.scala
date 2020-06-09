@@ -1,4 +1,4 @@
-package utils
+package silhouette
 
 
 import com.google.inject.name.Named
@@ -18,7 +18,7 @@ import com.mohiva.play.silhouette.password.{BCryptPasswordHasher, BCryptSha256Pa
 import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
 import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
 import com.typesafe.config.Config
-import models.{DBOAuth2InfoRepository, _}
+import models._
 import net.codingwell.scalaguice.ScalaModule
 import play.api._
 import play.api.db.slick.DatabaseConfigProvider
@@ -29,6 +29,7 @@ import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import play.api.libs.ws.WSClient
 import play.api.mvc.Cookie
+import utils.DefaultEnv
 
 import scala.concurrent.ExecutionContext.Implicits._
 
@@ -91,16 +92,16 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     new JcaCrypter(config)
   }
 
-  @Provides
-  def provideCredentialsProvider(authInfoRepository: AuthInfoRepository,
-                                 passwordHasherRegistry: PasswordHasherRegistry): CredentialsProvider = {
-    new CredentialsProvider(authInfoRepository, passwordHasherRegistry)
-  }
+//   @Provides
+//   def provideCredentialsProvider(authInfoRepository: AuthInfoRepository,
+//                                  passwordHasherRegistry: PasswordHasherRegistry): CredentialsProvider = {
+//     new CredentialsProvider(authInfoRepository, passwordHasherRegistry)
+//   }
 
   @Provides
-  def provideAuthInfoRepository(passwordInfoDAO: DelegableAuthInfoDAO[PasswordInfo],
+  def provideAuthInfoRepository(
                                 oauth2InfoDao: DelegableAuthInfoDAO[OAuth2Info]): AuthInfoRepository = {
-    new DelegableAuthInfoRepository(passwordInfoDAO, oauth2InfoDao)
+    new DelegableAuthInfoRepository(oauth2InfoDao)
   }
 
 //   @Provides

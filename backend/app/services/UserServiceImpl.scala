@@ -3,7 +3,7 @@ package services
 import com.mohiva.play.silhouette.api.LoginInfo
 import models.{UserRepository, DBLoginInfoRepository}
 import javax.inject.Inject
-import models.User
+import models.{User, UserRepository, DBLoginInfoRepository}
 
 import scala.concurrent.{ExecutionContext, Future}
 

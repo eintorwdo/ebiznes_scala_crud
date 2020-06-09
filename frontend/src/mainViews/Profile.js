@@ -16,27 +16,38 @@ import Breadcrumb from 'react-bootstrap/Breadcrumb';
 function select(state){
     return {
         loggedIn: state.loggedIn,
-        userId: state.userId,
-        userName: state.userName
+        userName: state.userName,
+        token: state.token
     }
 }
 
-const getUserInfo = async (id) => {
-    const user = await fetch(`http://localhost:9000/api/user/${id}`);
-    const userJson = await user.json();
-    return userJson;
+const getUserInfo = async (props) => {
+    const res = await fetch('http://localhost:9000/api/user', {
+        headers: {
+            'X-Auth-Token': props.token
+        }
+    });
+    const user = await res.json();
+    return [user, res.status];
 }
 
 class Profile extends React.Component {
     constructor(props){
         super(props);
-        this.state = {id: this.props.userId, name: '', email: this.props.userName, orders: [], loggedIn: this.props.loggedIn};
+        const error = this.props.loggedIn ? null : "You must be logged in to view this page";
+        this.state = {id: null, name: '', email: this.props.userName, orders: [], loggedIn: this.props.loggedIn, error};
     }
 
 
     componentDidMount(){
-        getUserInfo(this.state.id).then(u => {
-            this.setState({name: u.name, email: u.email, orders: u.orders});
+        getUserInfo(this.props).then(u => {
+            console.log(u)
+            if(u[1] === 200){
+                this.setState({id: u[0].id, name: u[0].name, email: u[0].email, orders: u[0].orders});
+            }
+            else{
+                this.setState({error: u[0].message});
+            }
         });
     }
 
@@ -52,7 +63,7 @@ class Profile extends React.Component {
             );
         });
 
-        if(this.state.loggedIn){
+        if(this.state.loggedIn && !this.state.error){
             return(
                 <>
                 <Container className="productListItem mt-3 p-3" fluid>
@@ -93,7 +104,7 @@ class Profile extends React.Component {
             );
         }
         else{
-            return <Redirect to={{pathname: "/error", state: "You must log in to view this page"}}/>
+            return <Redirect to={{pathname: "/error", state: this.state.error}}/>
         }
     }
 }

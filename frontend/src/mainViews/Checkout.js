@@ -17,10 +17,10 @@ import { Redirect } from "react-router-dom";
 
 function select(state, ownProps){
     return {
-        userId: state.userId,
         userName: state.userName,
         cookies: ownProps.cookies,
-        loggedIn: state.loggedIn
+        loggedIn: state.loggedIn,
+        token: state.token
     }
 }
 
@@ -39,7 +39,7 @@ const getPayments = async () => {
 class Checkout extends React.Component {
     constructor(props){
         super(props);
-        this.state = {products: [], payments: [], deliveries: [], available: true, details: [], deliveryChosen: null, valid: false, redirect: null, errorMsg: null, userId: this.props.userId, loggedIn: this.props.loggedIn};
+        this.state = {products: [], payments: [], deliveries: [], available: true, details: [], deliveryChosen: null, valid: false, redirect: null, errorMsg: null, loggedIn: this.props.loggedIn};
         this.addressRef1 = React.createRef();
         this.addressRef2 = React.createRef();
         this.addressRef3 = React.createRef();
@@ -98,7 +98,6 @@ class Checkout extends React.Component {
             const body = {
                 details: cart.products,
                 address: `${this.addressRef1.current.value} ${this.addressRef2.current.value} ${this.addressRef3.current.value} ${this.addressRef4.current.value}`,
-                userId: this.props.userId,
                 payment: parseInt(this.paymentRef.id),
                 delivery: parseInt(this.deliveryRef.id)
             };
@@ -106,6 +105,7 @@ class Checkout extends React.Component {
                 method: 'POST',
                 body: JSON.stringify(body),
                 headers: {
+                    'X-Auth-Token': this.props.token,
                     'Content-Type': 'application/json'
                 }
             });
@@ -251,7 +251,7 @@ class Checkout extends React.Component {
             );
         }
         else{
-            return <Redirect to={{pathname: '/error', state: this.state.errorMsg || 'You must be logged in to view this page'}} />
+            return <Redirect to={{pathname: this.state.redirect, state: this.state.errorMsg || 'You must be logged in to view this page'}} />
         }
     }
 }

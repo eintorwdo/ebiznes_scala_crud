@@ -2,22 +2,26 @@ const initialState = {
     loggedIn: false,
     userId: null,
     userName: null,
-    showLoginModal: false
+    showLoginModal: false,
+    token: null,
+    tokenExpiry: null
 }
 
 export const rootReducer = (state = initialState, action) => {
     if(action.type === "LOG_IN"){
         return Object.assign({}, state, {
             loggedIn: true,
-            userId: action.payload.id,
-            userName: action.payload.name
+            userName: action.payload.email,
+            token: action.payload.token,
+            tokenExpiry: parseInt(action.payload.tokenExpiry)
         });
     }
     else if(action.type === "LOG_OUT"){
         return Object.assign({}, state, {
             loggedIn: false,
-            userId: null,
-            userName: null
+            userName: null,
+            token: null,
+            tokenExpiry: null
         });
     }
     else if(action.type === "SHOW_LOGIN"){

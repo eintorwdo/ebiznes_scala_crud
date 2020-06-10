@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+// import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -11,14 +11,29 @@ import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 
-function select(state, ownProps){
+import checkIfLoggedIn from '../utils/checkIfLoggedIn.js';
+import {logOut} from '../actions/index.js';
+
+function select(state){
     return {
-        loggedIn: state.loggedIn
+        loggedIn: state.loggedIn,
+        token: state.token,
+        tokenExpiry: state.tokenExpiry
     }
 }
 
-const getOrderInfo = async (id) => {
-    const user = await fetch(`http://localhost:9000/api/order/${id}`);
+function mapDispatchToProps(dispatch){
+    return {
+        logout: () => dispatch(logOut())
+    }
+}
+
+const getOrderInfo = async (id, props) => {
+    const user = await fetch(`http://localhost:9000/api/order/${id}`, {
+        headers: {
+            'X-auth-token': props.token
+        }
+    });
     const userJson = await user.json();
     return userJson;
 }
@@ -31,9 +46,17 @@ class Order extends React.Component {
 
 
     componentDidMount(){
-        getOrderInfo(this.props.match.params.id).then(o => {
-            this.setState({order: o.order, details: o.details});
-        });
+        if(this.props.loggedIn){
+            if(checkIfLoggedIn(this.props.token, this.props.tokenExpiry)){
+                getOrderInfo(this.props.match.params.id, this.props).then(o => {
+                    this.setState({order: o.order, details: o.details});
+                });
+            }
+            else{
+                localStorage.clear();
+                this.props.logout();
+            }
+        }
     }
 
     render(){
@@ -171,5 +194,5 @@ class Order extends React.Component {
     }
 }
 
-const ConnectOrder = connect(select)(Order)
+const ConnectOrder = connect(select, mapDispatchToProps)(Order)
 export default ConnectOrder;

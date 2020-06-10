@@ -1,0 +1,18 @@
+@import scala.concurrent.{ExecutionContext, Future}
+
+@(frm: Form[CredentialsSingUpData])(implicit request: MessagesRequestHeader, flash: Flash)
+
+@import helper._
+@flash.get("success").getOrElse("")
+
+
+@form(routes.SignUpController.submit()) {
+@helper.CSRF.formField
+@inputText(frm("firstName"))
+@inputText(frm("lastName"))
+@inputText(frm("email"))
+@inputText(frm("password"))
+<div class="buttons">
+    <input type="submit" value="Submit"/>
+</div>
+}

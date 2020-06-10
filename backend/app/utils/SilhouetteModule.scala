@@ -52,9 +52,6 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     bind[Silhouette[DefaultEnv]].to[SilhouetteProvider[DefaultEnv]]
 
     bind[UserService].to[UserServiceImpl]
-    // bind[AppUserDao].to[AppUserDaoImpl]
-    // bind[LoginInfoDao].to[LoginInfoDaoImpl]
-
     bind[EventBus].toInstance(EventBus())
     bind[Clock].toInstance(Clock())
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
@@ -92,22 +89,22 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     new JcaCrypter(config)
   }
 
-//   @Provides
-//   def provideCredentialsProvider(authInfoRepository: AuthInfoRepository,
-//                                  passwordHasherRegistry: PasswordHasherRegistry): CredentialsProvider = {
-//     new CredentialsProvider(authInfoRepository, passwordHasherRegistry)
-//   }
-
   @Provides
-  def provideAuthInfoRepository(
-                                oauth2InfoDao: DelegableAuthInfoDAO[OAuth2Info]): AuthInfoRepository = {
-    new DelegableAuthInfoRepository(oauth2InfoDao)
+  def provideCredentialsProvider(authInfoRepository: AuthInfoRepository,
+                                 passwordHasherRegistry: PasswordHasherRegistry): CredentialsProvider = {
+    new CredentialsProvider(authInfoRepository, passwordHasherRegistry)
   }
 
-//   @Provides
-//   def providePasswordInfo(dbConfig: DatabaseConfigProvider): DelegableAuthInfoDAO[PasswordInfo] = {
-//     new PasswordInfoDao(dbConfig)
-//   }
+  @Provides
+  def provideAuthInfoRepository(passwordInfoDAO: DelegableAuthInfoDAO[PasswordInfo],
+                                oauth2InfoDao: DelegableAuthInfoDAO[OAuth2Info]): AuthInfoRepository = {
+    new DelegableAuthInfoRepository(passwordInfoDAO, oauth2InfoDao)
+  }
+
+  @Provides
+  def providePasswordInfo(dbConfig: DatabaseConfigProvider): DelegableAuthInfoDAO[PasswordInfo] = {
+    new DBPasswordInfoRepository(dbConfig)
+  }
 
   @Provides
   def providePasswordHasherRegistry(): PasswordHasherRegistry = {

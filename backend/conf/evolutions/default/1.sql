@@ -64,6 +64,14 @@ CREATE TABLE "oauth2_info" (
   FOREIGN KEY (login_info_id) REFERENCES login_info(id)
 );
 
+CREATE TABLE "password_info" (
+	"hasher" VARCHAR NOT NULL,
+	"password" VARCHAR NOT NULL,
+	"salt" VARCHAR,
+	"login_info_id"	VARHCAR NOT NULL,
+	FOREIGN KEY(login_info_id) references login_info("id")
+);
+
 CREATE TABLE "review" (
  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
  "description" TEXT NOT NULL,
@@ -121,6 +129,7 @@ DROP TABLE "user"
 DROP TABLE "login_info"
 DROP TABLE "user_login_info"
 DROP TABLE "oauth2_info"
+DROP TABLE "password_info"
 DROP TABLE "review"
 DROP TABLE "delivery"
 DROP TABLE "payment"

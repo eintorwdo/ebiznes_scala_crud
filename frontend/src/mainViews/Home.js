@@ -15,17 +15,19 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Container from 'react-bootstrap/Container';
 
 import { connect } from "react-redux";
 import { withCookies } from 'react-cookie';
-import {hideLogin, logIn} from '../actions/index.js';
+import {hideLogin, logIn, logOut} from '../actions/index.js';
 
-import Container from 'react-bootstrap/Container';
+import checkIfLoggedIn from '../utils/checkIfLoggedIn.js';
 
 function mapDispatchToProps(dispatch){
     return {
         hideLogin: () => dispatch(hideLogin()),
-        login: (payload) => dispatch(logIn(payload))
+        login: (payload) => dispatch(logIn(payload)),
+        logout: () => dispatch(logOut())
     }
 }
 
@@ -43,14 +45,17 @@ class Home extends React.Component {
         if(!cart){
             cookies.set('cart', {products: []}, { path: '/' });
         }
-        // console.log(new Date(localStorage.getItem('tokenExpiry') * 1000));
-        if(localStorage.getItem('token') && new Date(localStorage.getItem('tokenExpiry') * 1000) > new Date()){
+        if(checkIfLoggedIn(localStorage.getItem('token'), localStorage.getItem('tokenExpiry'))){
             const payload = {
                 token: localStorage.getItem('token'),
                 tokenExpiry: localStorage.getItem('tokenExpiry'),
                 email: localStorage.getItem('email')
             };
             this.props.login(payload);
+        }
+        else{
+            localStorage.clear();
+            this.props.logout();
         }
     }
 
@@ -97,7 +102,7 @@ class Home extends React.Component {
                                 </Row>
                                 <Row>
                                     <Col>  
-                                        <div className="loginProviderButton"><h3 className="text-center"><i className="fab fa-facebook"></i> Log in with Facebook</h3></div>
+                                        <div className="loginProviderButton" onClick={(e) => this.handleLoginRequest(e, "facebook")}><h3 className="text-center"><i className="fab fa-facebook"></i> Log in with Facebook</h3></div>
                                     </Col>
                                 </Row>
                                 </Col>

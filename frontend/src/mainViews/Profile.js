@@ -13,11 +13,21 @@ import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 
+import checkIfLoggedIn from '../utils/checkIfLoggedIn.js';
+import {logOut} from '../actions/index.js';
+
 function select(state){
     return {
         loggedIn: state.loggedIn,
         userName: state.userName,
-        token: state.token
+        token: state.token,
+        tokenExpiry: state.tokenExpiry
+    }
+}
+
+function mapDispatchToProps(dispatch){
+    return {
+        logout: () => dispatch(logOut())
     }
 }
 
@@ -27,7 +37,7 @@ const getUserInfo = async (props) => {
             'X-Auth-Token': props.token
         }
     });
-    const user = await res.json();
+    const user = res.status === 200 ? await res.json() : {message: res.statusText};
     return [user, res.status];
 }
 
@@ -40,15 +50,23 @@ class Profile extends React.Component {
 
 
     componentDidMount(){
-        getUserInfo(this.props).then(u => {
-            console.log(u)
-            if(u[1] === 200){
-                this.setState({id: u[0].id, name: u[0].name, email: u[0].email, orders: u[0].orders});
+        if(this.props.loggedIn){
+            if(checkIfLoggedIn(this.props.token, this.props.tokenExpiry)){
+                getUserInfo(this.props).then(u => {
+                    if(u[1] === 200){
+                        this.setState({id: u[0].id, name: u[0].name, email: u[0].email, orders: u[0].orders});
+                    }
+                    else{
+                        console.log(u[0])
+                        this.setState({error: u[0].message});
+                    }
+                });
             }
             else{
-                this.setState({error: u[0].message});
+                localStorage.clear();
+                this.props.logout();
             }
-        });
+        }
     }
 
     render(){
@@ -63,7 +81,7 @@ class Profile extends React.Component {
             );
         });
 
-        if(this.state.loggedIn && !this.state.error){
+        if(this.state.loggedIn){
             return(
                 <>
                 <Container className="productListItem mt-3 p-3" fluid>
@@ -109,5 +127,5 @@ class Profile extends React.Component {
     }
 }
 
-const ConnectProfile = connect(select)(Profile)
+const ConnectProfile = connect(select, mapDispatchToProps)(Profile)
 export default ConnectProfile;

@@ -127,7 +127,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
     })
   }
 
-  def orderJson(id: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
+  def orderJson(id: Int) = silhouette.SecuredAction.async { implicit request =>
     val ord = orderRepo.getById(id)
     val orderdetail = orderDetailRepo.getByOrderId(id)
     val result = for{
@@ -137,16 +137,21 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
 
     result.map(c => {
       if(c._1.nonEmpty){
-        val details = c._2.map(d => {
-          val prd = d._2.getOrElse(Product(0, "", "", 0, 0, Option(0), Option(0), Option(0)))
-          Json.obj("name" -> prd.name, "price" -> d._1.price, "amount" -> d._1.amount)
-        })
-        var resJson = Json.obj("info" -> c._1.head._1)
-        resJson = resJson + ("user" -> Json.toJson(c._1.head._2))
-        if(c._1.head._3.isDefined) resJson = resJson + ("payment" -> Json.toJson(c._1.head._3.get)) else resJson = resJson + ("payment" -> JsNull)
-        if(c._1.head._4.isDefined) resJson = resJson + ("delivery" -> Json.toJson(c._1.head._4.get)) else resJson = resJson + ("delivery" -> JsNull)
-        Ok(Json.obj("order" -> resJson,
-                    "details" -> details))
+        if(c._1.head._2.id == request.identity.id || request.identity.role == "ADMIN"){
+          val details = c._2.map(d => {
+            val prd = d._2.getOrElse(Product(0, "", "", 0, 0, Option(0), Option(0), Option(0)))
+            Json.obj("name" -> prd.name, "price" -> d._1.price, "amount" -> d._1.amount)
+          })
+          var resJson = Json.obj("info" -> c._1.head._1)
+          resJson = resJson + ("user" -> Json.toJson(c._1.head._2))
+          if(c._1.head._3.isDefined) resJson = resJson + ("payment" -> Json.toJson(c._1.head._3.get)) else resJson = resJson + ("payment" -> JsNull)
+          if(c._1.head._4.isDefined) resJson = resJson + ("delivery" -> Json.toJson(c._1.head._4.get)) else resJson = resJson + ("delivery" -> JsNull)
+          Ok(Json.obj("order" -> resJson,
+                      "details" -> details))
+        }
+        else{
+          Status(UNAUTHORIZED)
+        }
       }
       else{
         BadRequest(Json.obj("message" -> "Order not found"))

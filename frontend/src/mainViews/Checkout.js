@@ -15,12 +15,22 @@ import getProducts from '../utils/getProducts.js';
 import ProductTable from '../partials/ProductTable';
 import { Redirect } from "react-router-dom";
 
+import checkIfLoggedIn from '../utils/checkIfLoggedIn.js';
+import {logOut} from '../actions/index.js';
+
+function mapDispatchToProps(dispatch){
+    return {
+        logout: () => dispatch(logOut())
+    }
+}
+
 function select(state, ownProps){
     return {
         userName: state.userName,
         cookies: ownProps.cookies,
         loggedIn: state.loggedIn,
-        token: state.token
+        token: state.token,
+        tokenExpiry: state.tokenExpiry
     }
 }
 
@@ -51,26 +61,33 @@ class Checkout extends React.Component {
     componentDidMount(){
         const { cookies } = this.props;
         const cart = cookies.get('cart');
-        if(cart.products.length === 0){
-            this.setState({redirect: '/error', errorMsg: 'Empty cart'})
-        }
-        else{
-            getProducts(cart.products.map(p => p.id)).then(prds => {
-                getDeliveries().then(del => {
-                    getPayments().then(pmts => {
-                        let productsAvailable = true;
-                        let details = [];
-                        prds.products.forEach(p => {
-                            const index = cart.products.findIndex(product => product.id === p.id);
-                            if(p.amount - cart.products[index].amount < 0){
-                                productsAvailable = false;
-                            }
-                            details.push({id: p.id, name: p.name, price: p.price, amount: cart.products[index].amount});
+        if(this.props.loggedIn){
+            if(!checkIfLoggedIn(this.props.token, this.props.tokenExpiry)){
+                localStorage.clear();
+                this.props.logout();
+                this.setState({redirect: '/error', errorMsg: 'You must be logged in to view this page'});
+            }
+            else if(cart.products.length === 0){
+                this.setState({redirect: '/error', errorMsg: 'Empty cart'});
+            }
+            else{
+                getProducts(cart.products.map(p => p.id)).then(prds => {
+                    getDeliveries().then(del => {
+                        getPayments().then(pmts => {
+                            let productsAvailable = true;
+                            let details = [];
+                            prds.products.forEach(p => {
+                                const index = cart.products.findIndex(product => product.id === p.id);
+                                if(p.amount - cart.products[index].amount < 0){
+                                    productsAvailable = false;
+                                }
+                                details.push({id: p.id, name: p.name, price: p.price, amount: cart.products[index].amount});
+                            });
+                            this.setState({products: prds.products, payments: pmts, deliveries: del, available: productsAvailable, details});
                         });
-                        this.setState({products: prds.products, payments: pmts, deliveries: del, available: productsAvailable, details});
                     });
                 });
-            });
+            }
         }
     }
 
@@ -251,10 +268,10 @@ class Checkout extends React.Component {
             );
         }
         else{
-            return <Redirect to={{pathname: this.state.redirect, state: this.state.errorMsg || 'You must be logged in to view this page'}} />
+            return <Redirect to={{pathname: this.state.redirect || '/error', state: this.state.errorMsg || 'You must be logged in to view this page'}} />
         }
     }
 }
 
-const ConnectCheckout = connect(select)(Checkout);
+const ConnectCheckout = connect(select, mapDispatchToProps)(Checkout);
 export default ConnectCheckout;

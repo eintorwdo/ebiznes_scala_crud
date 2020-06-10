@@ -5,6 +5,8 @@
 
 #Auth routes
 GET     /auth/provider/:provider    controllers.SocialController.authenticate(provider: String)
+GET     /signup                     controllers.SignUpController.signUp
+POST    /signUpHandle               controllers.SignUpController.submit
 
 # Api routes
 GET     /api/categories             controllers.CategoryController.categoriesJson

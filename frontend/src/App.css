@@ -228,11 +228,12 @@ td{
   color: #0051ff;
 }
 
-@media (max-width: 767px){
-  ul{
-    list-style-type: none;
-  }
+ul{
+  list-style-type: none;
+  padding: 0;
+}
 
+@media (max-width: 767px){
   .cartTotal{
     border-top: 1px solid rgba(0,0,0,.1);
   }

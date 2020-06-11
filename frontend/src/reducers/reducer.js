@@ -4,7 +4,8 @@ const initialState = {
     userName: null,
     showLoginModal: false,
     token: null,
-    tokenExpiry: null
+    tokenExpiry: null,
+    role: null
 }
 
 export const rootReducer = (state = initialState, action) => {
@@ -13,7 +14,8 @@ export const rootReducer = (state = initialState, action) => {
             loggedIn: true,
             userName: action.payload.email,
             token: action.payload.token,
-            tokenExpiry: parseInt(action.payload.tokenExpiry)
+            tokenExpiry: parseInt(action.payload.tokenExpiry),
+            role: action.payload.role
         });
     }
     else if(action.type === "LOG_OUT"){
@@ -21,7 +23,8 @@ export const rootReducer = (state = initialState, action) => {
             loggedIn: false,
             userName: null,
             token: null,
-            tokenExpiry: null
+            tokenExpiry: null,
+            role: null
         });
     }
     else if(action.type === "SHOW_LOGIN"){

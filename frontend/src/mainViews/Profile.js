@@ -45,7 +45,7 @@ class Profile extends React.Component {
     constructor(props){
         super(props);
         const error = this.props.loggedIn ? null : "You must be logged in to view this page";
-        this.state = {id: null, name: '', email: this.props.userName, orders: [], loggedIn: this.props.loggedIn, error};
+        this.state = {id: null, name: '', email: this.props.userName, orders: [], loggedIn: this.props.loggedIn, error, redirect: null};
     }
 
 
@@ -66,6 +66,12 @@ class Profile extends React.Component {
                 localStorage.clear();
                 this.props.logout();
             }
+        }
+    }
+
+    componentDidUpdate(prevProps){
+        if(this.props.loggedIn !== prevProps.loggedIn){
+            this.setState({loggedIn: this.props.loggedIn, redirect: '/'});
         }
     }
 
@@ -122,7 +128,7 @@ class Profile extends React.Component {
             );
         }
         else{
-            return <Redirect to={{pathname: "/error", state: this.state.error}}/>
+            return <Redirect to={{pathname: this.state.redirect || "/error", state: this.state.error}}/>
         }
     }
 }

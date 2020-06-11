@@ -91,6 +91,12 @@ class Checkout extends React.Component {
         }
     }
 
+    componentDidUpdate(prevProps){
+        if(this.props.loggedIn !== prevProps.loggedIn){
+            this.setState({loggedIn: this.props.loggedIn, redirect: '/'});
+        }
+    }
+
     deliveryChangeHandle = (e) => {
         const index = this.state.deliveries.findIndex(d => d.id === parseInt(e.target.id));
         this.deliveryRef = e.target;

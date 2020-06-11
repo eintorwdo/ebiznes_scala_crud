@@ -20,6 +20,7 @@ class Auth extends React.Component {
         localStorage.setItem('token', q.token);
         localStorage.setItem('tokenExpiry', parseInt(q.tokenExpiry));
         localStorage.setItem('email', q.email);
+        localStorage.setItem('role', q.role);
         this.props.login(q);
     }
 

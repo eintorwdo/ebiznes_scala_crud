@@ -10,8 +10,10 @@ import Cart from './Cart.js';
 import ConnectCheckout from './Checkout.js';
 import Error from './Error.js';
 import ConnectAuth from './Auth.js';
+import ConnectManagementRoot from '../management/Root.js';
 
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -49,7 +51,8 @@ class Home extends React.Component {
             const payload = {
                 token: localStorage.getItem('token'),
                 tokenExpiry: localStorage.getItem('tokenExpiry'),
-                email: localStorage.getItem('email')
+                email: localStorage.getItem('email'),
+                role: localStorage.getItem('role')
             };
             this.props.login(payload);
         }
@@ -80,6 +83,7 @@ class Home extends React.Component {
                     <Route path="/cart/checkout" render={(props) => <ConnectCheckout {...props} cookies={this.props.cookies}/>}/>
                     <Route path="/error" render={(props) => <Error {...props}/>}/>
                     <Route path="/auth" render={(props) => <ConnectAuth {...props}/>}/>
+                    <Route path="/management" render={(props) => <ConnectManagementRoot {...props}/>}/>
 
                     <Modal
                         show={this.props.showLoginModal}

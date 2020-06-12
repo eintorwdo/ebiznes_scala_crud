@@ -64,7 +64,7 @@ class ManagementRoot extends React.Component {
                             {/* {this.props.role === 'REGULAR' ? <Categories {...this.props}/> : <Redirect to='/management/login' />} */}
                             <CategoriesOrdersUsers {...this.props} type="subcategories"/>
                         </Route>
-                        <Route path='/management/products'>
+                        <Route exact path='/management/products'>
                             {/* {this.props.role === 'REGULAR' ? <Categories {...this.props}/> : <Redirect to='/management/login' />} */}
                             <CategoriesOrdersUsers {...this.props} type="products"/>
                         </Route>
@@ -79,6 +79,7 @@ class ManagementRoot extends React.Component {
                         <Route path='/management/category/:id' render={props => <Category {...props} type="category"/>}/>
                         <Route path='/management/subcategory/:id' render={props => <Category {...props} type="subcategory"/>}/>
                         <Route path='/management/product/:id' render={props => <Product {...props}/>}/>
+                        <Route path='/management/products/add' render={props => <Product {...props} type="add"/>}/>
                     </Container>
             </Router>
             </>

@@ -39,6 +39,7 @@ GET     /api/products/ids           controllers.ProductController.productsWithId
 GET     /api/product/:id            controllers.ProductController.productJson(id: Int)
 POST    /api/product                controllers.ProductController.addProductJson
 PUT     /api/product/:id            controllers.ProductController.updateProductJson(id: Int)
+DELETE  /api/product/:id            controllers.ProductController.deleteProductJson(id: Int)
 GET     /api/manufacturers          controllers.ProductController.manufacturersJson
 GET     /api/manufacturer/:id       controllers.ProductController.manufacturerJson(id: Int)
 POST    /api/manufacturer           controllers.ProductController.addManufacturerJson

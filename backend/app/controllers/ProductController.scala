@@ -656,6 +656,16 @@ class ProductController @Inject()(productsRepo: ProductRepository, categoryRepo:
     Ok(views.html.index("Product deleted"))
   }
 
+  def deleteProductJson(id: Int) = Action { implicit request =>
+    val delRev = reviewRepo.deleteByProductId(id)
+    Await.result(delRev, duration.Duration.Inf)
+    val updateOrd = orderDetailRepo.deleteProductId(id)
+    Await.result(updateOrd, duration.Duration.Inf)
+    val delPrd = productsRepo.delete(id)
+    Await.result(delPrd, duration.Duration.Inf)
+    Ok(Json.obj("message" -> "Product deleted"))
+  }
+
   def deleteManufacturer(id: Int) = Action { implicit request =>
     val updateMan = productsRepo.deleteManufacturerId(id)
     Await.result(updateMan, duration.Duration.Inf)

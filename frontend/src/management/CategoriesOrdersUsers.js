@@ -48,12 +48,17 @@ class CategoriesOrdersUsers extends React.Component {
                 return <Link key={p.id} to={`/management/product/${p.id}`}><li>{p.name}</li></Link>
             });
         }
+        const addLink = this.props.type == 'categories' || this.props.type == 'subcategories' || this.props.type == 'products' ?
+            <Link to={`/management/${this.props.type}/add`}><h4>ADD</h4></Link> : null;
         return(
             <>
             <h3>{this.props.type}:</h3>
-            <ul>
+            {addLink}
+            <hr></hr>
+            <ul className="mt-3">
                 {items}
             </ul>
+            <hr></hr>
             </>
         )
     }

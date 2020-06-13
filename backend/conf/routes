@@ -17,10 +17,13 @@ GET     /api/subcategories          controllers.CategoryController.subCategories
 GET     /api/subcategory/:id        controllers.CategoryController.subCategoryJson(id: Int)
 POST    /api/subcategory            controllers.CategoryController.addSubCategoryJson
 PUT     /api/subcategory/:id        controllers.CategoryController.updateSubCategoryJson(id: Int)
+DELETE  /api/category/:id           controllers.CategoryController.deleteCategoryJson(id: Int)
+DELETE  /api/subcategory/:id        controllers.CategoryController.deleteSubCategoryJson(id: Int)
 GET     /api/orders                 controllers.OrderController.ordersJson
 GET     /api/order/:id              controllers.OrderController.orderJson(id: Int)
 POST    /api/order                  controllers.OrderController.addOrderJson
 PUT     /api/order/:id              controllers.OrderController.updateOrderJson(id: Int)
+DELETE  /api/order/:id              controllers.OrderController.deleteOrderJson(id: Int)
 # POST    /api/orderdetail/:id        controllers.OrderController.addOrderDetailJson(id: Int)
 # PUT     /api/orderdetail/:id        controllers.OrderController.updateOrderDetailJson(id: Int)
 GET     /api/orderdetails           controllers.OrderController.orderDetailsJson
@@ -83,8 +86,8 @@ GET     /addSubCategory             controllers.CategoryController.addSubCategor
 POST    /addSubCategoryHandle       controllers.CategoryController.addSubCategoryHandle
 GET     /updateSubCategory/:id      controllers.CategoryController.updateSubCategory(id: Int)
 POST    /updateSubCategoryHandle    controllers.CategoryController.updateSubCategoryHandle
-GET     /deleteCategory/:id         controllers.CategoryController.deleteCategory(id: Int)
-GET     /deleteSubCategory/:id      controllers.CategoryController.deleteSubCategory(id: Int)
+#GET     /deleteCategory/:id         controllers.CategoryController.deleteCategory(id: Int)
+#GET     /deleteSubCategory/:id      controllers.CategoryController.deleteSubCategory(id: Int)
 GET     /addOrder                   controllers.OrderController.addOrder
 POST    /addOrderHandle             controllers.OrderController.addOrderHandle
 GET     /updateOrder/:id            controllers.OrderController.updateOrder(id: Int)
@@ -101,7 +104,7 @@ GET     /addPayment                 controllers.OrderController.addPayment
 POST    /addPaymentHandle           controllers.OrderController.addPaymentHandle
 GET     /updatePayment/:id          controllers.OrderController.updatePayment(id: Int)
 POST    /updatePaymentHandle        controllers.OrderController.updatePaymentHandle
-GET     /deleteOrder/:id            controllers.OrderController.deleteOrder(id: Int)
+#GET     /deleteOrder/:id            controllers.OrderController.deleteOrder(id: Int)
 GET     /deleteOrderDetail/:id      controllers.OrderController.deleteOrderDetail(id: Int)
 GET     /deleteDelivery/:id         controllers.OrderController.deleteDelivery(id: Int)
 GET     /deletePayment/:id          controllers.OrderController.deletePayment(id: Int)

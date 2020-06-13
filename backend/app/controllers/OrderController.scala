@@ -127,7 +127,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
     })
   }
 
-  def orderJson(id: Int) = silhouette.SecuredAction.async { implicit request =>
+  def orderJson(id: Int) = Action.async { implicit request =>
     val ord = orderRepo.getById(id)
     val orderdetail = orderDetailRepo.getByOrderId(id)
     val result = for{
@@ -137,21 +137,22 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
 
     result.map(c => {
       if(c._1.nonEmpty){
-        if(c._1.head._2.id == request.identity.id || request.identity.role == "ADMIN"){
+        // if(c._1.head._2.id == request.identity.id || request.identity.role == "ADMIN"){
           val details = c._2.map(d => {
             val prd = d._2.getOrElse(Product(0, "", "", 0, 0, Option(0), Option(0), Option(0)))
             Json.obj("name" -> prd.name, "price" -> d._1.price, "amount" -> d._1.amount)
           })
           var resJson = Json.obj("info" -> c._1.head._1)
-          resJson = resJson + ("user" -> Json.toJson(c._1.head._2))
+          val user = Json.obj("id" -> c._1.head._2.id, "email" -> c._1.head._2.email)
+          resJson = resJson + ("user" -> user)
           if(c._1.head._3.isDefined) resJson = resJson + ("payment" -> Json.toJson(c._1.head._3.get)) else resJson = resJson + ("payment" -> JsNull)
           if(c._1.head._4.isDefined) resJson = resJson + ("delivery" -> Json.toJson(c._1.head._4.get)) else resJson = resJson + ("delivery" -> JsNull)
           Ok(Json.obj("order" -> resJson,
                       "details" -> details))
-        }
-        else{
-          Status(UNAUTHORIZED)
-        }
+        // }
+        // else{
+          // Status(UNAUTHORIZED)
+        // }
       }
       else{
         BadRequest(Json.obj("message" -> "Order not found"))
@@ -298,38 +299,25 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
     val json = request.body.asJson
     if(res.nonEmpty && json.nonEmpty){
       val body = json.get
-      val delIdJs = (body \ "deliveryId").validate[Int]
-      val pmtIdJs = (body \ "paymentId").validate[Int]
       val addrJs = (body \ "address").validate[String]
       val sntJs = (body \ "sent").validate[Int]
       val prcJs = (body \ "price").validate[Int]
       val paidJs = (body \ "paid").validate[Int]
       val packageJs = (body \ "packageNr").validate[String]
-      val delId = delIdJs.getOrElse(0)
-      val pmtId = pmtIdJs.getOrElse(0)
       val addr = addrJs.getOrElse("")
       val snt = sntJs.getOrElse(-1)
       val prc = prcJs.getOrElse(-1)
       val paid = paidJs.getOrElse(-1)
       val packageNr = packageJs.getOrElse("")
       val ord = res.head
-      if(delId == 0 || pmtId == 0 || addr == "" || snt == -1 || prc < 0 || paid < 0){
+      if(addr == "" || snt < 0 || prc < 0 || paid < 0){
         BadRequest(Json.obj("message" -> "Invalid request body"))
       }
       else{
-        val delivery = deliveryRepo.getById(delId)
-        val res2 = Await.result(delivery, duration.Duration.Inf)
-        val payment = paymentRepo.getById(pmtId)
-        val res3 = Await.result(payment, duration.Duration.Inf)
-        if(res2.isEmpty || res3.isEmpty){
-          BadRequest(Json.obj("message" -> "Invalid delivery or payment id"))
-        }
-        else{
-          val newOrd = Order(ord._1.id, prc, ord._1.date, addr, snt, ord._1.user, Option(pmtId), Option(delId), paid, packageNr)
-          val orderUpdate = orderRepo.update(id, newOrd)
-          Await.result(orderUpdate, duration.Duration.Inf)
-          Ok(Json.toJson(newOrd))
-        }
+        val newOrd = Order(ord._1.id, prc, ord._1.date, addr, snt, ord._1.user, ord._1.payment, ord._1.delivery, paid, packageNr)
+        val orderUpdate = orderRepo.update(id, newOrd)
+        Await.result(orderUpdate, duration.Duration.Inf)
+        Ok(Json.toJson(newOrd))
       }
     }
     else{
@@ -762,12 +750,12 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
     })
   }
 
-  def deleteOrder(id: Int) = Action { implicit request =>
+  def deleteOrderJson(id: Int) = Action { implicit request =>
     val deleteOrderDetail = orderDetailRepo.deleteByOrderId(id)
     Await.result(deleteOrderDetail, duration.Duration.Inf)
     val deleteOrder = orderRepo.delete(id)
     Await.result(deleteOrder, duration.Duration.Inf)
-    Ok(views.html.index("Order deleted"))
+    Ok(Json.obj("message" -> "Order deleted"))
   }
 
   def deleteOrderDetail(id: Int) = Action { implicit request =>

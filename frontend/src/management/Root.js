@@ -2,7 +2,9 @@ import React from 'react';
 import Home from './Home.js';
 import CategoriesOrdersUsers from './CategoriesOrdersUsers.js';
 import Category from './Category.js';
-import Product from './Product.js'
+import Product from './Product.js';
+import Order from './Order.js';
+import OrderUpdate from './OrderUpdate.js';
 
 import { BrowserRouter as Router, Route, Link, Redirect } from "react-router-dom";
 import Container from 'react-bootstrap/Container';
@@ -56,11 +58,11 @@ class ManagementRoot extends React.Component {
                             {/* {this.props.role === 'REGULAR' ? <Home {...this.props}/> : <Redirect to='/management/login' />} */}
                             <Home {...this.props}/>
                         </Route>
-                        <Route path='/management/categories'>
+                        <Route exact path='/management/categories'>
                             {/* {this.props.role === 'REGULAR' ? <Categories {...this.props}/> : <Redirect to='/management/login' />} */}
                             <CategoriesOrdersUsers {...this.props} type="categories"/>
                         </Route>
-                        <Route path='/management/subcategories'>
+                        <Route exact path='/management/subcategories'>
                             {/* {this.props.role === 'REGULAR' ? <Categories {...this.props}/> : <Redirect to='/management/login' />} */}
                             <CategoriesOrdersUsers {...this.props} type="subcategories"/>
                         </Route>
@@ -68,7 +70,7 @@ class ManagementRoot extends React.Component {
                             {/* {this.props.role === 'REGULAR' ? <Categories {...this.props}/> : <Redirect to='/management/login' />} */}
                             <CategoriesOrdersUsers {...this.props} type="products"/>
                         </Route>
-                        <Route path='/management/orders'>
+                        <Route exact path='/management/orders'>
                             {/* {this.props.role === 'REGULAR' ? <Categories {...this.props}/> : <Redirect to='/management/login' />} */}
                             <CategoriesOrdersUsers {...this.props} type="orders"/>
                         </Route>
@@ -80,6 +82,10 @@ class ManagementRoot extends React.Component {
                         <Route path='/management/subcategory/:id' render={props => <Category {...props} type="subcategory"/>}/>
                         <Route path='/management/product/:id' render={props => <Product {...props}/>}/>
                         <Route path='/management/products/add' render={props => <Product {...props} type="add"/>}/>
+                        <Route path='/management/categories/add' render={props => <Category {...props} type="category" method="add"/>}/>
+                        <Route path='/management/subcategories/add' render={props => <Category {...props} type="subcategory" method="add"/>}/>
+                        <Route exact path='/management/order/:id' render={props => <Order {...props}/>}/>
+                        <Route path='/management/order/:id/update' render={props => <OrderUpdate {...props}/>}/>
                     </Container>
             </Router>
             </>

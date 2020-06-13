@@ -129,7 +129,7 @@ class Product extends React.Component {
                 </>
             )
         }
-        else if(this.state.loading == false){
+        else if(!this.state.loading){
             return <Redirect to={{pathname: '/management/products'}} />
         }
         else{

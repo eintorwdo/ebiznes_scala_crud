@@ -390,7 +390,7 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
     })
   }
 
-  def deleteCategory(id: Int) = Action { implicit request =>
+  def deleteCategoryJson(id: Int) = Action { implicit request =>
     val deleteSubCatId = productsRepo.deleteSubCategoryId(id)
     Await.result(deleteSubCatId, duration.Duration.Inf)
     val deleteCatId = productsRepo.deleteCategoryId(id)
@@ -399,15 +399,15 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
     Await.result(deleteSubcategories, duration.Duration.Inf)
     val del = categoryRepo.delete(id)
     Await.result(del, duration.Duration.Inf)
-    Ok(views.html.index("Category deleted"))
+    Ok(Json.obj("message" -> "Category deleted"))
   }
 
-  def deleteSubCategory(id: Int) = Action { implicit request =>
+  def deleteSubCategoryJson(id: Int) = Action { implicit request =>
     val deleteSubCatId = productsRepo.deleteSubCategoryId(id)
     Await.result(deleteSubCatId, duration.Duration.Inf)
-    val deleteSubcategories = subCategoryRepo.deleteByCategoryId(id)
-    Await.result(deleteSubcategories, duration.Duration.Inf)
-    Ok(views.html.index("Subcategory deleted"))
+    val deleteSubcategory = subCategoryRepo.delete(id)
+    Await.result(deleteSubcategory, duration.Duration.Inf)
+    Ok(Json.obj("message" -> "Subcategory deleted"))
   }
 }
 

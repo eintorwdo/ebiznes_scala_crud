@@ -16,7 +16,7 @@ class CategoriesOrdersUsers extends React.Component {
     }
 
     componentDidMount(){
-        fetch(`http://localhost:9000/api/${this.props.type}`).then(res => res.json().then(cats => {
+        fetch(`http://localhost:9000/api/${this.props.type}`, {headers: {'X-Auth-Token': this.props.tokenInfo.token}}).then(res => res.json().then(cats => {
             this.setState({items: cats});
         }));
     }
@@ -64,5 +64,4 @@ class CategoriesOrdersUsers extends React.Component {
     }
 }
 
-// const ConnectCategories = connect(select)(Categories)
 export default CategoriesOrdersUsers;

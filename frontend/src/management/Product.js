@@ -55,7 +55,7 @@ class Product extends React.Component {
         const res = await fetch(url, {
             method,
             headers:{
-                'X-Auth-Token': 'xD',
+                'X-Auth-Token': this.props.tokenInfo.token,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
@@ -76,7 +76,7 @@ class Product extends React.Component {
     }
 
     handleDelete = async () => {
-        const res = await deleteItem('product', this.props.match.params.id);
+        const res = await deleteItem('product', this.props.match.params.id, this.props.tokenInfo.token);
         if(res.status == 200){
             alert('product deleted');
         }

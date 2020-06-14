@@ -18,7 +18,7 @@ class OrderUpdate extends React.Component {
     }
 
     getData = async () => {
-        const order = await fetch(`http://localhost:9000/api/order/${this.props.match.params.id}`).then(res => res.json());
+        const order = await fetch(`http://localhost:9000/api/order/${this.props.match.params.id}`, {headers: {'X-Auth-Token': this.props.tokenInfo.token}}).then(res => res.json());
         return order;
     }
 
@@ -56,7 +56,7 @@ class OrderUpdate extends React.Component {
     }
 
     handleDelete = async () => {
-        const res = await deleteItem('order', this.props.match.params.id);
+        const res = await deleteItem('order', this.props.match.params.id, this.props.tokenInfo.token);
         if(res.status == 200){
             alert('order deleted');
         }

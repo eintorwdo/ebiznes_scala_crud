@@ -15,7 +15,7 @@ class Order extends React.Component {
     }
 
     getData = async () => {
-        const order = await fetch(`http://localhost:9000/api/order/${this.props.match.params.id}`).then(res => res.json());
+        const order = await fetch(`http://localhost:9000/api/order/${this.props.match.params.id}`, {headers: {'X-Auth-Token': this.props.tokenInfo.token}}).then(res => res.json());
         return order;
     }
 

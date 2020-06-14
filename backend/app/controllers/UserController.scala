@@ -65,7 +65,7 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
     if(user.nonEmpty){
       val ordQuery = orderRepo.getByUserId(id)
       val orders = Await.result(ordQuery, duration.Duration.Inf)
-      val userNoPwd = Json.obj("id" -> user.get.id, "name" -> user.get.firstname, "email" -> user.get.email, "orders" -> orders)
+      val userNoPwd = Json.obj("id" -> user.get.id, "name" -> user.get.firstname, "lastname" -> user.get.lastname, "email" -> user.get.email, "role" -> user.get.role, "orders" -> orders)
       Ok(userNoPwd)
     }
     else{
@@ -111,6 +111,29 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
     )
   }
 
+  def updateUserRole(id: String) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val user = userRepo.getById(id)
+    val res = Await.result(user, duration.Duration.Inf)
+    val json = request.body.asJson
+    if(res.nonEmpty && json.nonEmpty){
+      val oldUser = res.get
+      val body = json.get
+      val roleOpt = (body \ "role").validate[String]
+      val role = roleOpt.getOrElse("")
+      if(role == "ADMIN" || role == "REGULAR"){
+        val updateQuery = userRepo.update(id, User(id, oldUser.firstname, oldUser.lastname, oldUser.email, oldUser.password, role))
+        Await.result(updateQuery, duration.Duration.Inf)
+        Ok(Json.obj("message" -> "User role updated"))
+      }
+      else{
+        BadRequest(Json.obj("message" -> "Invalid role parameter"))
+      }
+    }
+    else{
+      BadRequest(Json.obj("message" -> "User not found or empty request body"))
+    }
+  }
+
   def updateUser(id: String) = Action.async { implicit request: MessagesRequest[AnyContent] =>
     val user = userRepo.getById(id)
     user.map(x => {
@@ -147,7 +170,7 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
     Await.result(deleteReviews, duration.Duration.Inf)
     val deleteUser = userRepo.delete(id)
     Await.result(deleteUser, duration.Duration.Inf)
-    Ok(views.html.index("User deleted"))
+    Ok(Json.obj("message" -> "User deleted"))
   }
 }
 

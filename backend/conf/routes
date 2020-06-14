@@ -5,8 +5,8 @@
 
 #Auth routes
 GET     /auth/provider/:provider    controllers.SocialController.authenticate(provider: String)
-GET     /signup                     controllers.SignUpController.signUp
-POST    /signUpHandle               controllers.SignUpController.submit
+POST    /auth/signup                controllers.SignUpController.submit
+POST    /auth/signin                controllers.SignInController.submit
 
 # Api routes
 GET     /api/categories             controllers.CategoryController.categoriesJson
@@ -54,6 +54,8 @@ PUT     /api/review/:id             controllers.ProductController.updateReviewJs
 GET     /api/users                  controllers.UserController.usersJson
 GET     /api/user                   controllers.UserController.getUserSecured
 GET     /api/user/:id               controllers.UserController.userJson(id: String)
+PUT     /api/user/:id               controllers.UserController.updateUserRole(id: String)
+DELETE  /api/user/:id                   controllers.UserController.deleteUser(id: String)
 
 #View routes
 GET     /                           controllers.HomeController.index
@@ -117,7 +119,7 @@ GET     /users/:id                  controllers.UserController.user(id)
 GET     /addUser                    controllers.UserController.addUser
 POST    /addUserHandle              controllers.UserController.addUserHandle
 GET     /updateUser/:id             controllers.UserController.updateUser(id: String)
-GET     /deleteUser/:id             controllers.UserController.deleteUser(id: String)
+#GET     /deleteUser/:id             controllers.UserController.deleteUser(id: String)
 POST    /updateUserHandle           controllers.UserController.updateUserHandle
 POST    /cart/add/:id               controllers.ProductController.addToCart(id)
 DELETE  /cart/remove/:id            controllers.ProductController.removeFromCart(id)

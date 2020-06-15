@@ -24,9 +24,7 @@ GET     /api/order/:id              controllers.OrderController.orderJson(id: In
 POST    /api/order                  controllers.OrderController.addOrderJson
 PUT     /api/order/:id              controllers.OrderController.updateOrderJson(id: Int)
 DELETE  /api/order/:id              controllers.OrderController.deleteOrderJson(id: Int)
-# POST    /api/orderdetail/:id        controllers.OrderController.addOrderDetailJson(id: Int)
-# PUT     /api/orderdetail/:id        controllers.OrderController.updateOrderDetailJson(id: Int)
-GET     /api/orderdetails           controllers.OrderController.orderDetailsJson
+#GET     /api/orderdetails           controllers.OrderController.orderDetailsJson
 GET     /api/orderdetail/:id        controllers.OrderController.orderDetailJson(id: Int)
 GET     /api/deliveries             controllers.OrderController.deliveriesJson
 GET     /api/delivery/:id           controllers.OrderController.deliveryJson(id: Int)
@@ -55,83 +53,7 @@ GET     /api/users                  controllers.UserController.usersJson
 GET     /api/user                   controllers.UserController.getUserSecured
 GET     /api/user/:id               controllers.UserController.userJson(id: String)
 PUT     /api/user/:id               controllers.UserController.updateUserRole(id: String)
-DELETE  /api/user/:id                   controllers.UserController.deleteUser(id: String)
-
-#View routes
-GET     /                           controllers.HomeController.index
-GET     /search                     controllers.HomeController.search(query)
-GET     /products                   controllers.ProductController.products
-GET     /products/:id               controllers.ProductController.product(id: Int)
-GET     /addProduct                 controllers.ProductController.addProduct
-POST    /addProductHandle           controllers.ProductController.addProductHandle
-GET     /updateProduct/:id          controllers.ProductController.updateProduct(id: Int)
-POST    /updateProductHandle        controllers.ProductController.updateProductHandle
-GET     /addManufacturer            controllers.ProductController.addManufacturer
-POST    /addManufacturerHandle      controllers.ProductController.addManufacturerHandle
-GET     /updateManufacturer/:id     controllers.ProductController.updateManufacturer(id: Int)
-POST    /updateManufacturerHandle   controllers.ProductController.updateManufacturerHandle
-POST    /addReviewHandle/:id        controllers.ProductController.addReviewHandle(id: Int)
-GET     /updateReview/:id           controllers.ProductController.updateReview(id: Int)
-POST    /updateReviewHandle         controllers.ProductController.updateReviewHandle
-GET     /deleteReview/:id           controllers.ProductController.deleteReview(id: Int)
-GET     /deleteProduct/:id          controllers.ProductController.deleteProduct(id: Int)
-GET     /deleteManufacturer/:id     controllers.ProductController.deleteManufacturer(id: Int)
-GET     /categories                 controllers.CategoryController.categories
-GET     /categories/:cat            controllers.CategoryController.category(cat: Int)
-GET     /subcategories              controllers.CategoryController.subcategories()
-GET     /subcategories/:cat         controllers.CategoryController.subcategory(cat: Int)
-GET     /addCategory                controllers.CategoryController.addCategory
-POST    /addCategoryHandle          controllers.CategoryController.addCategoryHandle
-GET     /updateCategory/:id         controllers.CategoryController.updateCategory(id: Int)
-POST    /updateCategoryHandle       controllers.CategoryController.updateCategoryHandle
-GET     /addSubCategory             controllers.CategoryController.addSubCategory
-POST    /addSubCategoryHandle       controllers.CategoryController.addSubCategoryHandle
-GET     /updateSubCategory/:id      controllers.CategoryController.updateSubCategory(id: Int)
-POST    /updateSubCategoryHandle    controllers.CategoryController.updateSubCategoryHandle
-#GET     /deleteCategory/:id         controllers.CategoryController.deleteCategory(id: Int)
-#GET     /deleteSubCategory/:id      controllers.CategoryController.deleteSubCategory(id: Int)
-GET     /addOrder                   controllers.OrderController.addOrder
-POST    /addOrderHandle             controllers.OrderController.addOrderHandle
-GET     /updateOrder/:id            controllers.OrderController.updateOrder(id: Int)
-POST    /updateOrderHandle          controllers.OrderController.updateOrderHandle
-GET     /addOrderDetail/:id         controllers.OrderController.addOrderDetail(id: Int)
-POST    /addOrdeDetailHandle/:id    controllers.OrderController.addOrderDetailHandle(id: Int)
-GET     /updateOrderDetail/:id      controllers.OrderController.updateOrderDetail(id: Int)
-POST    /updateOrderDetailHandle    controllers.OrderController.updateOrderDetailHandle
-GET     /addDelivery                controllers.OrderController.addDelivery
-POST    /addDeliveryHandle          controllers.OrderController.addDeliveryHandle
-GET     /updateDelivery/:id         controllers.OrderController.updateDelivery(id: Int)
-POST    /updateDeliveryHandle       controllers.OrderController.updateDeliveryHandle
-GET     /addPayment                 controllers.OrderController.addPayment
-POST    /addPaymentHandle           controllers.OrderController.addPaymentHandle
-GET     /updatePayment/:id          controllers.OrderController.updatePayment(id: Int)
-POST    /updatePaymentHandle        controllers.OrderController.updatePaymentHandle
-#GET     /deleteOrder/:id            controllers.OrderController.deleteOrder(id: Int)
-GET     /deleteOrderDetail/:id      controllers.OrderController.deleteOrderDetail(id: Int)
-GET     /deleteDelivery/:id         controllers.OrderController.deleteDelivery(id: Int)
-GET     /deletePayment/:id          controllers.OrderController.deletePayment(id: Int)
-GET     /manufacturers              controllers.ProductController.manufacturers
-GET     /manufacturers/:id          controllers.ProductController.manufacturer(id)
-GET     /reviews                    controllers.ProductController.reviews
-GET     /reviews/:id                controllers.ProductController.review(id)
-GET     /users                      controllers.UserController.users
-GET     /users/:id                  controllers.UserController.user(id)
-GET     /addUser                    controllers.UserController.addUser
-POST    /addUserHandle              controllers.UserController.addUserHandle
-GET     /updateUser/:id             controllers.UserController.updateUser(id: String)
-#GET     /deleteUser/:id             controllers.UserController.deleteUser(id: String)
-POST    /updateUserHandle           controllers.UserController.updateUserHandle
-POST    /cart/add/:id               controllers.ProductController.addToCart(id)
-DELETE  /cart/remove/:id            controllers.ProductController.removeFromCart(id)
-GET     /cart                       controllers.ProductController.cart
-GET     /contact                    controllers.HomeController.contact
-POST    /checkout                   controllers.ProductController.checkout
-GET     /orders                     controllers.OrderController.orders
-GET     /orders/:id                 controllers.OrderController.order(id: Int)
-GET     /deliveries                 controllers.OrderController.deliveries
-GET     /deliveries/:id             controllers.OrderController.delivery(id)
-GET     /payments                   controllers.OrderController.payments
-GET     /payments/:id               controllers.OrderController.payment(id)
+DELETE  /api/user/:id               controllers.UserController.deleteUser(id: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

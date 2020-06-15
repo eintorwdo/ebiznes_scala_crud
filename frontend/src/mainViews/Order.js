@@ -59,6 +59,12 @@ class Order extends React.Component {
         }
     }
 
+    componentDidUpdate(prevProps){
+        if(this.props.loggedIn !== prevProps.loggedIn){
+            this.setState({loggedIn: this.props.loggedIn});
+        }
+    }
+
     render(){
         let orderInfo;
         let deliveryStatus;
@@ -189,7 +195,7 @@ class Order extends React.Component {
             );
         }
         else{
-            return <Redirect to={{pathname: "/error", state: "You must log in to view this page"}}/>
+            return <Redirect to={{pathname: "/"}}/>
         }
     }
 }

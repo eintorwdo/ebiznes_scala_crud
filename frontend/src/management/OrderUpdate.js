@@ -35,7 +35,7 @@ class OrderUpdate extends React.Component {
         const res = await fetch(url, {
             method: 'PUT',
             headers:{
-                'X-Auth-Token': 'xD',
+                'X-Auth-Token': this.props.tokenInfo.token,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)

@@ -19,7 +19,8 @@ function select(state, ownProps){
     return {
         loggedIn: state.loggedIn,
         cookies: ownProps.cookies,
-        userId: state.userId
+        userId: state.userId,
+        token: state.token
     }
 }
 
@@ -63,14 +64,14 @@ class Product extends React.Component {
             e.stopPropagation();
             const body = {
                 description: e.target.description.value,
-                product: this.state.product.info.id,
-                user: this.state.userId
+                product: this.state.product.info.id
             }
             const response = await fetch('http://localhost:9000/api/review', {
                 method: 'POST',
                 body: JSON.stringify(body),
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-Auth-Token': this.props.token
                 }
             });
             const responseJson = await response.json();

@@ -13,10 +13,10 @@ import scala.util.{Failure, Success}
 import slick.dbio.DBIOAction
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.api.actions.SecuredRequest
-import utils.DefaultEnv
+import utils.{DefaultEnv, ResponseMsgs, Validation}
 
 @Singleton
-class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRepository, orderRepo: OrderRepository, orderDetailRepo: OrderDetailRepository, deliveryRepo: DeliveryRepository, paymentRepo: PaymentRepository, silhouette: Silhouette[DefaultEnv], cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
+class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRepository, orderRepo: OrderRepository, orderDetailRepo: OrderDetailRepository, deliveryRepo: DeliveryRepository, paymentRepo: PaymentRepository, silhouette: Silhouette[DefaultEnv], messages: ResponseMsgs, validation: Validation, cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
   
   def ordersJson() = silhouette.SecuredAction.async { implicit request =>
     if(request.identity.role == "ADMIN"){
@@ -66,36 +66,25 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
   def addOrderJson() = silhouette.SecuredAction { implicit request =>
     val date = java.time.LocalDate.now.toString
     val json = request.body.asJson
-    if(json.nonEmpty){
-      val body = json.get
-      val detailsJs = (body \ "details").validate[Seq[JsObject]]
-      val addressJs = (body \ "address").validate[String]
-      val paymentJs = (body \ "payment").validate[Int]
-      val deliveryJs = (body \ "delivery").validate[Int]
-
-      val details = detailsJs.getOrElse(Seq())
-      val address = addressJs.getOrElse("")
-      val payment = paymentJs.getOrElse(0)
-      val delivery = deliveryJs.getOrElse(0)
-
-      if(details.nonEmpty && address != "" && payment != 0 && delivery != 0){
-        val ids = details.map(d => {
-          val idJs = (d \ "id").validate[Int]
-          val amountJs = (d \ "amount").validate[Int]
-          val id = idJs.getOrElse(0)
-          val amount = amountJs.getOrElse(0)
-          (id, amount)
-        })
-        var areDetailsValid = true
-        ids.foreach(el => {
-          if(el._1 <= 0 || el._2 <= 0){
-            areDetailsValid = false
-          }
-        })
-        if(!areDetailsValid){
-          BadRequest(Json.obj("message" -> "Invalid product id or amount specified"))
-        }
-        else{
+    val body = json.getOrElse(Json.obj())
+    val details = (body \ "details").validate[Seq[JsObject]].getOrElse(Seq())
+    val address = (body \ "address").validate[String].getOrElse("")
+    val payment = (body \ "payment").validate[Int].getOrElse(0)
+    val delivery = (body \ "delivery").validate[Int].getOrElse(0)
+    val deliveryQuery = deliveryRepo.getById(delivery)
+    val deliveryResult = Await.result(deliveryQuery, duration.Duration.Inf)
+    val paymentQuery = paymentRepo.getById(payment)
+    val paymentResult = Await.result(paymentQuery, duration.Duration.Inf)
+    if(details.nonEmpty && address != "" && paymentResult.nonEmpty && deliveryResult.nonEmpty){
+      val ids = details.map(d => {
+        val id = (d \ "id").validate[Int].getOrElse(0)
+        val amount = (d \ "amount").validate[Int].getOrElse(0)
+        (id, amount)
+      })
+      val areDetailsValid = validation.areDetailsValid(ids)
+      areDetailsValid match{
+        case false => BadRequest(Json.obj("message" -> "Invalid product id or amount specified"))
+        case true => {
           val updateProducts = productRepo.updateProductsAfterOrder(ids)
           val updatedRows = Await.result(updateProducts, duration.Duration.Inf)
           updatedRows.length match {
@@ -111,35 +100,23 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
                 totalPrice = totalPrice + product.price * i._2
                 (product.price, 0, product.id, i._2)
               })
-              val deliveryQuery = deliveryRepo.getById(delivery)
-              val deliveryResult = Await.result(deliveryQuery, duration.Duration.Inf)
-              val paymentQuery = paymentRepo.getById(payment)
-              val paymentResult = Await.result(paymentQuery, duration.Duration.Inf)
-              if(deliveryResult.nonEmpty && paymentResult.nonEmpty){
-                totalPrice = totalPrice + deliveryResult.get.price
-                val paid = 0
-                val packageNr = ""
-                val sent = 0
-                val createOrderQuery = orderRepo.create(totalPrice, date, address, sent, request.identity.id, Some(payment), Some(delivery), paid, packageNr)
-                val newOrder = Await.result(createOrderQuery, duration.Duration.Inf)
-                val detailsWithOrderId = orderDetails.map(d => (d._1, newOrder.id, Some(d._3), d._4))
-                val detailsInsertQuery = orderDetailRepo.insertMany(detailsWithOrderId)
-                val insertedDetails = Await.result(detailsInsertQuery, duration.Duration.Inf)
-                Ok(Json.obj("inserted" -> insertedDetails))
-              }
-              else{
-                BadRequest(Json.obj("message" -> "Invalid payment or delivery id"))
-              }
+              totalPrice = totalPrice + deliveryResult.get.price
+              val paid = 0
+              val packageNr = ""
+              val sent = 0
+              val createOrderQuery = orderRepo.create(totalPrice, date, address, sent, request.identity.id, Some(payment), Some(delivery), paid, packageNr)
+              val newOrder = Await.result(createOrderQuery, duration.Duration.Inf)
+              val detailsWithOrderId = orderDetails.map(d => (d._1, newOrder.id, Some(d._3), d._4))
+              val detailsInsertQuery = orderDetailRepo.insertMany(detailsWithOrderId)
+              val insertedDetails = Await.result(detailsInsertQuery, duration.Duration.Inf)
+              Ok(Json.obj("inserted" -> insertedDetails))
             }
           }
         }
       }
-      else{
-        BadRequest(Json.obj("message" -> "Invalid request body"))
-      }
     }
     else{
-      BadRequest(Json.obj("message" -> "Empty request body"))
+      BadRequest(Json.obj("message" -> messages.invalidBody))
     }
   }
 

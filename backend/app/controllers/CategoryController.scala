@@ -10,12 +10,13 @@ import play.api.data.Forms._
 import play.api.libs.json._
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.api.actions.SecuredRequest
-import utils.DefaultEnv
+import utils.{DefaultEnv, ResponseMsgs}
 
 import scala.util.{Failure, Success}
+import play.api.libs.json.JsPath.json
 
 @Singleton
-class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategoryRepo: SubCategoryRepository, productsRepo: ProductRepository, manufacturerRepo: ManufacturerRepository, silhouette: Silhouette[DefaultEnv], cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
+class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategoryRepo: SubCategoryRepository, productsRepo: ProductRepository, manufacturerRepo: ManufacturerRepository, silhouette: Silhouette[DefaultEnv], cc: MessagesControllerComponents, messages: ResponseMsgs)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
 
   def categoriesJson(): Action[AnyContent] = Action { implicit request: MessagesRequest[AnyContent] =>
     val categories = categoryRepo.list()
@@ -42,7 +43,7 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
       Ok(Json.obj("category" -> category.get, "products" -> productsWithMan))
     }
     else{
-      BadRequest(Json.obj("message" -> "Category not found"))
+      BadRequest(Json.obj("message" -> messages.catNotFound))
     }
   }
 
@@ -64,11 +65,11 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
         }
       }
       else{
-        BadRequest(Json.obj("message" -> "Empty body"))
+        BadRequest(Json.obj("message" -> messages.emptyBody))
       }
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(Json.obj("message" -> messages.notAuthorized))
     }
   }
 
@@ -90,23 +91,23 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
             else{
               val newCat = Category(cat.id, newName)
               val updateCat = categoryRepo.update(id, newCat)
-              val res = Await.result(updateCat, duration.Duration.Inf)
+              Await.result(updateCat, duration.Duration.Inf)
               Ok(Json.toJson(newCat))
             }
           }
           else{
-            BadRequest(Json.obj("message" -> "Category not found"))
+            BadRequest(Json.obj("message" -> messages.catNotFound))
           }
         })
       }
       else{
         Future.successful(
-          BadRequest(Json.obj("message" -> "Empty body"))
+          BadRequest(Json.obj("message" -> messages.emptyBody))
         )
       }
     }
     else{
-      Future(Forbidden(Json.obj("message" -> "Not authorized")))
+      Future(Forbidden(Json.obj("message" -> messages.notAuthorized)))
     }
   }
 
@@ -114,81 +115,67 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
     if(request.identity.role == "ADMIN"){
       val body: AnyContent = request.body
       val jsonBody: Option[JsValue] = body.asJson
-      if(jsonBody.nonEmpty){
-        val obj = jsonBody.get
-        val nameLookup = (obj \ "name").validate[String]
-        val categoryLookup = (obj \ "category").validate[Int]
-        val name = nameLookup.getOrElse("")
-        val category = categoryLookup.getOrElse(0)
+      jsonBody match{
+        case Some(obj) => {val name = (obj \ "name").validate[String].getOrElse("")
+        val category = (obj \ "category").validate[Int].getOrElse(0)
         if(name.length == 0 || category == 0){
           BadRequest(Json.obj("message" -> "Incorrect name or category id"))
         }
         else{
           val catQuery = categoryRepo.getById(category)
           val catQueryRes = Await.result(catQuery, duration.Duration.Inf)
-          if(catQueryRes.nonEmpty){
-            val createSubCat = subCategoryRepo.create(name, category)
-            val res = Await.result(createSubCat, duration.Duration.Inf)
-            Ok(Json.toJson(res))
-          }
-          else{
-            BadRequest(Json.obj("message" -> "Invalid category id"))
+          catQueryRes match{
+            case Some(_) => {
+              val createSubCat = subCategoryRepo.create(name, category)
+              val res = Await.result(createSubCat, duration.Duration.Inf)
+              Ok(Json.toJson(res))
+            }
+            case None => BadRequest(Json.obj("message" -> "Invalid category id"))
           }
         }
       }
-      else{
-        BadRequest(Json.obj("message" -> "Empty body"))
+        case None => BadRequest(Json.obj("message" -> messages.emptyBody))
       }
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(Json.obj("message" -> messages.notAuthorized))
     }
   }
 
-  def updateSubCategoryJson(id: Int) = silhouette.SecuredAction.async { implicit request =>
+  def updateSubCategoryJson(id: Int) = silhouette.SecuredAction { implicit request =>
     if(request.identity.role == "ADMIN"){
-      val subcategory = subCategoryRepo.getById(id)
-      val body: AnyContent = request.body
-      val jsonBody: Option[JsValue] = body.asJson
-      if(jsonBody.nonEmpty){
-        val obj = jsonBody.get
-        subcategory.map(x => {
-          if(x.nonEmpty){
-            val subcat = x.get
-            val nameLookup = (obj \ "name").validate[String]
-            val categoryLookup = (obj \ "category").validate[Int]
-            val newName = nameLookup.getOrElse("")
-            val newCategoryId = categoryLookup.getOrElse(0)
-            if(newName.length == 0 || newCategoryId == 0){
-              BadRequest(Json.obj("message" -> "Invalid name or category id"))
-            }
-            else{
-              val catQuery = categoryRepo.getById(newCategoryId)
-              val catQueryRes = Await.result(catQuery, duration.Duration.Inf)
-              if(catQueryRes.nonEmpty){
-                val newSubCat = SubCategory(subcat.id, newName, newCategoryId)
-                val updateSubCat = subCategoryRepo.update(id, newSubCat)
-                val res = Await.result(updateSubCat, duration.Duration.Inf)
-                Ok(Json.toJson(newSubCat))
-              }
-              else{
-                BadRequest(Json.obj("message" -> "Invalid category id"))
-              }
-            }
+      val subcategoryQuery = subCategoryRepo.getById(id)
+      val jsonBody: Option[JsValue] = request.body.asJson
+      jsonBody match{
+      case Some(obj) => {
+        val subcategory = Await.result(subcategoryQuery, duration.Duration.Inf)
+        subcategory match{
+          case Some(subcat) => {val newName = (obj \ "name").validate[String].getOrElse("")
+          val newCategoryId = (obj \ "category").validate[Int].getOrElse(0)
+          if(newName.length == 0 || newCategoryId == 0){
+            BadRequest(Json.obj("message" -> "Invalid name or category id"))
           }
           else{
-            BadRequest(Json.obj("message" -> "Category not found"))
+            val catQuery = categoryRepo.getById(newCategoryId)
+            val catQueryRes = Await.result(catQuery, duration.Duration.Inf)
+            catQueryRes match {
+            case Some(_) => {val newSubCat = SubCategory(subcat.id, newName, newCategoryId)
+              val updateSubCat = subCategoryRepo.update(id, newSubCat)
+              Await.result(updateSubCat, duration.Duration.Inf)
+              Ok(Json.toJson(newSubCat))
+            }
+            case None => BadRequest(Json.obj("message" -> "Invalid category id"))
+            }
           }
-        })
+        }
+        case None => BadRequest(Json.obj("message" -> messages.catNotFound))
+        }
       }
-      else{
-        Future.successful(
-          BadRequest(Json.obj("message" -> "Empty body"))
-        )
+      case None => BadRequest(Json.obj("message" -> messages.emptyBody))
       }
     }
     else{
-      Future(Forbidden(Json.obj("message" -> "Not authorized")))
+      Forbidden(Json.obj("message" -> messages.notAuthorized))
     }
   }
 
@@ -233,15 +220,20 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
       Ok(Json.obj("message" -> "Category deleted"))
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(Json.obj("message" -> messages.notAuthorized))
     }
   }
 
   def deleteSubCategoryJson(id: Int) = silhouette.SecuredAction { implicit request =>
-    val deleteSubCatId = productsRepo.deleteSubCategoryId(id)
-    Await.result(deleteSubCatId, duration.Duration.Inf)
-    val deleteSubcategory = subCategoryRepo.delete(id)
-    Await.result(deleteSubcategory, duration.Duration.Inf)
-    Ok(Json.obj("message" -> "Subcategory deleted"))
+    if(request.identity.role == "ADMIN"){
+      val deleteSubCatId = productsRepo.deleteSubCategoryId(id)
+      Await.result(deleteSubCatId, duration.Duration.Inf)
+      val deleteSubcategory = subCategoryRepo.delete(id)
+      Await.result(deleteSubcategory, duration.Duration.Inf)
+      Ok(Json.obj("message" -> "Subcategory deleted"))
+    }
+    else{
+      Forbidden(Json.obj("message" -> messages.notAuthorized))
+    }
   }
 }

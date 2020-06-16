@@ -146,32 +146,28 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
     if(request.identity.role == "ADMIN"){
       val subcategoryQuery = subCategoryRepo.getById(id)
       val jsonBody: Option[JsValue] = request.body.asJson
-      jsonBody match{
-      case Some(obj) => {
-        val subcategory = Await.result(subcategoryQuery, duration.Duration.Inf)
-        subcategory match{
-          case Some(subcat) => {val newName = (obj \ "name").validate[String].getOrElse("")
-          val newCategoryId = (obj \ "category").validate[Int].getOrElse(0)
-          if(newName.length == 0 || newCategoryId == 0){
-            BadRequest(Json.obj("message" -> "Invalid name or category id"))
-          }
-          else{
-            val catQuery = categoryRepo.getById(newCategoryId)
-            val catQueryRes = Await.result(catQuery, duration.Duration.Inf)
-            catQueryRes match {
-            case Some(_) => {val newSubCat = SubCategory(subcat.id, newName, newCategoryId)
-              val updateSubCat = subCategoryRepo.update(id, newSubCat)
-              Await.result(updateSubCat, duration.Duration.Inf)
-              Ok(Json.toJson(newSubCat))
-            }
-            case None => BadRequest(Json.obj("message" -> "Invalid category id"))
-            }
-          }
+      val obj = jsonBody.getOrElse(Json.obj())
+      val subcategory = Await.result(subcategoryQuery, duration.Duration.Inf)
+      subcategory match{
+        case Some(subcat) => {val newName = (obj \ "name").validate[String].getOrElse("")
+        val newCategoryId = (obj \ "category").validate[Int].getOrElse(0)
+        if(newName.length == 0 || newCategoryId == 0){
+          BadRequest(Json.obj("message" -> "Invalid name or category id"))
         }
-        case None => BadRequest(Json.obj("message" -> messages.catNotFound))
+        else{
+          val catQuery = categoryRepo.getById(newCategoryId)
+          val catQueryRes = Await.result(catQuery, duration.Duration.Inf)
+          catQueryRes match {
+          case Some(_) => {val newSubCat = SubCategory(subcat.id, newName, newCategoryId)
+            val updateSubCat = subCategoryRepo.update(id, newSubCat)
+            Await.result(updateSubCat, duration.Duration.Inf)
+            Ok(Json.toJson(newSubCat))
+          }
+          case None => BadRequest(Json.obj("message" -> "Invalid category id"))
+          }
         }
       }
-      case None => BadRequest(Json.obj("message" -> messages.emptyBody))
+      case None => BadRequest(Json.obj("message" -> messages.catNotFound))
       }
     }
     else{

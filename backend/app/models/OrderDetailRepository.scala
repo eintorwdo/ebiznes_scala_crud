@@ -18,8 +18,8 @@ class OrderDetailRepository @Inject() (dbConfigProvider: DatabaseConfigProvider,
     def price = column[Int]("price")
     def order = column[Int]("order_")
     def product = column[Option[Int]]("product")
-    def order_fk = foreignKey("order_fk", order, ord)(_.id)
-    def product_fk = foreignKey("prd_fk", product, prd)(_.id?)
+    def orderFk = foreignKey("order_fk", order, ord)(_.id)
+    def productFk = foreignKey("prd_fk", product, prd)(_.id?)
     def amount = column[Int]("amount")
     def * = (id, price, order, product, amount) <> ((OrderDetail.apply _).tupled, OrderDetail.unapply)
   }
@@ -71,8 +71,8 @@ class OrderDetailRepository @Inject() (dbConfigProvider: DatabaseConfigProvider,
      db.run(orderDetailQuery.update(None)).map(_ => ())
   }
 
-  def update(id: Int, new_orderdetail: OrderDetail): Future[Unit] = {
-    val orderDetailToUpdate: OrderDetail = new_orderdetail.copy(id)
+  def update(id: Int, newOrderdetail: OrderDetail): Future[Unit] = {
+    val orderDetailToUpdate: OrderDetail = newOrderdetail.copy(id)
     db.run(orderdetail.filter(_.id === id).update(orderDetailToUpdate)).map(_ => ())
   }
 

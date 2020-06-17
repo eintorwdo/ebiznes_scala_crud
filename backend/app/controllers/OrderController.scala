@@ -127,16 +127,11 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       val json = request.body.asJson
       if(res.nonEmpty && json.nonEmpty){
         val body = json.get
-        val addrJs = (body \ "address").validate[String]
-        val sntJs = (body \ "sent").validate[Int]
-        val prcJs = (body \ "price").validate[Int]
-        val paidJs = (body \ "paid").validate[Int]
-        val packageJs = (body \ "packageNr").validate[String]
-        val addr = addrJs.getOrElse("")
-        val snt = sntJs.getOrElse(-1)
-        val prc = prcJs.getOrElse(-1)
-        val paid = paidJs.getOrElse(-1)
-        val packageNr = packageJs.getOrElse("")
+        val addr = (body \ "address").validate[String].getOrElse("")
+        val snt = (body \ "sent").validate[Int].getOrElse(-1)
+        val prc = (body \ "price").validate[Int].getOrElse(-1)
+        val paid = (body \ "paid").validate[Int].getOrElse(-1)
+        val packageNr = (body \ "packageNr").validate[String].getOrElse("")
         val ord = res.head
         if(addr == "" || snt < 0 || prc < 0 || paid < 0){
           BadRequest(messages.invalidBody)
@@ -195,10 +190,8 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       val json = request.body.asJson
       if(json.nonEmpty){
         val body = json.get
-        val nameJs = (body \ "name").validate[String]
-        val priceJs = (body \ "price").validate[Int]
-        val name = nameJs.getOrElse("")
-        val price = priceJs.getOrElse(-1)
+        val name = (body \ "name").validate[String].getOrElse("")
+        val price = (body \ "price").validate[Int].getOrElse(-1)
         if(name == "" || price < 0){
           BadRequest(messages.invalidBody)
         }
@@ -224,10 +217,8 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       val json = request.body.asJson
       if(res.nonEmpty && json.nonEmpty){
         val body = json.get
-        val nameJs = (body \ "name").validate[String]
-        val priceJs = (body \ "price").validate[Int]
-        val name = nameJs.getOrElse("")
-        val price = priceJs.getOrElse(-1)
+        val name = (body \ "name").validate[String].getOrElse("")
+        val price = (body \ "price").validate[Int].getOrElse(-1)
         if(name == "" || price < 0){
           BadRequest(messages.invalidBody)
         }
@@ -269,8 +260,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       val json = request.body.asJson
       if(json.nonEmpty){
         val body = json.get
-        val nameJs = (body \ "name").validate[String]
-        val name = nameJs.getOrElse("")
+        val name = (body \ "name").validate[String].getOrElse("")
         if(name == ""){
           BadRequest(Json.obj("message" -> "Invalid name"))
         }
@@ -296,8 +286,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       val json = request.body.asJson
       if(res.nonEmpty && json.nonEmpty){
         val body = json.get
-        val nameJs = (body \ "name").validate[String]
-        val name = nameJs.getOrElse("")
+        val name = (body \ "name").validate[String].getOrElse("")
         if(name == ""){
           BadRequest(Json.obj("message" -> "Invalid name"))
         }

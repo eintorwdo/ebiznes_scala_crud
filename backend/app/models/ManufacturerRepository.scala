@@ -36,8 +36,8 @@ class ManufacturerRepository @Inject() (dbConfigProvider: DatabaseConfigProvider
     manufacturer.filter(_.id === id).result.headOption
   }
 
-  def update(id: Int, new_manufacturer: Manufacturer): Future[Unit] = {
-    val manToUpdate: Manufacturer = new_manufacturer.copy(id)
+  def update(id: Int, newManufacturer: Manufacturer): Future[Unit] = {
+    val manToUpdate: Manufacturer = newManufacturer.copy(id)
     db.run(manufacturer.filter(_.id === id).update(manToUpdate)).map(_ => ())
   }
 

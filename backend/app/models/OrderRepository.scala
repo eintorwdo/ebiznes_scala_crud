@@ -38,11 +38,11 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
 
     def packageNr = column[String]("packageNr")
 
-    def user_fk = foreignKey("usr_fk", user, usr)(_.id)
+    def userFk = foreignKey("usr_fk", user, usr)(_.id)
 
-    def payment_fk = foreignKey("pmt_fk", payment, pmt)(_.id?)
+    def paymentFk = foreignKey("pmt_fk", payment, pmt)(_.id?)
 
-    def delivery_fk = foreignKey("dlv_fk", delivery, dlv)(_.id?)
+    def deliveryFk = foreignKey("dlv_fk", delivery, dlv)(_.id?)
 
     def * = (id, price, date, address, sent, user, payment, delivery, paid, packageNr) <> ((Order.apply _).tupled, Order.unapply)
 
@@ -64,30 +64,16 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
 
   private val dlv = TableQuery[DeliveryTable]
 
-
-  /**
-   * Create a person with the given name and age.
-   *
-   * This is an asynchronous operation, it will return a future of the created person, which can be used to obtain the
-   * id for that person.
-   */
   def create(price: Int, date: String, address: String, sent: Int, user: String, payment: Option[Int], delivery: Option[Int], paid: Int, packageNr: String): Future[Order] = db.run {
     (order.map(p => (p.price,p.date,p.address,p.sent,p.user,p.payment,p.delivery, p.paid, p.packageNr))
       returning order.map(_.id)
-      into {case ((price,date,address,sent,user,payment,delivery, paid, packageNr),id) => Order(id,price,date,address,sent,user,payment,delivery, paid, packageNr)}
+      into {case ((price,date,address,sent,user,payment,delivery, paid, packageNr),id) => Order(id,price,date,address,sent,user,payment,delivery,paid,packageNr)}
       ) += (price, date, address, sent, user, payment, delivery, paid, packageNr)
   }
 
-  /**
-   * List all the people in the database.
-   */
   def list(): Future[Seq[Order]] = db.run {
     order.result
   }
-
-  // def getById(id: Int): Future[Order] = db.run {
-  //   order.filter(_.id === id).result.head
-  // }
 
   def getByIdOption(id: Int): Future[Option[Order]] = db.run {
     order.filter(_.id === id).result.headOption
@@ -95,8 +81,8 @@ class OrderRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val u
 
   def delete(id: Int): Future[Unit] = db.run(order.filter(_.id === id).delete).map(_ => ())
 
-  def update(id: Int, new_order: Order): Future[Unit] = {
-    val orderToUpdate: Order = new_order.copy(id)
+  def update(id: Int, newOrder: Order): Future[Unit] = {
+    val orderToUpdate: Order = newOrder.copy(id)
     db.run(order.filter(_.id === id).update(orderToUpdate)).map(_ => ())
   }
 

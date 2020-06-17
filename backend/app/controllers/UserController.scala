@@ -8,14 +8,14 @@ import play.api.data.Form
 import play.api.data.Forms._
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.api.actions.SecuredRequest
-import utils.DefaultEnv
+import utils.{DefaultEnv, ResponseMsgs}
 
 import scala.concurrent._
 import scala.util.{Failure, Success}
 import play.api.libs.json._
 
 @Singleton
-class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderRepository, reviewRepo: ReviewRepository, silhouette: Silhouette[DefaultEnv], cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
+class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderRepository, reviewRepo: ReviewRepository, silhouette: Silhouette[DefaultEnv], messages: ResponseMsgs, cc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
   
   def getUserSecured() = silhouette.SecuredAction { implicit request =>
     val usrQuery = userRepo.getById(request.identity.id)
@@ -39,7 +39,7 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
       Ok(Json.obj("users" -> usersNoPwd))
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -58,7 +58,7 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
       }
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -70,8 +70,7 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
       if(res.nonEmpty && json.nonEmpty){
         val oldUser = res.get
         val body = json.get
-        val roleOpt = (body \ "role").validate[String]
-        val role = roleOpt.getOrElse("")
+        val role = (body \ "role").validate[String].getOrElse("")
         if(role == "ADMIN" || role == "REGULAR"){
           val updateQuery = userRepo.update(id, User(id, oldUser.firstname, oldUser.lastname, oldUser.email, oldUser.password, role))
           Await.result(updateQuery, duration.Duration.Inf)
@@ -86,7 +85,7 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
       }
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -101,7 +100,7 @@ class UserController @Inject()(userRepo: UserRepository, orderRepo: OrderReposit
       Ok(Json.obj("message" -> "User deleted"))
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(messages.notAuthorized)
     }
   }
 }

@@ -53,8 +53,7 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
       val jsonBody: Option[JsValue] = body.asJson
       if(jsonBody.nonEmpty){
         val obj = jsonBody.get
-        val nameLookup = (obj \ "name").validate[String]
-        val name = nameLookup.getOrElse("")
+        val name = (obj \ "name").validate[String].getOrElse("")
         if(name.length == 0){
           BadRequest(Json.obj("message" -> "Invalid name"))
         }
@@ -83,8 +82,7 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
         category.map(x => {
           if(x.nonEmpty){
             val cat = x.get
-            val nameLookup = (obj \ "name").validate[String]
-            val newName = nameLookup.getOrElse("")
+            val newName = (obj \ "name").validate[String].getOrElse("")
             if(newName.length == 0){
               BadRequest(Json.obj("message" -> "Invalid name"))
             }

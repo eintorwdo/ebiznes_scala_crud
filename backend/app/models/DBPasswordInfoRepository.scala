@@ -24,7 +24,7 @@ class DBPasswordInfoRepository @Inject()(protected val dbConfigProvider: Databas
         def password = column[String]("password")
         def salt = column[Option[String]]("salt")
         def loginInfoId = column[String]("login_info_id")
-        def loginInfo_fk = foreignKey("login_info_fk", loginInfoId, TableQuery[LoginInfoTable])(_.id)
+        def loginInfoFk = foreignKey("login_info_fk", loginInfoId, TableQuery[LoginInfoTable])(_.id)
 
         def * = (hasher, password, salt, loginInfoId) <> ((DBPasswordInfo.apply _).tupled, DBPasswordInfo.unapply)
     }
@@ -56,17 +56,7 @@ class DBPasswordInfoRepository @Inject()(protected val dbConfigProvider: Databas
     }
 
     def add(loginInfo: LoginInfo, authInfo: PasswordInfo): Future[PasswordInfo] = {
-        // val action = loginInfos.filter(dbLoginInfo => dbLoginInfo.providerId === loginInfo.providerID &&
-        //   dbLoginInfo.providerKey === loginInfo.providerKey)
-        //   .result
-        //   .headOption
-        //   .flatMap { dbLoginInfo =>
-        //     passwordInfoTable += PasswordInfoDb(authInfo.hasher, authInfo.password, authInfo.salt, dbLoginInfo.get.id)
-        //   }.transactionally
-
-        // db.run(action).map(_ => authInfo)
         db.run(addAction(loginInfo, authInfo)).map(_ => authInfo)
-
     }
 
     def update(loginInfo: LoginInfo, authInfo: PasswordInfo): Future[PasswordInfo] = db.run {

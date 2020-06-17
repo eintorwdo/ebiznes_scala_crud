@@ -26,7 +26,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       })
     }
     else{
-      Future(Forbidden(Json.obj("message" -> "Not authorized")))
+      Future(Forbidden(messages.notAuthorized))
     }
   }
 
@@ -54,7 +54,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
                       "details" -> details))
         }
         else{
-          Forbidden(Json.obj("message" -> "Not authorized"))
+          Forbidden(messages.notAuthorized)
         }
       }
       else{
@@ -116,7 +116,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       }
     }
     else{
-      BadRequest(Json.obj("message" -> messages.invalidBody))
+      BadRequest(messages.invalidBody)
     }
   }
 
@@ -139,7 +139,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
         val packageNr = packageJs.getOrElse("")
         val ord = res.head
         if(addr == "" || snt < 0 || prc < 0 || paid < 0){
-          BadRequest(Json.obj("message" -> "Invalid request body"))
+          BadRequest(messages.invalidBody)
         }
         else{
           val newOrd = Order(ord._1.id, prc, ord._1.date, addr, snt, ord._1.user, ord._1.payment, ord._1.delivery, paid, packageNr)
@@ -153,7 +153,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       }
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -169,7 +169,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       }
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -200,7 +200,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
         val name = nameJs.getOrElse("")
         val price = priceJs.getOrElse(-1)
         if(name == "" || price < 0){
-          BadRequest(Json.obj("message" -> "Invalid request body"))
+          BadRequest(messages.invalidBody)
         }
         else{
           val createDelivery = deliveryRepo.create(name, price)
@@ -213,7 +213,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       }
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -223,14 +223,13 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       val res = Await.result(delivery, duration.Duration.Inf)
       val json = request.body.asJson
       if(res.nonEmpty && json.nonEmpty){
-        val x = res.get
         val body = json.get
         val nameJs = (body \ "name").validate[String]
         val priceJs = (body \ "price").validate[Int]
         val name = nameJs.getOrElse("")
         val price = priceJs.getOrElse(-1)
         if(name == "" || price < 0){
-          BadRequest(Json.obj("message" -> "Invalid request body"))
+          BadRequest(messages.invalidBody)
         }
         else{
           val newDelivery = Delivery(id, name, price)
@@ -244,7 +243,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       }
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -286,7 +285,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       }
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -296,7 +295,6 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       val res = Await.result(payment, duration.Duration.Inf)
       val json = request.body.asJson
       if(res.nonEmpty && json.nonEmpty){
-        val x = res.get
         val body = json.get
         val nameJs = (body \ "name").validate[String]
         val name = nameJs.getOrElse("")
@@ -315,7 +313,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       }
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -328,7 +326,7 @@ class OrderController @Inject()(productRepo: ProductRepository, userRepo: UserRe
       Ok(Json.obj("message" -> "Order deleted"))
     }
     else{
-      Forbidden(Json.obj("message" -> "Not authorized"))
+      Forbidden(messages.notAuthorized)
     }
   }
 }

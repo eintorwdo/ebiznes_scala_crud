@@ -43,7 +43,7 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
       Ok(Json.obj("category" -> category.get, "products" -> productsWithMan))
     }
     else{
-      BadRequest(Json.obj("message" -> messages.catNotFound))
+      BadRequest(messages.catNotFound)
     }
   }
 
@@ -65,11 +65,11 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
         }
       }
       else{
-        BadRequest(Json.obj("message" -> messages.emptyBody))
+        BadRequest(messages.emptyBody)
       }
     }
     else{
-      Forbidden(Json.obj("message" -> messages.notAuthorized))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -96,18 +96,18 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
             }
           }
           else{
-            BadRequest(Json.obj("message" -> messages.catNotFound))
+            BadRequest(messages.catNotFound)
           }
         })
       }
       else{
         Future.successful(
-          BadRequest(Json.obj("message" -> messages.emptyBody))
+          BadRequest(messages.emptyBody)
         )
       }
     }
     else{
-      Future(Forbidden(Json.obj("message" -> messages.notAuthorized)))
+      Future(Forbidden(messages.notAuthorized))
     }
   }
 
@@ -134,11 +134,11 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
           }
         }
       }
-        case None => BadRequest(Json.obj("message" -> messages.emptyBody))
+        case None => BadRequest(messages.emptyBody)
       }
     }
     else{
-      Forbidden(Json.obj("message" -> messages.notAuthorized))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -167,11 +167,11 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
           }
         }
       }
-      case None => BadRequest(Json.obj("message" -> messages.catNotFound))
+      case None => BadRequest(messages.catNotFound)
       }
     }
     else{
-      Forbidden(Json.obj("message" -> messages.notAuthorized))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -216,7 +216,7 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
       Ok(Json.obj("message" -> "Category deleted"))
     }
     else{
-      Forbidden(Json.obj("message" -> messages.notAuthorized))
+      Forbidden(messages.notAuthorized)
     }
   }
 
@@ -229,7 +229,7 @@ class CategoryController @Inject()(categoryRepo: CategoryRepository, subCategory
       Ok(Json.obj("message" -> "Subcategory deleted"))
     }
     else{
-      Forbidden(Json.obj("message" -> messages.notAuthorized))
+      Forbidden(messages.notAuthorized)
     }
   }
 }

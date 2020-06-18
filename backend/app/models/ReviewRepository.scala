@@ -19,8 +19,8 @@ class ReviewRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val 
     def user = column[String]("user")
     def product = column[Int]("product")
     def date = column[String]("date")
-    def user_fk = foreignKey("usr_fk", user, usr)(_.id)
-    def product_fk = foreignKey("prd_fk", product, prd)(_.id)
+    def userFk = foreignKey("usr_fk", user, usr)(_.id)
+    def productFk = foreignKey("prd_fk", product, prd)(_.id)
     def * = (id, description, user, product, date) <> ((Review.apply _).tupled, Review.unapply)
   }
 
@@ -52,8 +52,8 @@ class ReviewRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val 
     review.filter(_.id === id).result.headOption
   }
 
-  def update(id: Int, new_review: Review): Future[Unit] = {
-    val revToUpdate: Review = new_review.copy(id)
+  def update(id: Int, newReview: Review): Future[Unit] = {
+    val revToUpdate: Review = newReview.copy(id)
     db.run(review.filter(_.id === id).update(revToUpdate)).map(_ => ())
   }
 

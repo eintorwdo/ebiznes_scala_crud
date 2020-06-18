@@ -17,13 +17,10 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
 
   class ProductTable(tag: Tag) extends Table[Product](tag, "product") {
 
-    /** The ID column, which is the primary key, and auto incremented */
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
-    /** The name column */
     def name = column[String]("name")
 
-    /** The age column */
     def description = column[String]("description")
 
     def category = column[Option[Int]]("category")
@@ -36,24 +33,19 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
 
     def subcategory = column[Option[Int]]("subcategory")
 
-    def subcategory_fk = foreignKey("subcat_fk", subcategory, subcat)(_.id?)
+    def subcategoryFk = foreignKey("subcat_fk", subcategory, subcat)(_.id?)
 
-    def category_fk = foreignKey("cat_fk", category, subcat)(_.id?)
+    def categoryFk = foreignKey("cat_fk", category, subcat)(_.id?)
 
-    def manufacturer_fk = foreignKey("man_fk", manufacturer, man)(_.id?)
+    def manufacturerFk = foreignKey("man_fk", manufacturer, man)(_.id?)
 
     def * = (id, name, description, price, amount, manufacturer, category, subcategory) <> ((Product.apply _).tupled, Product.unapply)
 
   }
 
-  /**
-   * The starting point for all queries on the people table.
-   */
-
   import categoryRepository.CategoryTable
   import subCategoryRepository.SubCategoryTable
   import manufacturerRepository.ManufacturerTable
-  // import reviewRepository.ReviewTable
 
   private val product = TableQuery[ProductTable]
 
@@ -63,29 +55,13 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
 
   private val man = TableQuery[ManufacturerTable]
 
-  // private val rev = TableQuery[ReviewTable]
-
-  /**
-   * Create a person with the given name and age.
-   *
-   * This is an asynchronous operation, it will return a future of the created person, which can be used to obtain the
-   * id for that person.
-   */
   def create(name: String, description: String, price: Int, amount: Int, manufacturer: Option[Int], category: Option[Int], subcategory: Option[Int]): Future[Product] = db.run {
-    // We create a projection of just the name and age columns, since we're not inserting a value for the id column
     (product.map(p => (p.name, p.description,p.price,p.amount,p.manufacturer,p.category,p.subcategory))
-      // Now define it to return the id, because we want to know what id was generated for the person
       returning product.map(_.id)
-      // And we define a transformation for the returned value, which combines our original parameters with the
-      // returned id
       into {case ((name,description,price,amount,manufacturer,category,subcategory),id) => Product(id,name,description,price,amount,manufacturer,category,subcategory)}
-      // And finally, insert the product into the database
       ) += (name,description,price,amount,manufacturer,category,subcategory)
   }
 
-  /**
-   * List all the people in the database.
-   */
   def list(): Future[Seq[Product]] = db.run {
     product.result
   }
@@ -117,22 +93,22 @@ class ProductRepository @Inject() (dbConfigProvider: DatabaseConfigProvider, val
     }
   }
 
-  def getByCategory(category_id: Int): Future[Seq[Product]] = db.run {
-    product.filter(_.category === category_id).result
+  def getByCategory(categoryId: Int): Future[Seq[Product]] = db.run {
+    product.filter(_.category === categoryId).result
   }
 
-  def getBySubCategory(subcategory_id: Int): Future[Seq[Product]] = db.run {
-    product.filter(_.subcategory === subcategory_id).result
+  def getBySubCategory(subcategoryId: Int): Future[Seq[Product]] = db.run {
+    product.filter(_.subcategory === subcategoryId).result
   }
 
-  def getByCategories(category_ids: List[Int]): Future[Seq[Product]] = db.run {
-    product.filter(_.category inSet category_ids).result
+  def getByCategories(categoryIds: List[Int]): Future[Seq[Product]] = db.run {
+    product.filter(_.category inSet categoryIds).result
   }
 
   def delete(id: Int): Future[Unit] = db.run(product.filter(_.id === id).delete).map(_ => ())
 
-  def update(id: Int, new_product: Product): Future[Unit] = {
-    val productToUpdate: Product = new_product.copy(id)
+  def update(id: Int, newProduct: Product): Future[Unit] = {
+    val productToUpdate: Product = newProduct.copy(id)
     db.run(product.filter(_.id === id).update(productToUpdate)).map(_ => ())
   }
 

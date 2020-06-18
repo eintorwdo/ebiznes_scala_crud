@@ -17,7 +17,7 @@ class SubCategoryRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
     def category = column[Int]("category")
-    def category_fk = foreignKey("cat_fk", category, subcategory)(_.id)
+    def categoryFk = foreignKey("cat_fk", category, subcategory)(_.id)
     def * = (id, name, category) <> ((SubCategory.apply _).tupled, SubCategory.unapply)
   }
 
@@ -43,8 +43,8 @@ class SubCategoryRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)
     subcategory.filter(_.category === id).result
   }
 
-  def update(id: Int, new_subcategory: SubCategory): Future[Unit] = {
-    val subCategoryToUpdate: SubCategory = new_subcategory.copy(id)
+  def update(id: Int, newSubcategory: SubCategory): Future[Unit] = {
+    val subCategoryToUpdate: SubCategory = newSubcategory.copy(id)
     db.run(subcategory.filter(_.id === id).update(subCategoryToUpdate)).map(_ => ())
   }
 

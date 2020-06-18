@@ -3,7 +3,6 @@ import React from 'react';
 import { connect } from "react-redux";
 import queryString from 'query-string';
 import { Redirect } from "react-router-dom";
-// import Container from 'react-bootstrap/Container';
 
 import {logIn} from '../actions/index.js';
 

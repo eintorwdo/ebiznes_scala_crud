@@ -1,13 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Link, Redirect } from "react-router-dom";
-// import { connect } from "react-redux";
-
-// function select(state){
-//     return {
-//         showLoginModal: state.showLoginModal,
-//         role: state.role
-//     }
-// }
+import { Link } from "react-router-dom";
 
 class CategoriesOrdersUsers extends React.Component {
     constructor(props){

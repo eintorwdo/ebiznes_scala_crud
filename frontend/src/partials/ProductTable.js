@@ -1,8 +1,4 @@
 import React from 'react';
-import MyNavbar from '../partials/Navbar.js'
-import Search from '../mainViews/Search.js'
-import Product from '../mainViews/Product.js'
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import _ from 'lodash';
 
 import Table from 'react-bootstrap/Table';

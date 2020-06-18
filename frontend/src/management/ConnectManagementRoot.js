@@ -11,8 +11,7 @@ import { BrowserRouter as Router, Route, Link, Redirect } from "react-router-dom
 import Container from 'react-bootstrap/Container';
 
 import { connect } from "react-redux";
-import {hideLogin, logIn, logOut} from '../actions/index.js';
-import checkIfLoggedIn from '../utils/checkIfLoggedIn.js';
+import {hideLogin, logOut} from '../actions/index.js';
 
 
 function mapDispatchToProps(dispatch){

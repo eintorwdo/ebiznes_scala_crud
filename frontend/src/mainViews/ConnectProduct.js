@@ -11,7 +11,7 @@ import Form from 'react-bootstrap/Form';
 
 import addToCartHandler from '../utils/addToCartHandler.js';
 
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 

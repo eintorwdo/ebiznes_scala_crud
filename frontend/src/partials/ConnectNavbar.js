@@ -10,7 +10,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 
 import { connect } from "react-redux";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import {logOut, showLogin} from '../actions/index.js';
 
@@ -41,7 +41,6 @@ class MyNavbar extends React.Component {
         super(props);
         this.state = {loggedIn: this.props.loggedIn, userName: this.props.userName, userId: this.props.userId, categories: [], query: ""};
         this.categoryRef = React.createRef();
-        const { cookies } = this.props;
     }
 
     componentDidMount(){

@@ -1,20 +1,19 @@
 import React from 'react';
-import ConnectNavbar from '../partials/Navbar.js';
+import ConnectNavbar from '../partials/ConnectNavbar.js';
 import Search from './Search.js';
 import CategorySearch from './CategorySearch.js';
-import ConnectProduct from './Product.js';
+import ConnectProduct from './ConnectProduct.js';
 import Main from './Main.js';
-import ConnectProfile from './Profile.js';
-import ConnectOrder from './Order.js';
+import ConnectProfile from './ConnectProfile.js';
+import ConnectOrder from './ConnectOrder.js';
 import Cart from './Cart.js';
-import ConnectCheckout from './Checkout.js';
+import ConnectCheckout from './ConnectCheckout.js';
 import Error from './Error.js';
-import ConnectAuth from './Auth.js';
-import ConnectManagementRoot from '../management/Root.js';
-import Register from './Register.js';
+import ConnectAuth from './ConnectAuth.js';
+import ConnectManagementRoot from '../management/ConnectManagementRoot.js';
+import ConnectRegister from './ConnectRegister.js';
 
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-// import { Redirect } from "react-router-dom";
 import Modal from 'react-bootstrap/Modal'
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -121,7 +120,7 @@ class Home extends React.Component {
                     <Route path="/error" render={(props) => <Error {...props}/>}/>
                     <Route path="/auth" render={(props) => <ConnectAuth {...props}/>}/>
                     <Route path="/management" render={(props) => <ConnectManagementRoot {...props}/>}/>
-                    <Route path="/register" render={(props) => <Register {...props}/>}/>
+                    <Route path="/register" render={(props) => <ConnectRegister {...props}/>}/>
 
                     <Modal
                         show={this.props.showLoginModal}

@@ -1,5 +1,4 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -10,7 +9,7 @@ import Form from 'react-bootstrap/Form';
 
 import { connect } from "react-redux";
 
-import _ from 'lodash';
+// import _ from 'lodash';
 import getProducts from '../utils/getProducts.js';
 import ProductTable from '../partials/ProductTable';
 import { Redirect } from "react-router-dom";

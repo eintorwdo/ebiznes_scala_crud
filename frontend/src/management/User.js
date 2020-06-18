@@ -1,7 +1,7 @@
 import React from 'react';
 import ConfirmModal from './partials/ConfirmModal.js';
 import Button from 'react-bootstrap/Button';
-import { BrowserRouter as Router, Route, Link, Redirect } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 
 import deleteItem from '../utils/deleteItem.js';
 

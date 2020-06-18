@@ -1,6 +1,6 @@
 import React from 'react';
 import Button from 'react-bootstrap/Button';
-import { BrowserRouter as Router, Route, Link, Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 class Order extends React.Component {
     constructor(props){

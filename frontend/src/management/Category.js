@@ -15,8 +15,8 @@ class Category extends React.Component {
         if(this.props.method !== 'add'){
             fetch(`http://localhost:9000/api/${this.props.type}/${this.props.match.params.id}`).then(res => res.json().then(cat => {
                 if(this.props.type == 'subcategory'){
-                    this.getCategories().then(res => {
-                        this.setState({item: cat, categories: res, loading: false});
+                    this.getCategories().then(parentCats => {
+                        this.setState({item: cat, categories: parentCats, loading: false});
                     });
                 }
                 else{

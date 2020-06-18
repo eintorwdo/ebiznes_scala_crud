@@ -1,7 +1,5 @@
 import React from 'react';
 
-// import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';

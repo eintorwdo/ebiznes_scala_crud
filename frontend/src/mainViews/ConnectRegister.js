@@ -6,7 +6,7 @@ import Col from 'react-bootstrap/Col';
 
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
-import {hideLogin, logIn, logOut} from '../actions/index.js';
+import {hideLogin, logIn} from '../actions/index.js';
 
 function mapDispatchToProps(dispatch){
     return {

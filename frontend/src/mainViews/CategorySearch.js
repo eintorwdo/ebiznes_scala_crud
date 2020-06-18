@@ -1,5 +1,4 @@
 import React from 'react';
-// import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 import SearchList from '../partials/SearchList.js';
 
@@ -9,7 +8,7 @@ let getProducts = async (catId, type = "category") => {
     return productsJson;
 }
 
-class Search extends React.Component {
+class CategorySearch extends React.Component {
     constructor(props){
         super(props);
         const type = this.props.type === "category" || this.props.type === "subcategory" ? this.props.type : "category";
@@ -38,4 +37,4 @@ class Search extends React.Component {
     }
 }
 
-export default Search;
+export default CategorySearch;
